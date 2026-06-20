@@ -42,6 +42,23 @@ export function buildChecklists(): ChecklistsSeed {
       ],
     },
     {
+      // Spray booth daily safety — the "blocked welding beat" for the demo.
+      // user_emp3 (Luis Park) has an overdue proc_booth assignment; his run
+      // stalls at the respirator PPE step, surfacing as BLOCKED on /autopilot.
+      id: "chk_booth_daily",
+      orgId: ORG_ID,
+      procedureId: "proc_booth",
+      role: "employee",
+      title: "Daily — Spray Booth Safety",
+      cadence: "daily",
+      items: [
+        { id: "chk_booth_i1", label: "Confirm no ignition sources within 3 m of booth", required: true, type: "warning" },
+        { id: "chk_booth_i2", label: "Start booth extraction — run 2 min before spraying", required: true, type: "task" },
+        { id: "chk_booth_i3", label: "Don respirator, nitrile gloves, and coveralls", required: true, type: "ppe" },
+        { id: "chk_booth_i4", label: "Verify operator holds Spray Booth Safety cert", required: true, type: "task" },
+      ],
+    },
+    {
       id: "chk_close",
       orgId: ORG_ID,
       procedureId: "proc_close",
@@ -82,7 +99,11 @@ export function buildChecklists(): ChecklistsSeed {
     },
   ];
 
-  // Today's runs — opening done, laser bench underway, closing not started yet.
+  // Today's runs:
+  //   chk_open   → complete (Luis Park, all done)
+  //   chk_laser  → in_progress (Sam Ortiz, past PPE + extraction, calibration next)
+  //   chk_booth  → in_progress / BLOCKED (Luis Park, stuck at PPE step — cert overdue)
+  //   chk_owner  → in_progress (Jordan Vale, reviewed queue, still needs floor check)
   const today = dateFrom(0);
   const checklistRuns: ChecklistRun[] = [
     {
@@ -99,6 +120,17 @@ export function buildChecklists(): ChecklistsSeed {
       userId: "user_employee",
       date: today,
       completedItemIds: ["chk_laser_i1", "chk_laser_i2"],
+      status: "in_progress",
+    },
+    {
+      // Luis Park starts the spray booth daily but stalls at the PPE step because
+      // his Spray Booth Safety cert is overdue (see seed-assignments). This is the
+      // "blocked beat" surfaced as ■ BLOCKED on /autopilot and /twin.
+      id: "run_booth_today",
+      checklistId: "chk_booth_daily",
+      userId: "user_emp3",
+      date: today,
+      completedItemIds: ["chk_booth_i1", "chk_booth_i2"],
       status: "in_progress",
     },
     {
