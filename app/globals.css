@@ -80,4 +80,8 @@
   .hr-rule {
     @apply border-t border-rule;
   }
+  /* faint critical-red wash (for warning/quiz-fail panels) */
+  .tint-critical {
+    background-color: rgb(var(--red) / 0.06);
+  }
 }
