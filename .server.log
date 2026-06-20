@@ -10,5 +10,4 @@ At C:\Users\judej\AppData\Roaming\npm\pnpm.ps1:24 char:5
    - Network:      http://10.59.93.128:3100
 
  ✓ Starting...
- ✓ Ready in 760ms
-[ELIFECYCLE] Command failed with exit code 4294967295.
+ ✓ Ready in 1487ms

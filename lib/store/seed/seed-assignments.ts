@@ -4,14 +4,51 @@ import type {
   Attempt,
   Certification,
 } from "@/types/domain";
-import { OWNER_ID, TRAINER_ID } from "./seed-people";
-import { daysFrom } from "./util";
+import {
+  ASSEMBLER_ID,
+  EMPLOYEE_ID,
+  OWNER_ID,
+  QC_ID,
+  TRAINER_ID,
+  WELDER_ID,
+} from "./seed-people";
+import { daysFrom, isoOn } from "./util";
 
 export interface AssignmentsSeed {
   assignments: Assignment[];
   attempts: Attempt[];
   certifications: Certification[];
 }
+
+/**
+ * Standalone safety/compliance certifications (issued outside in-app training).
+ *
+ * Compliance beat: EXACTLY 3 expired — two on Sarah (the CNC operator running
+ * the cell right now), one on Derek (which blocks him at the welding bay). Every
+ * other cert here is current, so all 6 people read as "trained".
+ */
+interface CertSpec {
+  user: string;
+  proc: string;
+  version: number;
+  issued: string;
+  expires?: string;
+}
+
+const COMPLIANCE_CERTS: CertSpec[] = [
+  // ── EXPIRED (the 3 flagged compliance issues) ──────────────────────────────
+  // Sarah Chen (CNC operator) — two expired certs on the person running the CNC.
+  { user: EMPLOYEE_ID, proc: "proc_loto", version: 1, issued: isoOn("2024-05-15"), expires: isoOn("2025-05-15") },
+  { user: EMPLOYEE_ID, proc: "proc_cpr", version: 1, issued: isoOn("2023-09-20"), expires: isoOn("2025-09-20") },
+  // Derek Foster (welder) — welding cert expired ~3 weeks ago; blocks the bay.
+  { user: WELDER_ID, proc: "proc_welding_cert", version: 1, issued: isoOn("2025-05-30"), expires: isoOn("2026-05-30") },
+
+  // ── CURRENT compliance certs ───────────────────────────────────────────────
+  { user: OWNER_ID, proc: "proc_safety_mgr", version: 1, issued: isoOn("2025-12-01"), expires: isoOn("2026-12-01") },
+  { user: OWNER_ID, proc: "proc_loto", version: 1, issued: isoOn("2025-11-10"), expires: isoOn("2026-11-10") },
+  { user: TRAINER_ID, proc: "proc_cpr", version: 1, issued: isoOn("2025-10-01"), expires: isoOn("2027-10-01") },
+  { user: QC_ID, proc: "proc_loto", version: 1, issued: isoOn("2026-01-10"), expires: isoOn("2027-01-10") },
+];
 
 interface Entry {
   user: string;
@@ -31,29 +68,25 @@ interface Entry {
   };
 }
 
-const ENTRIES: Entry[] = [
-  // Sam Ortiz (the demo employee) — one fresh laser assignment to train live.
-  { user: "user_employee", proc: "proc_laser", version: 2, status: "not_started", assignedDaysAgo: -1, dueInDays: 2 },
-  { user: "user_employee", proc: "proc_booth", version: 1, status: "completed", assignedDaysAgo: -20, dueInDays: -16, passed: { score: 100, answers: { proc_booth_s4: 0 }, daysAgo: -17, expiresInDays: 348 } },
-  { user: "user_employee", proc: "proc_open", version: 1, status: "completed", assignedDaysAgo: -25, dueInDays: -23, passed: { score: 100, answers: {}, daysAgo: -24 } },
+const TRAINING: Entry[] = [
+  // Sarah — the LIVE Stage-1 training: assigned the CNC startup, not started yet.
+  { user: EMPLOYEE_ID, proc: "proc_cnc_startup", version: 2, status: "not_started", assignedDaysAgo: -1, dueInDays: 1 },
+  // A second open assignment so the demo can assign live to anyone.
+  { user: QC_ID, proc: "proc_cnc_startup", version: 2, status: "not_started", assignedDaysAgo: -1, dueInDays: 2 },
 
-  // Dana Cole — certified on the laser at v1 (now v2: a recert story), plus an overdue.
-  { user: "user_emp2", proc: "proc_laser", version: 1, status: "completed", assignedDaysAgo: -35, dueInDays: -30, passed: { score: 80, answers: { proc_laser_s7: 0 }, daysAgo: -31, expiresInDays: 334 } },
-  { user: "user_emp2", proc: "proc_vinyl", version: 1, status: "in_progress", assignedDaysAgo: -2, dueInDays: 3 },
-  { user: "user_emp2", proc: "proc_qa", version: 1, status: "overdue", assignedDaysAgo: -10, dueInDays: -2 },
+  // Completed trainings -> attempts + valid certs (so all 6 read as trained).
+  // Tom certified on the CNC startup at v1 while current is v2 (version drift).
+  { user: ASSEMBLER_ID, proc: "proc_cnc_startup", version: 1, status: "completed", assignedDaysAgo: -30, dueInDays: -26, passed: { score: 100, answers: { proc_cnc_startup_s7: 0 }, daysAgo: -27, expiresInDays: 320 } },
+  { user: ASSEMBLER_ID, proc: "proc_cnc_preop", version: 1, status: "completed", assignedDaysAgo: -28, dueInDays: -25, passed: { score: 100, answers: {}, daysAgo: -26 } },
+  { user: EMPLOYEE_ID, proc: "proc_cnc_preop", version: 1, status: "completed", assignedDaysAgo: -25, dueInDays: -22, passed: { score: 100, answers: {}, daysAgo: -23 } },
+  { user: WELDER_ID, proc: "proc_welding_setup", version: 1, status: "completed", assignedDaysAgo: -20, dueInDays: -16, passed: { score: 100, answers: { proc_welding_setup_s5: 0 }, daysAgo: -17 } },
+  { user: WELDER_ID, proc: "proc_cnc_preop", version: 1, status: "completed", assignedDaysAgo: -24, dueInDays: -21, passed: { score: 80, answers: {}, daysAgo: -22 } },
+  { user: QC_ID, proc: "proc_cnc_preop", version: 1, status: "completed", assignedDaysAgo: -18, dueInDays: -15, passed: { score: 100, answers: {}, daysAgo: -16 } },
 
-  // Luis Park
-  { user: "user_emp3", proc: "proc_open", version: 1, status: "completed", assignedDaysAgo: -25, dueInDays: -23, passed: { score: 100, answers: {}, daysAgo: -24 } },
-  { user: "user_emp3", proc: "proc_maint", version: 1, status: "not_started", assignedDaysAgo: -1, dueInDays: 1 },
-  { user: "user_emp3", proc: "proc_booth", version: 1, status: "overdue", assignedDaysAgo: -12, dueInDays: -3 },
-
-  // Tess Nguyen
-  { user: "user_emp4", proc: "proc_vinyl", version: 1, status: "completed", assignedDaysAgo: -15, dueInDays: -12, passed: { score: 100, answers: { proc_vinyl_s4: 0 }, daysAgo: -13 } },
-  { user: "user_emp4", proc: "proc_close", version: 1, status: "not_started", assignedDaysAgo: -1, dueInDays: 4 },
-
-  // Priya Anand
-  { user: "user_emp5", proc: "proc_qa", version: 1, status: "completed", assignedDaysAgo: -14, dueInDays: -11, passed: { score: 100, answers: {}, daysAgo: -12 } },
-  { user: "user_emp5", proc: "proc_laser", version: 2, status: "not_started", assignedDaysAgo: -1, dueInDays: 2 },
+  // In-progress + overdue for the manager's "needs attention" view.
+  { user: ASSEMBLER_ID, proc: "proc_welding_setup", version: 1, status: "in_progress", assignedDaysAgo: -3, dueInDays: 4 },
+  { user: WELDER_ID, proc: "proc_loto", version: 1, status: "overdue", assignedDaysAgo: -14, dueInDays: -4 },
+  { user: QC_ID, proc: "proc_cpr", version: 1, status: "overdue", assignedDaysAgo: -12, dueInDays: -2 },
 ];
 
 export function buildAssignments(): AssignmentsSeed {
@@ -61,7 +94,18 @@ export function buildAssignments(): AssignmentsSeed {
   const attempts: Attempt[] = [];
   const certifications: Certification[] = [];
 
-  ENTRIES.forEach((e, i) => {
+  COMPLIANCE_CERTS.forEach((c, i) => {
+    certifications.push({
+      id: `cert_c${i + 1}`,
+      userId: c.user,
+      procedureId: c.proc,
+      versionNumber: c.version,
+      issuedAt: c.issued,
+      expiresAt: c.expires,
+    });
+  });
+
+  TRAINING.forEach((e, i) => {
     const id = `asg_${i + 1}`;
     assignments.push({
       id,
@@ -75,25 +119,23 @@ export function buildAssignments(): AssignmentsSeed {
     });
 
     if (e.passed) {
-      const startedAt = daysFrom(e.passed.daysAgo, -1);
-      const completedAt = daysFrom(e.passed.daysAgo);
       attempts.push({
-        id: `att_${i + 1}`,
+        id: `att_t${i + 1}`,
         assignmentId: id,
         userId: e.user,
         procedureId: e.proc,
         versionNumber: e.version,
-        startedAt,
-        completedAt,
+        startedAt: daysFrom(e.passed.daysAgo, -1),
+        completedAt: daysFrom(e.passed.daysAgo),
         score: e.passed.score,
         answersJson: e.passed.answers,
       });
       certifications.push({
-        id: `cert_${i + 1}`,
+        id: `cert_t${i + 1}`,
         userId: e.user,
         procedureId: e.proc,
         versionNumber: e.version,
-        issuedAt: completedAt,
+        issuedAt: daysFrom(e.passed.daysAgo),
         expiresAt:
           e.passed.expiresInDays !== undefined
             ? daysFrom(e.passed.expiresInDays)
@@ -104,6 +146,3 @@ export function buildAssignments(): AssignmentsSeed {
 
   return { assignments, attempts, certifications };
 }
-
-// Referenced so seed authoring intent (owner can also assign) stays linted-clean.
-export const SEED_ASSIGNERS = [OWNER_ID, TRAINER_ID];

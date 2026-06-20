@@ -14,7 +14,7 @@ import { buildSeed, type DemoData } from "./seed";
  * Bump SEED_VERSION whenever the seed shape changes — a mismatched on-disk file
  * is ignored and re-seeded automatically.
  */
-const SEED_VERSION = 1;
+const SEED_VERSION = 2;
 const DATA_FILE = path.join(process.cwd(), ".demo-data.json");
 
 interface StoreShape {

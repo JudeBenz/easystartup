@@ -6,8 +6,14 @@ import { faker } from "@faker-js/faker";
  * demo). Never use argless `new Date()` / `Math.random()` here.
  */
 
-// The demo "now" — Saturday 2026-06-20, 09:00 local-ish (UTC for stability).
-export const DEMO_NOW = new Date("2026-06-20T09:00:00.000Z");
+// The demo "now" — 2026-06-20, 06:58 (UTC for stability). Shift starts 07:30:
+// the shop is mid-opening, two stations actively running.
+export const DEMO_NOW = new Date("2026-06-20T06:58:00.000Z");
+
+/** Absolute ISO timestamp for a fixed calendar date (e.g. expired certs). */
+export function isoOn(date: string, hour = 8): string {
+  return `${date}T${String(hour).padStart(2, "0")}:00:00.000Z`;
+}
 
 /** ISO string offset from the demo clock by whole days (+ optional hours). */
 export function daysFrom(days: number, hours = 0): string {
