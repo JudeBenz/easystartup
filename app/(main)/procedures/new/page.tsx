@@ -1,12 +1,15 @@
-import { RoutePlaceholder } from "@/components/route-placeholder";
+import { PageHeader } from "@/components/page-header";
+import { ProcedureEditor } from "@/components/procedures/procedure-editor";
 
-export default function NewProcedurePage() {
+export default async function NewProcedurePage() {
   return (
-    <RoutePlaceholder
-      eyebrow="Stage 1 · Procedurize"
-      title="New procedure"
-      description="Capture a procedure once — manually or AI-drafted."
-      owner="Builder A is building the procedure editor."
-    />
+    <div>
+      <PageHeader
+        eyebrow="Stage 1 · Procedurize"
+        title="New procedure"
+        description="Capture a procedure once — add steps of any type, then publish a first version."
+      />
+      <ProcedureEditor />
+    </div>
   );
 }
