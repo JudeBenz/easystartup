@@ -178,7 +178,7 @@ export function TraineePlayer({
     <div className="flex min-h-screen flex-col bg-paper">
       {/* Top bar */}
       <header className="border-b-2 border-ink">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-3">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="min-w-0">
             <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-navy">
               Trainee player · v{versionNumber}
@@ -210,7 +210,11 @@ export function TraineePlayer({
       </header>
 
       {/* Body */}
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-10">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+        <div
+          key={phase === "steps" ? `s${stepIndex}` : phase}
+          className="flex flex-1 flex-col duration-200 animate-in fade-in-0 slide-in-from-right-1"
+        >
         {phase === "ppe" && (
           <PpeGate
             ppe={procedure.ppe}
@@ -258,11 +262,12 @@ export function TraineePlayer({
             issued={issuedAt !== null}
           />
         )}
+        </div>
       </div>
 
       {/* Footer actions */}
       <footer className="border-t border-rule bg-panel">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           {phase === "ppe" && (
             <>
               <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
