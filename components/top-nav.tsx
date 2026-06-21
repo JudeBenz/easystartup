@@ -23,12 +23,13 @@ const PILLARS: NavPillar[] = [
   {
     label: "Operations",
     routes: [
-      { href: "/home",       label: "Home" },
-      { href: "/autopilot",  label: "Autopilot" },
-      { href: "/people",     label: "People" },
-      { href: "/spaces",     label: "Spaces" },
-      { href: "/reports",    label: "Reports" },
-      { href: "/twin",       label: "Twin" },
+      { href: "/home",        label: "Home" },
+      { href: "/operations",  label: "Operations" },
+      { href: "/autopilot",   label: "Autopilot" },
+      { href: "/people",      label: "People" },
+      { href: "/spaces",      label: "Spaces" },
+      { href: "/reports",     label: "Reports" },
+      { href: "/twin",        label: "Twin" },
     ],
   },
   {

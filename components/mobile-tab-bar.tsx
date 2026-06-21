@@ -21,10 +21,11 @@ const TABS = [
   },
   {
     label: "Operations",
-    href:  "/home",
+    href:  "/operations",
     Icon:  LayoutDashboard,
     match: (p: string) =>
       p === "/home" ||
+      p === "/operations" ||
       p.startsWith("/autopilot") ||
       p.startsWith("/people") ||
       p.startsWith("/reports") ||
