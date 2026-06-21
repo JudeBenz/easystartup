@@ -361,10 +361,10 @@ function SceneContent({
       <directionalLight position={[8, 14, 6]}  intensity={0.72} />
       <directionalLight position={[-4, 5, -4]} intensity={0.18} color="#E8EEF6" />
 
-      {/* Baseplate — warm paper */}
+      {/* Baseplate */}
       <mesh position={[0, -0.03, 0]}>
         <boxGeometry args={[10.6, 0.06, 10.6]} />
-        <meshStandardMaterial color="#F4F2EC" roughness={0.9} metalness={0} />
+        <meshStandardMaterial color="#F1F4F0" roughness={0.9} metalness={0} />
       </mesh>
 
       {/* Hairline floor grid */}
@@ -497,7 +497,7 @@ export function TwinScene({
     <Canvas
       camera={{ position: [8, 8, 7], fov: 42, near: 0.1, far: 120 }}
       gl={{ antialias: true, alpha: false }}
-      style={{ background: "#F4F2EC" }}
+      style={{ background: "#F1F4F0" }}
       dpr={[1, 2]}
     >
       <SceneContent

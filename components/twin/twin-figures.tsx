@@ -209,7 +209,7 @@ export function RobotFigure({
       {/* Eye strip */}
       <mesh position={[0, 0.47, 0.051]}>
         <boxGeometry args={[0.08, 0.025, 0.005]} />
-        <meshStandardMaterial color="#F4F2EC" roughness={0.5} metalness={0} transparent opacity={opacity * 0.9} />
+        <meshStandardMaterial color="#F1F4F0" roughness={0.5} metalness={0} transparent opacity={opacity * 0.9} />
       </mesh>
       {/* Left arm */}
       <mesh position={[-0.13, 0.24, 0]}>

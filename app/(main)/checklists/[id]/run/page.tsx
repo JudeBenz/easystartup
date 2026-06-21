@@ -137,7 +137,7 @@ export default async function RunChecklistPage({
                       >
                         <path
                           d="M1 4L3.5 6.5L9 1"
-                          stroke="#FBFAF7"
+                          stroke="#F1F4F0"
                           strokeWidth="1.5"
                           strokeLinecap="square"
                         />
@@ -147,7 +147,7 @@ export default async function RunChecklistPage({
                   <span
                     className="text-sm leading-snug"
                     style={{
-                      color: done ? "#8C8B85" : "#17181B",
+                      color: done ? "#79837C" : "#14181A",
                       textDecoration: done ? "line-through" : "none",
                     }}
                   >

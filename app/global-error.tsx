@@ -15,7 +15,7 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en">
-      <body style={{ background: "#F4F2EC", color: "#17181B" }}>
+      <body style={{ background: "#F1F4F0", color: "#14181A" }}>
         <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-amber">
             Something went wrong
