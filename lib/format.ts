@@ -1,6 +1,7 @@
 import type {
   AssignmentStatus,
   ChecklistRunStatus,
+  JobStatus,
   ProcedureStatus,
   StepType,
   WarningLevel,
@@ -25,6 +26,22 @@ export function fmtDate(iso: string): string {
 export function fmtDateShort(iso: string): string {
   const d = new Date(iso);
   return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
+}
+
+/** UTC clock time, e.g. "07:30" — matches the seed clock (no hydration drift). */
+export function fmtTime(iso: string): string {
+  const d = new Date(iso);
+  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(
+    d.getUTCMinutes()
+  ).padStart(2, "0")}`;
+}
+
+/** Human duration from minutes, e.g. 180 → "3h", 90 → "1h 30m", 45 → "45m". */
+export function fmtDuration(min: number): string {
+  if (min < 60) return `${min}m`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m === 0 ? `${h}h` : `${h}h ${m}m`;
 }
 
 export interface StatusMeta {
@@ -67,6 +84,22 @@ export function runStatusMeta(status: ChecklistRunStatus): StatusMeta {
     case "pending":
     default:
       return { tone: "neutral", label: "Pending" };
+  }
+}
+
+export function jobStatusMeta(status: JobStatus): StatusMeta {
+  switch (status) {
+    case "complete":
+      return { tone: "green", label: "Complete" };
+    case "in_progress":
+      return { tone: "navy", label: "In progress" };
+    case "blocked":
+      return { tone: "amber", label: "Blocked" };
+    case "cancelled":
+      return { tone: "neutral", label: "Cancelled" };
+    case "scheduled":
+    default:
+      return { tone: "neutral", label: "Scheduled" };
   }
 }
 

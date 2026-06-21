@@ -16,8 +16,9 @@ const TABS = [
     label: "Create",
     href:  "/procedures/new",
     Icon:  FilePlus2,
-    // Active when on any create/procedure path
-    match: (p: string) => p.startsWith("/procedures"),
+    // Active when on any create/procedure/job-type path
+    match: (p: string) =>
+      p.startsWith("/procedures") || p.startsWith("/job-types"),
   },
   {
     label: "Operations",
@@ -26,6 +27,7 @@ const TABS = [
     match: (p: string) =>
       p === "/home" ||
       p === "/operations" ||
+      p.startsWith("/jobs") ||
       p.startsWith("/autopilot") ||
       p.startsWith("/people") ||
       p.startsWith("/reports") ||

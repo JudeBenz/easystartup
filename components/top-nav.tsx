@@ -18,6 +18,7 @@ const PILLARS: NavPillar[] = [
     label: "Create",
     routes: [
       { href: "/procedures", label: "Procedures" },
+      { href: "/job-types",  label: "Job Types" },
     ],
   },
   {
@@ -25,6 +26,7 @@ const PILLARS: NavPillar[] = [
     routes: [
       { href: "/home",        label: "Home" },
       { href: "/operations",  label: "Operations" },
+      { href: "/jobs",        label: "Jobs" },
       { href: "/autopilot",   label: "Autopilot" },
       { href: "/people",      label: "People" },
       { href: "/spaces",      label: "Spaces" },
