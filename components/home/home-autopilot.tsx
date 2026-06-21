@@ -1,6 +1,12 @@
 import Link from "next/link";
 import type { Role } from "@/types/domain";
-import { getTodayChecklists, getTimeToCompetency, getCompletionTrend } from "@/lib/store";
+import {
+  getTodayChecklists,
+  getTimeToCompetency,
+  getCompletionTrend,
+  getMorningStatus,
+} from "@/lib/store";
+import type { MorningStatus } from "@/lib/store/autopilot";
 import { runStatusMeta } from "@/lib/format";
 import { StatusDot } from "@/components/status-dot";
 import { Progress } from "@/components/ui/progress";
@@ -17,6 +23,56 @@ function isBlocked(cwr: ChecklistWithRun): boolean {
     (i) => i.required && !cwr.run!.completedItemIds.includes(i.id)
   );
   return next?.type === "ppe" || next?.type === "warning";
+}
+
+// ── Owner global verdict strip ────────────────────────────────────────────────
+
+function OwnerVerdictStrip({ status }: { status: MorningStatus }) {
+  const color = status.isOpen ? "#2C7048" : status.blocked > 0 ? "#A6660E" : "#1C3A5E";
+  const bg    = status.isOpen ? "#E6F0E6" : status.blocked > 0 ? "#F6ECD8" : "#E8EEF6";
+  const top   = status.blockers[0];
+
+  return (
+    <div
+      className="mb-3 border px-4 py-3"
+      style={{ borderColor: color, background: bg }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="mb-0.5 flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 shrink-0" style={{ background: color }} />
+            <span
+              className="font-mono text-[10px] uppercase tracking-[0.1em]"
+              style={{ color }}
+            >
+              {status.isOpen
+                ? "Open"
+                : status.blocked > 0
+                ? "Blocked"
+                : "In progress"}
+            </span>
+          </div>
+          <p className="font-display text-sm font-semibold text-ink">
+            {status.complete} of {status.total} stations ready
+          </p>
+          {top && (
+            <p className="mt-0.5 text-xs" style={{ color: "#A6660E" }}>
+              ■{" "}
+              {top.expiredCertTitle
+                ? `${top.userName}'s ${top.expiredCertTitle} expired`
+                : `${top.userName}: ${top.blockingItemLabel}`}
+            </p>
+          )}
+        </div>
+        <Link
+          href="/autopilot"
+          className="shrink-0 self-start font-mono text-[10px] uppercase tracking-[0.1em] text-navy hover:underline"
+        >
+          Details →
+        </Link>
+      </div>
+    </div>
+  );
 }
 
 // ── Owner-only analytics card ─────────────────────────────────────────────────
@@ -76,10 +132,12 @@ function OwnerAnalyticsCard() {
  * role + the "is the business open?" signal. Leaves home-training.tsx to A.
  */
 export function HomeAutopilot({ role }: { role: Role }) {
-  const today = getTodayChecklists(role);
+  const today         = getTodayChecklists(role);
+  const morningStatus = role === "owner" ? getMorningStatus() : null;
+
   const complete = today.filter((t) => t.status === "complete").length;
-  const blocked = today.filter(isBlocked).length;
-  const isOpen = today.length > 0 && complete === today.length;
+  const blocked  = today.filter(isBlocked).length;
+  const isOpen   = today.length > 0 && complete === today.length;
 
   return (
     <section>
@@ -94,30 +152,34 @@ export function HomeAutopilot({ role }: { role: Role }) {
         <span className="flex-1 border-t border-rule" />
       </div>
 
-      {/* Opening status banner */}
-      <div
-        className="mb-3 border px-4 py-3 flex items-center justify-between"
-        style={{
-          borderColor: isOpen ? "#2C7048" : blocked > 0 ? "#A6660E" : "#1C3A5E",
-          background: isOpen ? "#E6F0E6" : blocked > 0 ? "#F6ECD8" : "#E8EEF6",
-        }}
-      >
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
-            Opening sequence
-          </p>
-          <p className="mt-0.5 font-display text-sm font-semibold text-ink">
-            {isOpen
-              ? "Open for business"
-              : blocked > 0
-              ? `${blocked} routine${blocked > 1 ? "s" : ""} blocked`
-              : `${complete} of ${today.length} complete`}
-          </p>
+      {/* Verdict banner: full picture for owners, role-specific for others */}
+      {morningStatus ? (
+        <OwnerVerdictStrip status={morningStatus} />
+      ) : (
+        <div
+          className="mb-3 flex items-center justify-between border px-4 py-3"
+          style={{
+            borderColor: isOpen ? "#2C7048" : blocked > 0 ? "#A6660E" : "#1C3A5E",
+            background:  isOpen ? "#E6F0E6" : blocked > 0 ? "#F6ECD8" : "#E8EEF6",
+          }}
+        >
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
+              Opening sequence
+            </p>
+            <p className="mt-0.5 font-display text-sm font-semibold text-ink">
+              {isOpen
+                ? "Open for business"
+                : blocked > 0
+                ? `${blocked} routine${blocked > 1 ? "s" : ""} blocked`
+                : `${complete} of ${today.length} complete`}
+            </p>
+          </div>
+          <StatusDot tone={isOpen ? "green" : blocked > 0 ? "amber" : "navy"}>
+            {isOpen ? "Open" : blocked > 0 ? "Blocked" : "In progress"}
+          </StatusDot>
         </div>
-        <StatusDot tone={isOpen ? "green" : blocked > 0 ? "amber" : "navy"}>
-          {isOpen ? "Open" : blocked > 0 ? "Blocked" : "In progress"}
-        </StatusDot>
-      </div>
+      )}
 
       {/* Routine list */}
       {today.length === 0 ? (
