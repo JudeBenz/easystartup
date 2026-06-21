@@ -12,6 +12,7 @@ import { StatStrip } from "@/components/stat-strip";
 import { StatusDot } from "@/components/status-dot";
 import { fmtDate } from "@/lib/format";
 import { assignmentStatusMeta } from "@/lib/format";
+import { AnalyticsSection } from "@/components/reports/analytics-section";
 
 export default function ReportsPage() {
   const org = getOrg();
@@ -210,6 +211,11 @@ export default function ReportsPage() {
           })}
         </div>
       </section>
+
+      {/* ── 03 / Training analytics ─────────────────────────────────────── */}
+      <div className="mt-8">
+        <AnalyticsSection />
+      </div>
     </div>
   );
 }

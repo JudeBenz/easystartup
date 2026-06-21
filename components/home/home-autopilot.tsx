@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Role } from "@/types/domain";
-import { getTodayChecklists } from "@/lib/store";
+import { getTodayChecklists, getTimeToCompetency, getCompletionTrend } from "@/lib/store";
 import { runStatusMeta } from "@/lib/format";
 import { StatusDot } from "@/components/status-dot";
 import { Progress } from "@/components/ui/progress";
@@ -18,6 +18,58 @@ function isBlocked(cwr: ChecklistWithRun): boolean {
   );
   return next?.type === "ppe" || next?.type === "warning";
 }
+
+// ── Owner-only analytics card ─────────────────────────────────────────────────
+
+function OwnerAnalyticsCard() {
+  const competency = getTimeToCompetency();
+  const thisWeek   = getCompletionTrend(1)[0]?.count ?? 0;
+
+  return (
+    <div className="mt-4 border border-rule bg-panel">
+      <div className="flex items-center justify-between border-b border-rule px-4 py-2">
+        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
+          Analytics
+        </span>
+        <Link
+          href="/reports"
+          className="font-mono text-[10px] uppercase tracking-[0.12em] text-navy hover:underline"
+        >
+          View reports →
+        </Link>
+      </div>
+      <div className="grid grid-cols-2 divide-x divide-rule">
+        <div className="px-4 py-3">
+          <p className="font-mono text-[9px] uppercase tracking-[0.1em] text-faint">
+            Median cert time
+          </p>
+          {competency.totalCertified === 0 ? (
+            <p className="mt-1 font-mono text-[10px] text-faint">—</p>
+          ) : (
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span className="tnum font-display text-2xl font-bold text-ink">
+                {String(competency.overallMedianDays).padStart(2, "0")}
+              </span>
+              <span className="font-mono text-[9px] uppercase text-faint">days</span>
+            </div>
+          )}
+        </div>
+        <div className="px-4 py-3">
+          <p className="font-mono text-[9px] uppercase tracking-[0.1em] text-faint">
+            Completions this week
+          </p>
+          <div className="mt-1">
+            <span className="tnum font-display text-2xl font-bold text-ink">
+              {String(thisWeek).padStart(2, "0")}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Autopilot section ─────────────────────────────────────────────────────────
 
 /**
  * /home — Stage 2 autopilot slot (Builder B). Today's routines for the active
@@ -115,6 +167,8 @@ export function HomeAutopilot({ role }: { role: Role }) {
       >
         Open autopilot →
       </Link>
+
+      {role === "owner" && <OwnerAnalyticsCard />}
     </section>
   );
 }
