@@ -95,6 +95,7 @@ export function TraineePlayer({
   const startedAtIso = useRef("");
   const [doneMs, setDoneMs] = useState(0);
   const [issuedAt, setIssuedAt] = useState<string | null>(null);
+  const [certId, setCertId] = useState<string | null>(null);
   const persisted = useRef(false);
 
   const allPpeChecked = ppeChecked.every(Boolean);
@@ -275,7 +276,10 @@ export function TraineePlayer({
       startedAtIso: startedAtIso.current,
       assignmentId,
     })
-      .then((r) => setIssuedAt(r.issuedAt))
+      .then((r) => {
+        setIssuedAt(r.issuedAt);
+        setCertId(r.certificationId);
+      })
       .catch(() => setIssuedAt(new Date().toISOString()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
@@ -446,9 +450,22 @@ export function TraineePlayer({
               <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-green">
                 {issuedAt ? "Certification issued" : "Issuing…"}
               </span>
-              <Button onClick={() => router.push("/home")} className={navBtn}>
-                Back to home <ChevronRight className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                {certId && (
+                  <Button asChild variant="outline" className={navBtn}>
+                    <a
+                      href={`/verify/${certId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View certificate
+                    </a>
+                  </Button>
+                )}
+                <Button onClick={() => router.push("/home")} className={navBtn}>
+                  Back to home <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </>
           )}
         </div>

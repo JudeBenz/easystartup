@@ -223,14 +223,21 @@ export default async function ProcedureDetailPage({
                   return (
                     <li
                       key={c.id}
-                      className="flex items-center justify-between px-3 py-2"
+                      className="flex items-center justify-between gap-3 px-3 py-2"
                     >
-                      <span className="truncate font-display text-sm font-semibold text-ink">
+                      <span className="min-w-0 flex-1 truncate font-display text-sm font-semibold text-ink">
                         {person?.name ?? "—"}
                       </span>
                       <StatusDot tone={expired ? "red" : "green"}>
                         {expired ? "Expired" : `v${c.versionNumber}`}
                       </StatusDot>
+                      <Link
+                        href={`/verify/${c.id}`}
+                        target="_blank"
+                        className="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-navy hover:underline"
+                      >
+                        Verify
+                      </Link>
                     </li>
                   );
                 })}
