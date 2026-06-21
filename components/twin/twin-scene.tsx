@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useRef, useState, useEffect, useMemo } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, Edges, Line } from "@react-three/drei";
 import * as THREE from "three";
 import type { EnrichedZone, ZoneStatus, EmployeeFigureData } from "./twin-types";
@@ -58,6 +58,108 @@ function toFloor(zone: EnrichedZone) {
     w:  zone.w * S,
     d:  zone.h * S,
   };
+}
+
+// ── Point cloud scan ──────────────────────────────────────────────────────────
+// Small navy points scattered across the floor that converge to the model.
+// Only rendered during the scan animation (progress 0 → 0.85).
+
+const POINT_COUNT = 180;
+
+function PointCloudScan({ progress }: { progress: number }) {
+  if (progress <= 0 || progress >= 0.88) return null;
+
+  // Points are stable across renders (memoised)
+  const points = useMemo(() => {
+    const arr: [number, number, number][] = [];
+    for (let i = 0; i < POINT_COUNT; i++) {
+      // Use deterministic pseudo-random based on index
+      const seed = i * 7919;
+      const x = ((seed * 9301 + 49297) % 233280) / 233280 * 10 - 5;
+      const z = ((seed * 49297 + 9301) % 233280) / 233280 * 10 - 5;
+      const y = ((seed * 1234 + 5678) % 10000) / 10000 * 1.5 + 0.05;
+      arr.push([x, y, z]);
+    }
+    return arr;
+  }, []);
+
+  // Each point converges toward floor as progress increases
+  const opacity = Math.min(1, (1 - progress / 0.88) * 2.5);
+
+  return (
+    <>
+      {points.map(([x, y, z], i) => {
+        const convergeFrac = Math.min(1, progress * 1.4);
+        const py = y * (1 - convergeFrac) + 0.05 * convergeFrac;
+        return (
+          <mesh key={i} position={[x, py, z]}>
+            <boxGeometry args={[0.018, 0.018, 0.018]} />
+            <meshBasicMaterial color="#1C3A5E" transparent opacity={opacity * 0.45} />
+          </mesh>
+        );
+      })}
+    </>
+  );
+}
+
+// ── Camera controller ─────────────────────────────────────────────────────────
+// Idle auto-orbit when untouched; smooth tween to selected zone on click.
+// Reduced-motion: no auto-orbit, instant camera snap.
+
+function CameraController({
+  selectedId,
+  zones,
+  skipMotion,
+}: {
+  selectedId: string | null;
+  zones:      EnrichedZone[];
+  skipMotion: boolean;
+}) {
+  const { camera } = useThree();
+  const orbitRef   = useRef<{ target: THREE.Vector3; object: THREE.Camera } | null>(null);
+  const idleAngle  = useRef(0);
+  const lastInteract = useRef(0);
+  const targetPos  = useRef(new THREE.Vector3(8, 8, 7));
+  const targetLook = useRef(new THREE.Vector3(0, 0, 0));
+
+  // Update target when selectedId changes
+  useEffect(() => {
+    const zone = zones.find((z) => z.id === selectedId);
+    if (zone) {
+      const { cx, cz } = toFloor(zone);
+      // Position: stand back and above the zone
+      targetPos.current.set(cx + 3.5, 5.5, cz + 3.5);
+      targetLook.current.set(cx, 0, cz);
+    } else {
+      targetPos.current.set(8, 8, 7);
+      targetLook.current.set(0, 0, 0);
+    }
+    lastInteract.current = 0; // reset idle timer
+  }, [selectedId, zones]);
+
+  useFrame((state, dt) => {
+    if (skipMotion) return;
+
+    lastInteract.current += dt;
+
+    // Auto-orbit: kick in after 4s idle, only when nothing selected
+    if (!selectedId && lastInteract.current > 4) {
+      idleAngle.current += dt * 0.08;
+      const r = 11;
+      targetPos.current.set(
+        Math.sin(idleAngle.current) * r,
+        8,
+        Math.cos(idleAngle.current) * r
+      );
+      targetLook.current.set(0, 0, 0);
+    }
+
+    // Lerp camera toward target
+    camera.position.lerp(targetPos.current, dt * 1.8);
+    camera.lookAt(targetLook.current);
+  });
+
+  return null;
 }
 
 // ── Zone block ────────────────────────────────────────────────────────────────
@@ -302,6 +404,16 @@ function SceneContent({
       })}
 
       <ScanPlane progress={scanProgress} />
+
+      {/* Point cloud — navy dots that converge as the scan completes */}
+      {!skipScan && <PointCloudScan progress={scanProgress} />}
+
+      {/* Camera controller — idle auto-orbit + zone focus */}
+      <CameraController
+        selectedId={selectedId}
+        zones={zones}
+        skipMotion={skipScan}
+      />
 
       {/* Employee figures — fade in after scan reaches 85% */}
       {(() => {

@@ -350,7 +350,7 @@ export function TwinClient({
               <span className="ml-1 text-faint">blocked</span>
             </span>
           )}
-          <span className="ml-auto text-faint">Drag to orbit · Click a zone</span>
+          <span className="ml-auto text-faint">Drag to orbit · Click zone or person</span>
         </div>
 
         {/* 3D canvas */}
@@ -358,15 +358,27 @@ export function TwinClient({
           className="flex-1 relative border border-rule2 overflow-hidden"
           style={{ minHeight: 320 }}
         >
-          {/* Accessibility fallback — screen-reader zone list, hidden visually */}
-          <ul className="sr-only" aria-label="Floor zones">
-            {zones.map((z) => (
-              <li key={z.id}>
-                {z.label}: {STATUS_CFG[z.status].label}
-                {z.procedureTitles.length > 0 && ` — ${z.procedureTitles.join(", ")}`}
-              </li>
-            ))}
-          </ul>
+          {/* Accessibility fallback — screen-reader zone + people list */}
+          <div className="sr-only">
+            <ul aria-label="Floor zones">
+              {zones.map((z) => (
+                <li key={z.id}>
+                  {z.label}: {STATUS_CFG[z.status].label}
+                  {z.procedureTitles.length > 0 && ` — ${z.procedureTitles.join(", ")}`}
+                </li>
+              ))}
+            </ul>
+            <ul aria-label="Team members on floor">
+              {employees.map((e) => (
+                <li key={e.userId}>
+                  <Link href={`/people/${e.userId}`}>
+                    {e.name}
+                  </Link>
+                  {` — ${e.role}, ${e.zoneLabel}: ${e.certStatusForZone}`}
+                </li>
+              ))}
+            </ul>
+          </div>
 
           <TwinScene
             zones={zones}
