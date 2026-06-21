@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import type { EnrichedZone, ZoneStatus, ZoneSpec, ZoneSpecStep } from "./twin-types";
+import Link from "next/link";
+import { initialsOf } from "@/lib/utils";
+import type { EnrichedZone, ZoneStatus, ZoneSpec, ZoneSpecStep, EmployeeFigureData, PersonCertStatus } from "./twin-types";
 
 // Re-export types so server page can import from one place
-export type { EnrichedZone, ZoneStatus, ZoneSpec, ZoneSpecStep };
+export type { EnrichedZone, ZoneStatus, ZoneSpec, ZoneSpecStep, EmployeeFigureData };
 
 // 3D canvas — client-only (Three.js / WebGL requires window)
 const TwinScene = dynamic(
@@ -43,6 +45,104 @@ const FAIL_COLOR: Record<string, string> = {
   WARN_AND_LOG:   C.navy,
   RETRY_ONCE:     C.faint,
 };
+
+// ── Person info panel ─────────────────────────────────────────────────────────
+
+const PERSON_STATUS_COLOR: Record<PersonCertStatus, string> = {
+  certified: C.green,
+  expired:   C.amber,
+  assigned:  C.navy,
+  untrained: C.faint,
+};
+
+const PERSON_STATUS_LABEL: Record<PersonCertStatus, string> = {
+  certified: "Certified",
+  expired:   "Cert expired",
+  assigned:  "In progress",
+  untrained: "Not trained",
+};
+
+function PersonInfoPanel({
+  employee,
+  onClose,
+}: {
+  employee: EmployeeFigureData;
+  onClose: () => void;
+}) {
+  return (
+    <div className="flex flex-1 flex-col overflow-y-auto">
+      {/* Header */}
+      <div className="border-b border-rule px-4 py-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-ink font-mono text-[9px] font-bold text-panel">
+            {initialsOf(employee.name)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <Link
+              href={`/people/${employee.userId}`}
+              className="font-display text-sm font-bold text-ink hover:text-navy hover:underline"
+            >
+              {employee.name}
+            </Link>
+            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-faint">
+              {employee.role}
+            </p>
+            <p className="font-mono text-[9px] text-faint">
+              ↓ {employee.zoneLabel}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 font-mono text-[11px] text-faint hover:text-ink"
+            aria-label="Close person panel"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {/* Zone certifications */}
+      <div className="space-y-3 px-4 py-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-faint">
+          Zone certifications
+        </p>
+        <div className="space-y-1.5">
+          {employee.zoneProcedures.map((proc) => (
+            <div
+              key={proc.procedureId}
+              className="flex items-center justify-between border border-rule bg-panel px-3 py-2"
+            >
+              <span className="text-[11px] text-soft">{proc.procedureTitle}</span>
+              <span
+                className="font-mono text-[9px] font-semibold"
+                style={{ color: PERSON_STATUS_COLOR[proc.status] }}
+              >
+                ■ {PERSON_STATUS_LABEL[proc.status]}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <Link
+          href={`/people/${employee.userId}`}
+          className="block border border-rule2 bg-panel px-3 py-2 text-center font-mono text-[10px] uppercase tracking-[0.1em] text-navy hover:bg-paper transition-colors"
+        >
+          View full profile →
+        </Link>
+
+        <div className="border border-rule bg-amber-bg/60 px-3 py-2">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-amber">
+            Stage 3 · Roadmap
+          </span>
+          <p className="mt-1 text-[11px] text-soft">
+            In Stage 3, real-time zone occupancy is tracked via the spatial twin — no
+            manual check-in required.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── Spec panel ────────────────────────────────────────────────────────────────
 
@@ -190,15 +290,29 @@ function RobotSpecPanel({ zone }: { zone: EnrichedZone | null }) {
 
 export function TwinClient({
   zones,
+  employees,
   mapName,
 }: {
-  zones: EnrichedZone[];
-  mapName: string;
+  zones:     EnrichedZone[];
+  employees: EmployeeFigureData[];
+  mapName:   string;
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId,       setSelectedId]       = useState<string | null>(null);
+  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
-  const selectedZone = zones.find((z) => z.id === selectedId) ?? null;
+  const selectedZone   = zones.find((z) => z.id === selectedId) ?? null;
+  const selectedPerson = employees.find((e) => e.userId === selectedPersonId) ?? null;
+
+  function handleSelectZone(id: string | null) {
+    setSelectedId(id);
+    setSelectedPersonId(null);   // person deselects when zone changes
+  }
+
+  function handleSelectPerson(userId: string) {
+    setSelectedPersonId((prev) => (prev === userId ? null : userId));
+    setSelectedId(null);         // zone deselects when person is clicked
+  }
 
   const activeCt  = zones.filter((z) => z.status === "in_progress").length;
   const blockedCt = zones.filter((z) => z.status === "blocked").length;
@@ -256,8 +370,11 @@ export function TwinClient({
 
           <TwinScene
             zones={zones}
+            employees={employees}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            selectedPersonId={selectedPersonId}
+            onSelect={handleSelectZone}
+            onSelectPerson={handleSelectPerson}
             onReady={() => setReady(true)}
           />
         </div>
@@ -287,7 +404,14 @@ export function TwinClient({
             Auto-translated from human procedure
           </p>
         </div>
-        <RobotSpecPanel zone={selectedZone} />
+        {selectedPerson ? (
+          <PersonInfoPanel
+            employee={selectedPerson}
+            onClose={() => setSelectedPersonId(null)}
+          />
+        ) : (
+          <RobotSpecPanel zone={selectedZone} />
+        )}
       </div>
 
     </div>

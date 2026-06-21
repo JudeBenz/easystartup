@@ -4,7 +4,8 @@ import { useRef, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, Edges, Line } from "@react-three/drei";
 import * as THREE from "three";
-import type { EnrichedZone, ZoneStatus } from "./twin-types";
+import type { EnrichedZone, ZoneStatus, EmployeeFigureData } from "./twin-types";
+import { PersonFigure } from "./twin-figures";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
@@ -29,6 +30,15 @@ const S       = 0.1;    // scale: 100 → 10 units
 const OFF     = -5;     // center offset
 const BLOCK_H = 0.55;   // extrusion height
 const SCAN_DUR = 1.6;   // seconds for full-floor scan
+
+// Offsets for placing multiple figures within a zone footprint
+const FIGURE_OFFSETS: [number, number][][] = [
+  [],
+  [[0, 0]],
+  [[-0.22,  0],    [0.22,  0]],
+  [[-0.22, -0.15], [0.22, -0.15], [0,     0.18]],
+  [[-0.22, -0.18], [0.22, -0.18], [-0.22, 0.18], [0.22, 0.18]],
+];
 
 function toFloor(zone: EnrichedZone) {
   return {
@@ -165,16 +175,22 @@ function ScanPlane({ progress }: { progress: number }) {
 
 function SceneContent({
   zones,
+  employees,
   selectedId,
+  selectedPersonId,
   onSelect,
+  onSelectPerson,
   onReady,
   skipScan,
 }: {
-  zones: EnrichedZone[];
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
-  onReady: () => void;
-  skipScan: boolean;
+  zones:            EnrichedZone[];
+  employees:        EmployeeFigureData[];
+  selectedId:       string | null;
+  selectedPersonId: string | null;
+  onSelect:         (id: string | null) => void;
+  onSelectPerson:   (id: string) => void;
+  onReady:          () => void;
+  skipScan:         boolean;
 }) {
   const progressRef  = useRef(0);
   const [scanProgress, setScanProgress] = useState(0);
@@ -243,6 +259,38 @@ function SceneContent({
 
       <ScanPlane progress={scanProgress} />
 
+      {/* Employee figures — fade in after scan reaches 85% */}
+      {(() => {
+        const figureOpacity = skipScan ? 1 : Math.min(1, Math.max(0, (scanProgress - 0.85) / 0.15));
+        if (figureOpacity === 0) return null;
+
+        // Group employees by zone
+        const byZone = new Map<string, EmployeeFigureData[]>();
+        for (const emp of employees) {
+          if (!byZone.has(emp.zoneId)) byZone.set(emp.zoneId, []);
+          byZone.get(emp.zoneId)!.push(emp);
+        }
+
+        return zones.flatMap((zone) => {
+          const { cx, cz } = toFloor(zone);
+          const zoneEmps = byZone.get(zone.id) ?? [];
+          const offsets  = FIGURE_OFFSETS[Math.min(zoneEmps.length, 4)] ?? [];
+          return zoneEmps.map((emp, i) => {
+            const [ox, oz] = offsets[i] ?? [0, 0];
+            return (
+              <PersonFigure
+                key={emp.userId}
+                employee={emp}
+                basePosition={[cx + ox, BLOCK_H, cz + oz]}
+                isSelected={selectedPersonId === emp.userId}
+                onSelect={onSelectPerson}
+                figureOpacity={figureOpacity}
+              />
+            );
+          });
+        });
+      })()}
+
       {/* Invisible backdrop — click empty floor to deselect */}
       <mesh
         position={[0, -0.002, 0]}
@@ -260,14 +308,20 @@ function SceneContent({
 
 export function TwinScene({
   zones,
+  employees,
   selectedId,
+  selectedPersonId,
   onSelect,
+  onSelectPerson,
   onReady,
 }: {
-  zones: EnrichedZone[];
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
-  onReady: () => void;
+  zones:            EnrichedZone[];
+  employees:        EmployeeFigureData[];
+  selectedId:       string | null;
+  selectedPersonId: string | null;
+  onSelect:         (id: string | null) => void;
+  onSelectPerson:   (id: string) => void;
+  onReady:          () => void;
 }) {
   // Synchronous check — avoids a flash of scan animation for reduced-motion users
   const [skipScan] = useState(() =>
@@ -285,8 +339,11 @@ export function TwinScene({
     >
       <SceneContent
         zones={zones}
+        employees={employees}
         selectedId={selectedId}
+        selectedPersonId={selectedPersonId}
         onSelect={onSelect}
+        onSelectPerson={onSelectPerson}
         onReady={onReady}
         skipScan={skipScan}
       />

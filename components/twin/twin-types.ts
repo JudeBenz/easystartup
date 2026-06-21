@@ -1,4 +1,21 @@
 export type ZoneStatus = "complete" | "in_progress" | "blocked" | "pending";
+export type PersonCertStatus = "certified" | "expired" | "assigned" | "untrained";
+
+export interface EmployeeProcedureStatus {
+  procedureId:    string;
+  procedureTitle: string;
+  status:         PersonCertStatus;
+}
+
+export interface EmployeeFigureData {
+  userId:             string;
+  name:               string;
+  role:               string;
+  zoneId:             string;
+  zoneLabel:          string;
+  certStatusForZone:  PersonCertStatus;
+  zoneProcedures:     EmployeeProcedureStatus[];
+}
 
 export interface ZoneSpecStep {
   id: string;

@@ -5,6 +5,11 @@ import {
   getProcedures,
   getProcedure,
   getStepsForVersion,
+  getUsers,
+  getMemberships,
+  getCertifications,
+  getAllAssignments,
+  demoToday,
 } from "@/lib/store";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -13,7 +18,9 @@ import {
   type ZoneStatus,
   type ZoneSpec,
   type ZoneSpecStep,
+  type EmployeeFigureData,
 } from "@/components/twin/twin-client";
+import type { PersonCertStatus } from "@/components/twin/twin-types";
 import type { Checklist, ChecklistRun, Zone, Step } from "@/types/domain";
 
 // ── Zone status derivation ────────────────────────────────────────────────────
@@ -179,6 +186,79 @@ function buildZoneSpec(zoneId: string, primaryProcId: string): ZoneSpec | undefi
   };
 }
 
+// ── Employee → zone assignment ─────────────────────────────────────────────────
+
+const ROLE_LABEL_MAP: Record<string, string> = {
+  owner:    "Owner",
+  trainer:  "Trainer",
+  employee: "Employee",
+};
+
+function computeEmployeeFigures(
+  zones: Array<{ id: string; label: string; procedureIds: string[] }>,
+  procTitles: Map<string, string>,
+  today: string
+): EmployeeFigureData[] {
+  const users       = getUsers();
+  const memberships = getMemberships();
+  const allCerts    = getCertifications();
+  const allAsg      = getAllAssignments();
+  const roleMap     = new Map(memberships.map((m) => [m.userId, m.role]));
+
+  return users.flatMap((user): EmployeeFigureData[] => {
+    const userCerts = allCerts.filter((c) => c.userId === user.id);
+    const userAsg   = allAsg.filter((a) => a.userId === user.id && a.status !== "completed");
+
+    // Score each zone: valid cert = 3pts, expired cert = 1pt, open assignment = 1pt
+    let bestZone: typeof zones[0] | undefined;
+    let bestScore = 0;
+
+    for (const zone of zones) {
+      let score = 0;
+      for (const procId of zone.procedureIds) {
+        const cert = userCerts.find((c) => c.procedureId === procId);
+        if (cert) {
+          const isExp = cert.expiresAt ? cert.expiresAt.slice(0, 10) <= today : false;
+          score += isExp ? 1 : 3;
+        } else if (userAsg.some((a) => a.procedureId === procId)) {
+          score += 1;
+        }
+      }
+      if (score > bestScore) { bestScore = score; bestZone = zone; }
+    }
+
+    if (!bestZone || bestScore === 0) return [];
+
+    const zoneProcedures = bestZone.procedureIds.map((procId) => {
+      const cert   = userCerts.find((c) => c.procedureId === procId);
+      let status: PersonCertStatus = "untrained";
+      if (cert) {
+        const isExp = cert.expiresAt ? cert.expiresAt.slice(0, 10) <= today : false;
+        status = isExp ? "expired" : "certified";
+      } else if (userAsg.some((a) => a.procedureId === procId)) {
+        status = "assigned";
+      }
+      return { procedureId: procId, procedureTitle: procTitles.get(procId) ?? procId, status };
+    });
+
+    const statuses = zoneProcedures.map((p) => p.status);
+    const certStatusForZone: PersonCertStatus =
+      statuses.includes("expired")    ? "expired"    :
+      statuses.includes("certified")  ? "certified"  :
+      statuses.includes("assigned")   ? "assigned"   : "untrained";
+
+    return [{
+      userId:            user.id,
+      name:              user.name,
+      role:              ROLE_LABEL_MAP[roleMap.get(user.id) ?? "employee"],
+      zoneId:            bestZone.id,
+      zoneLabel:         bestZone.label,
+      certStatusForZone,
+      zoneProcedures,
+    }];
+  });
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function TwinPage() {
@@ -186,8 +266,12 @@ export default function TwinPage() {
   const procedures = getProcedures();
   const checklists = getChecklists();
   const todayRuns  = getTodayRuns();
+  const today      = demoToday();
 
   const procMap = new Map(procedures.map((p) => [p.id, p.title]));
+
+  const zones         = spaceMap?.zones ?? [];
+  const employeeFigures = computeEmployeeFigures(zones, procMap, today);
 
   const enrichedZones: EnrichedZone[] = (spaceMap?.zones ?? []).map((zone) => ({
     id:              zone.id,
@@ -223,6 +307,7 @@ export default function TwinPage() {
       {/* Interactive floor plan — fills remaining height */}
       <TwinClient
         zones={enrichedZones}
+        employees={employeeFigures}
         mapName={spaceMap?.name ?? "Floor"}
       />
     </div>
