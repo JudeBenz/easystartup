@@ -15,6 +15,17 @@ const toneClass: Record<NonNullable<Stat["tone"]>, string> = {
   red: "text-destructive",
 };
 
+// Static class strings so Tailwind's content scan keeps them. Base is 2 columns
+// on phones; expands to one column per stat from the `sm` breakpoint up.
+const smCols: Record<number, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-2",
+  3: "grid-cols-2 sm:grid-cols-3",
+  4: "grid-cols-2 sm:grid-cols-4",
+  5: "grid-cols-2 sm:grid-cols-5",
+  6: "grid-cols-2 sm:grid-cols-6",
+};
+
 /** Pad small integers to two digits (06) per the design language. */
 function display(value: string | number): string {
   if (typeof value === "number" && Number.isInteger(value) && value >= 0 && value < 100) {
@@ -23,18 +34,22 @@ function display(value: string | number): string {
   return String(value);
 }
 
-/** A readout strip — ruled band, hairline cells, big tabular numbers. */
+/**
+ * A readout strip — ruled band, hairline cells, big tabular numbers. Wraps to a
+ * 2-column grid on phones; per-cell borders keep clean hairlines at any wrap.
+ */
 export function StatStrip({ stats, className }: { stats: Stat[]; className?: string }) {
+  const cols = smCols[stats.length] ?? "grid-cols-2 sm:grid-cols-4";
   return (
     <div
       className={cn(
-        "grid divide-x divide-rule border border-rule bg-panel",
+        "grid border-l border-t border-rule bg-panel",
+        cols,
         className
       )}
-      style={{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}
     >
       {stats.map((s) => (
-        <div key={s.label} className="px-4 py-3">
+        <div key={s.label} className="border-b border-r border-rule px-4 py-3">
           <div
             className={cn(
               "tnum font-display text-2xl font-bold leading-none",

@@ -89,13 +89,13 @@ export default async function ProceduresPage({
                 <th className="px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-faint">
                   Procedure
                 </th>
-                <th className="px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-faint">
+                <th className="hidden px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-faint md:table-cell">
                   Category
                 </th>
-                <th className="px-4 py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-faint">
+                <th className="hidden px-4 py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-faint sm:table-cell">
                   Steps
                 </th>
-                <th className="px-4 py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-faint">
+                <th className="hidden px-4 py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-faint sm:table-cell">
                   Version
                 </th>
                 <th className="px-4 py-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-faint">
@@ -122,17 +122,17 @@ export default async function ProceduresPage({
                         </span>
                       </Link>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="hidden px-4 py-3 md:table-cell">
                       <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-soft">
                         {p.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="hidden px-4 py-3 text-right sm:table-cell">
                       <span className="tnum font-mono text-xs text-ink">
                         {String(stepCount).padStart(2, "0")}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="hidden px-4 py-3 text-right sm:table-cell">
                       <span className="tnum font-mono text-xs text-ink">
                         {p.status === "published" ? `v${p.currentVersion}` : "—"}
                       </span>
