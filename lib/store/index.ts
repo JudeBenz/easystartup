@@ -14,6 +14,7 @@ export * from "./attempts";
 export * from "./assignments";
 export * from "./checklists";
 export * from "./twin";
+export * from "./spaces";
 export * from "./analytics";
 export * from "./autopilot";
 export * from "./compliance";
