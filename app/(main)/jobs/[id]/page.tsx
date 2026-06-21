@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowUpRight, Check, ImageOff } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import {
   canDispatch,
   demoToday,
@@ -16,20 +16,15 @@ import {
   getUsersByRole,
   missingCertsForDispatch,
 } from "@/lib/store";
-import { getRole } from "@/lib/session";
+import { getRole, getActingUser } from "@/lib/session";
 import { fmtDate, fmtTime, jobStatusMeta } from "@/lib/format";
-import type { ChecklistItem } from "@/types/domain";
-import {
-  addJobProofAction,
-  completeJobAction,
-  toggleJobItemAction,
-} from "@/app/_actions/job-actions";
 import { PageHeader } from "@/components/page-header";
 import { StatStrip } from "@/components/stat-strip";
 import { StatusDot } from "@/components/status-dot";
 import { DispatchDialog } from "@/components/jobs/dispatch-dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { ChecklistRunner } from "@/components/jobs/checklist-runner";
+import { ProofCapture } from "@/components/jobs/proof-capture";
+import { CompleteButton } from "@/components/jobs/complete-button";
 
 export default async function JobDetailPage({
   params,
@@ -40,54 +35,56 @@ export default async function JobDetailPage({
   const job = getJob(id);
   if (!job) notFound();
 
-  const role = await getRole();
-  const canManage = role === "owner" || role === "trainer";
+  const [role, actor] = await Promise.all([getRole(), getActingUser()]);
+  const isManager  = role === "owner" || role === "trainer";
+  const isAssigned =
+    job.assignedUserIds.includes(actor.id) || job.managerId === actor.id;
+  const canEdit   = isAssigned || isManager;
+  const canManage = isManager;
 
-  const jobType = getJobType(job.jobTypeId);
-  const site = job.siteId ? getSite(job.siteId) : undefined;
-  const crew = job.crewId ? getCrew(job.crewId) : undefined;
+  const jobType     = getJobType(job.jobTypeId);
+  const site        = job.siteId ? getSite(job.siteId) : undefined;
+  const crew        = job.crewId ? getCrew(job.crewId) : undefined;
   const crewMembers = job.crewId ? getCrewMembers(job.crewId) : [];
-  const manager = job.managerId ? getUser(job.managerId) : undefined;
-  const assignees = job.assignedUserIds
+  const manager     = job.managerId ? getUser(job.managerId) : undefined;
+  const assignees   = job.assignedUserIds
     .map((uid) => getUser(uid))
     .filter((u): u is NonNullable<typeof u> => Boolean(u));
 
-  const template = jobType?.checklistTemplate ?? [];
-  const run = job.checklistRunId
+  const template      = jobType?.checklistTemplate ?? [];
+  const run           = job.checklistRunId
     ? getRun(job.id, job.scheduledAt.slice(0, 10))
     : undefined;
-  const completed = new Set(run?.completedItemIds ?? []);
-  const requiredItems = template.filter((i) => i.required);
-  const allRequiredDone = requiredItems.every((i) => completed.has(i.id));
-  const doneCount = template.filter((i) => completed.has(i.id)).length;
+  const checkedIds    = run?.completedItemIds ?? [];
+  const completed     = new Set(checkedIds);
+  const requiredItems     = template.filter((i) => i.required);
+  const allRequiredDone   = requiredItems.every((i) => completed.has(i.id));
+  const doneCount         = template.filter((i) => completed.has(i.id)).length;
 
   const linkedProcedures = (jobType?.procedureIds ?? [])
     .map((pid) => getProcedure(pid))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
-  const meta = jobStatusMeta(job.status);
-  const isClosed = job.status === "complete" || job.status === "cancelled";
-  const day = job.scheduledAt.slice(0, 10);
-  const whenLabel =
+  const statusMeta = jobStatusMeta(job.status);
+  const isClosed   = job.status === "complete" || job.status === "cancelled";
+  const day        = job.scheduledAt.slice(0, 10);
+  const whenLabel  =
     day === demoToday()
       ? `Today · ${fmtTime(job.scheduledAt)}`
       : `${fmtDate(job.scheduledAt)} · ${fmtTime(job.scheduledAt)}`;
 
-  // Dispatch dialog inputs — cert eligibility per worker candidate (employees).
+  const proofRequired = jobType?.kind === "field";
+  const hasProof      = job.proofMediaUrls.length > 0;
+  const requiredTotal = requiredItems.length;
+  const requiredDone  = requiredItems.filter((i) => completed.has(i.id)).length;
+
+  // Dispatch dialog inputs — cert eligibility per worker candidate
   const showDispatch = canManage && !isClosed;
   const dispatchCrews = showDispatch
-    ? getCrews().map((c) => ({
-        id: c.id,
-        name: c.name,
-        truck: c.truck,
-        memberUserIds: c.memberUserIds,
-      }))
+    ? getCrews().map((c) => ({ id: c.id, name: c.name, truck: c.truck, memberUserIds: c.memberUserIds }))
     : [];
   const dispatchManagers = showDispatch
-    ? [...getUsersByRole("owner"), ...getUsersByRole("trainer")].map((u) => ({
-        id: u.id,
-        name: u.name,
-      }))
+    ? [...getUsersByRole("owner"), ...getUsersByRole("trainer")].map((u) => ({ id: u.id, name: u.name }))
     : [];
   const dispatchCandidates = showDispatch
     ? getUsersByRole("employee").map((u) => ({
@@ -115,8 +112,8 @@ export default async function JobDetailPage({
                 managers={dispatchManagers}
                 candidates={dispatchCandidates}
                 initial={{
-                  crewId: job.crewId ?? "",
-                  managerId: job.managerId ?? "",
+                  crewId:          job.crewId ?? "",
+                  managerId:       job.managerId ?? "",
                   assignedUserIds: job.assignedUserIds,
                 }}
                 triggerVariant="outline"
@@ -142,7 +139,7 @@ export default async function JobDetailPage({
       <StatStrip
         className="mb-8"
         stats={[
-          { label: "Status", value: meta.label, tone: meta.tone === "amber" ? "amber" : "ink" },
+          { label: "Status", value: statusMeta.label, tone: statusMeta.tone === "amber" ? "amber" : "ink" },
           { label: "Checklist", value: `${doneCount}/${template.length}` },
           { label: "Crew", value: crew?.name ?? "Unassigned" },
           { label: "Proof", value: job.proofMediaUrls.length },
@@ -150,9 +147,10 @@ export default async function JobDetailPage({
       />
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Left: checklist + proof */}
+        {/* Left: checklist + proof + notes */}
         <div className="space-y-8 lg:col-span-2">
-          {/* Checklist run */}
+
+          {/* Checklist */}
           <section>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-mono text-[11px] uppercase tracking-[0.14em] text-navy">
@@ -171,34 +169,59 @@ export default async function JobDetailPage({
               <p className="border border-dashed border-rule2 bg-panel px-5 py-8 text-center text-sm text-soft">
                 No checklist run yet.
               </p>
+            ) : canEdit && !isClosed ? (
+              <ChecklistRunner
+                runId={run.id}
+                items={template}
+                checkedIds={checkedIds}
+              />
             ) : (
               <ul className="divide-y divide-rule overflow-hidden rounded-md border border-rule bg-panel">
-                {template.map((item) => (
-                  <ChecklistRow
-                    key={item.id}
-                    item={item}
-                    done={completed.has(item.id)}
-                    disabled={isClosed}
-                    toggle={async () => {
-                      "use server";
-                      await toggleJobItemAction(run.id, item.id, job.id);
-                    }}
-                  />
-                ))}
+                {template.map((item) => {
+                  const done = completed.has(item.id);
+                  return (
+                    <li key={item.id} className="flex items-center gap-3 px-4 py-3">
+                      <span
+                        aria-hidden
+                        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border"
+                        style={{
+                          borderColor: done ? "rgb(14 122 78)" : "rgb(214 221 212)",
+                          background: done ? "rgb(14 122 78)" : "transparent",
+                        }}
+                      >
+                        {done && (
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4L3.5 6.5L9 1" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="square" />
+                          </svg>
+                        )}
+                      </span>
+                      <span
+                        className="text-sm"
+                        style={{
+                          color: done ? "rgb(121 131 124)" : "rgb(20 24 26)",
+                          textDecoration: done ? "line-through" : "none",
+                        }}
+                      >
+                        {item.label}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
 
-          {/* Proof gallery */}
+          {/* Proof of work */}
           <section>
             <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.14em] text-navy">
               02 / Proof of work
             </h2>
-            {job.proofMediaUrls.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 border border-dashed border-rule2 bg-panel px-5 py-8 text-center text-sm text-soft">
-                <ImageOff className="h-5 w-5 text-faint" />
-                No proof photos yet.
-              </div>
+            {canEdit && !isClosed ? (
+              <ProofCapture jobId={job.id} proofUrls={job.proofMediaUrls} />
+            ) : job.proofMediaUrls.length === 0 ? (
+              <p className="border border-dashed border-rule2 bg-panel px-5 py-8 text-center text-sm text-soft">
+                No proof photos.
+              </p>
             ) : (
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {job.proofMediaUrls.map((url, i) => (
@@ -216,30 +239,6 @@ export default async function JobDetailPage({
                 ))}
               </ul>
             )}
-
-            {canManage && !isClosed && (
-              <form
-                action={async (formData: FormData) => {
-                  "use server";
-                  await addJobProofAction(
-                    job.id,
-                    String(formData.get("url") ?? "")
-                  );
-                }}
-                className="mt-3 flex items-center gap-2"
-              >
-                <Input
-                  name="url"
-                  type="url"
-                  placeholder="Paste a photo URL…"
-                  aria-label="Proof photo URL"
-                  className="h-9"
-                />
-                <Button type="submit" variant="outline" size="sm">
-                  Add proof
-                </Button>
-              </form>
-            )}
           </section>
 
           {job.notes && (
@@ -254,7 +253,7 @@ export default async function JobDetailPage({
           )}
         </div>
 
-        {/* Right: meta + people + procedures + actions */}
+        {/* Right: meta + crew + procedures + PPE + complete */}
         <aside className="space-y-8">
           <section>
             <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.14em] text-navy">
@@ -262,12 +261,10 @@ export default async function JobDetailPage({
             </h2>
             <dl className="overflow-hidden rounded-md border border-rule bg-panel">
               <MetaRow label="Status">
-                <StatusDot tone={meta.tone}>{meta.label}</StatusDot>
+                <StatusDot tone={statusMeta.tone}>{statusMeta.label}</StatusDot>
               </MetaRow>
               <MetaRow label="When">{whenLabel}</MetaRow>
-              <MetaRow label="Site">
-                {site ? site.name : "—"}
-              </MetaRow>
+              <MetaRow label="Site">{site ? site.name : "—"}</MetaRow>
               <MetaRow label="Manager">{manager?.name ?? "—"}</MetaRow>
               {job.completedAt && (
                 <MetaRow label="Completed">{fmtDate(job.completedAt)}</MetaRow>
@@ -284,9 +281,7 @@ export default async function JobDetailPage({
             ) : (
               <div className="rounded-md border border-rule bg-panel">
                 <div className="flex items-center justify-between border-b border-rule px-3 py-2">
-                  <span className="font-display text-sm font-semibold text-ink">
-                    {crew.name}
-                  </span>
+                  <span className="font-display text-sm font-semibold text-ink">{crew.name}</span>
                   {crew.truck && (
                     <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-faint">
                       {crew.truck}
@@ -295,15 +290,10 @@ export default async function JobDetailPage({
                 </div>
                 <ul className="divide-y divide-rule">
                   {(crewMembers.length > 0 ? crewMembers : assignees).map((u) => (
-                    <li
-                      key={u.id}
-                      className="flex items-center justify-between px-3 py-2"
-                    >
+                    <li key={u.id} className="flex items-center justify-between px-3 py-2">
                       <span className="text-sm text-ink">{u.name}</span>
                       {u.id === crew.leadUserId && (
-                        <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-navy">
-                          Lead
-                        </span>
+                        <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-navy">Lead</span>
                       )}
                     </li>
                   ))}
@@ -355,107 +345,20 @@ export default async function JobDetailPage({
             </section>
           )}
 
-          {canManage && !isClosed && (
+          {canEdit && !isClosed && (
             <section>
-              <form
-                action={async () => {
-                  "use server";
-                  await completeJobAction(job.id);
-                }}
-              >
-                <Button type="submit" className="w-full">
-                  <Check className="h-4 w-4" /> Mark job complete
-                </Button>
-              </form>
-              {!allRequiredDone && template.length > 0 && (
-                <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.08em] text-faint">
-                  {requiredItems.length - requiredItems.filter((i) => completed.has(i.id)).length}{" "}
-                  required item(s) still open
-                </p>
-              )}
+              <CompleteButton
+                jobId={job.id}
+                requiredTotal={requiredTotal}
+                requiredDone={requiredDone}
+                hasProof={hasProof}
+                proofRequired={proofRequired}
+              />
             </section>
           )}
         </aside>
       </div>
     </div>
-  );
-}
-
-function ChecklistRow({
-  item,
-  done,
-  disabled,
-  toggle,
-}: {
-  item: ChecklistItem;
-  done: boolean;
-  disabled: boolean;
-  toggle: () => Promise<void>;
-}) {
-  const tint =
-    !done && item.type === "warning"
-      ? "bg-amber-bg"
-      : !done && item.type === "ppe"
-        ? "bg-navy-tint/50"
-        : undefined;
-
-  return (
-    <li className={tint}>
-      <form action={toggle}>
-        <button
-          type="submit"
-          disabled={disabled}
-          className="flex w-full items-start gap-3 px-4 py-3 text-left disabled:cursor-not-allowed disabled:opacity-70"
-          aria-label={`${done ? "Uncheck" : "Check"}: ${item.label}`}
-          aria-pressed={done}
-        >
-          <span
-            aria-hidden
-            className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center border"
-            style={{
-              borderColor: done ? "rgb(14 122 78)" : "rgb(214 221 212)",
-              background: done ? "rgb(14 122 78)" : "transparent",
-            }}
-          >
-            {done && (
-              <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                <path
-                  d="M1 4L3.5 6.5L9 1"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.5"
-                  strokeLinecap="square"
-                />
-              </svg>
-            )}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span
-              className="text-sm leading-snug"
-              style={{
-                color: done ? "rgb(121 131 124)" : "rgb(20 24 26)",
-                textDecoration: done ? "line-through" : "none",
-              }}
-            >
-              {item.label}
-            </span>
-            {(item.type === "ppe" || item.type === "warning") && (
-              <span
-                className={`ml-2 font-mono text-[9px] uppercase tracking-[0.1em] ${
-                  item.type === "warning" ? "text-amber" : "text-navy"
-                }`}
-              >
-                {item.type}
-              </span>
-            )}
-            {!item.required && (
-              <span className="ml-2 font-mono text-[9px] uppercase tracking-[0.08em] text-faint">
-                Optional
-              </span>
-            )}
-          </span>
-        </button>
-      </form>
-    </li>
   );
 }
 
@@ -468,9 +371,7 @@ function MetaRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-rule px-3 py-2 last:border-0">
-      <dt className="font-mono text-[10px] uppercase tracking-[0.1em] text-faint">
-        {label}
-      </dt>
+      <dt className="font-mono text-[10px] uppercase tracking-[0.1em] text-faint">{label}</dt>
       <dd className="text-right text-sm text-ink">{children}</dd>
     </div>
   );
