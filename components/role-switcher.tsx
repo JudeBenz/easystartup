@@ -32,7 +32,11 @@ export function RoleSwitcher({ role }: { role: Role }) {
             key={r}
             type="button"
             disabled={pending}
-            onClick={() => startTransition(() => setRole(r))}
+            onClick={() =>
+              startTransition(async () => {
+                await setRole(r);
+              })
+            }
             className={cn(
               "border-l border-rule2 px-2.5 py-1.5 font-display text-xs font-semibold transition-colors first:border-l-0 sm:border-l sm:px-3",
               active

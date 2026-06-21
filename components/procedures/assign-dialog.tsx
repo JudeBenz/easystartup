@@ -56,14 +56,18 @@ export function AssignDialog({
       return;
     }
     startTransition(async () => {
-      const { count } = await assignProcedureAction({
+      const res = await assignProcedureAction({
         procedureId,
         userIds: Array.from(selected),
         dueDate: due,
       });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
       toast.success(
-        count > 0
-          ? `Assigned to ${count} ${count === 1 ? "person" : "people"}.`
+        res.count > 0
+          ? `Assigned to ${res.count} ${res.count === 1 ? "person" : "people"}.`
           : "Those people were already assigned."
       );
       setOpen(false);

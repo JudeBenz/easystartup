@@ -61,10 +61,14 @@ export function AccountMenu({ user, role }: { user: User; role: Role }) {
           onSelect={(e) => {
             e.preventDefault();
             startTransition(async () => {
-              await resetDemoAction();
-              toast.success("Demo reset", {
-                description: "All data restored to the seed.",
-              });
+              const res = await resetDemoAction();
+              if (res.ok) {
+                toast.success("Demo reset", {
+                  description: "All data restored to the seed.",
+                });
+              } else {
+                toast.error("Couldn't reset the demo. Try again.");
+              }
             });
           }}
         >

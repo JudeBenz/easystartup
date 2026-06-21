@@ -277,8 +277,12 @@ export function TraineePlayer({
       assignmentId,
     })
       .then((r) => {
-        setIssuedAt(r.issuedAt);
-        setCertId(r.certificationId);
+        if (r.ok) {
+          setIssuedAt(r.issuedAt);
+          setCertId(r.certificationId);
+        } else {
+          setIssuedAt(new Date().toISOString());
+        }
       })
       .catch(() => setIssuedAt(new Date().toISOString()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
