@@ -3,51 +3,68 @@
 @tailwind utilities;
 
 /*
- * EasyStartUp tokens — warm "operations instrument" palette.
+ * EasyStartUp tokens — light-money palette (supersedes warm-paper).
  * Values are space-separated RGB triplets (consumed via rgb(var(--x) / <alpha>)).
- * FROZEN after foundation — do not edit without a sync.
+ * CSS variable NAMES are unchanged so existing components auto-pick new colors.
  */
 @layer base {
   :root {
-    /* raw palette */
-    --paper: 244 242 236; /* #F4F2EC */
-    --panel: 251 250 247; /* #FBFAF7 */
-    --ink: 23 24 27; /* #17181B */
-    --soft: 81 83 90; /* #51535A */
-    --faint: 140 139 133; /* #8C8B85 */
-    --rule: 222 219 208; /* #DEDBD0 */
-    --rule-2: 203 200 188; /* #CBC8BC */
-    --navy: 28 58 94; /* #1C3A5E */
-    --navy-hover: 22 48 78; /* #16304E */
-    --navy-tint: 232 238 246; /* #E8EEF6 */
-    --amber: 166 102 14; /* #A6660E */
-    --amber-bg: 246 236 216; /* #F6ECD8 */
-    --green: 44 112 72; /* #2C7048 */
-    --green-bg: 230 240 230; /* #E6F0E6 */
-    --red: 180 35 24; /* #B42318 (destructive only) */
+    /* ── Surface palette ──────────────────────────────────────────── */
+    --paper:   241 244 240;   /* #F1F4F0 — page bg (green-tinted light)  */
+    --panel:   255 255 255;   /* #FFFFFF — cards / surfaces               */
+    --ink:     20  24  26;    /* #14181A — primary text (high contrast)   */
+    --soft:    76  86  79;    /* #4C564F — secondary text                 */
+    --faint:   121 131 124;   /* #79837C — labels / metadata              */
+    --rule:    224 230 223;   /* #E0E6DF — hairlines / card borders       */
+    --rule-2:  214 221 212;   /* #D6DDD4 — stronger dividers              */
 
-    /* shadcn semantic mapping */
-    --background: var(--paper);
-    --foreground: var(--ink);
-    --card: var(--panel);
-    --card-foreground: var(--ink);
-    --popover: var(--panel);
-    --popover-foreground: var(--ink);
-    --primary: var(--navy);
-    --primary-foreground: var(--panel);
-    --secondary: 234 231 222;
-    --secondary-foreground: var(--ink);
-    --muted: 234 231 222;
-    --muted-foreground: var(--soft);
-    --accent: var(--navy-tint);
-    --accent-foreground: var(--navy);
-    --destructive: var(--red);
+    /* ── Signature green (formerly "navy" — names kept for compat) ── */
+    --navy:      14 122 78;   /* #0E7A4E — primary accent: CTAs, active   */
+    --navy-hover: 11 107 67;  /* #0B6B43 — green-deep: hover, AA labels  */
+    --navy-tint: 228 242 234; /* #E4F2EA — green-tint: chips, avatar bg  */
+
+    /* ── Semantic green aliases (new) ─────────────────────────────── */
+    --green:      14 122 78;  /* #0E7A4E — same as --navy, sparklines     */
+    --green-bg:  228 242 234; /* #E4F2EA — same as --navy-tint            */
+    --green-deep: 11 107 67;  /* #0B6B43 — AA-safe text on light bg       */
+
+    /* ── Attention / status ────────────────────────────────────────── */
+    --amber:        154 100  16; /* #9A6410 — attention text/icon (AA)    */
+    --amber-strong: 122  79  12; /* #7A4F0C — amber numbers               */
+    --amber-bg:     251 241 221; /* #FBF1DD — amber card bg               */
+    --amber-border: 232 211 160; /* #E8D3A0 — amber card border           */
+    --gold:         183 121  31; /* #B7791F — premium/cert flourish only  */
+    --red:          192  57  43; /* #C0392B — critical only, sparing      */
+
+    /* ── Branded header (deep green) ──────────────────────────────── */
+    --header:      12  90  57; /* #0C5A39 — branded header bar           */
+    --header-soft: 143 199 168; /* #8FC7A8 — labels on green header      */
+    --header-mint: 111 216 158; /* #6FD89E — positive / sparkline in hdr */
+    --header-gold: 232 199 126; /* #E8C77E — blocked/attention in header */
+
+    /* ── shadcn semantic mapping ───────────────────────────────────── */
+    --background:            var(--paper);
+    --foreground:            var(--ink);
+    --card:                  var(--panel);
+    --card-foreground:       var(--ink);
+    --popover:               var(--panel);
+    --popover-foreground:    var(--ink);
+    --primary:               var(--navy);
+    --primary-foreground:    255 255 255;
+    --secondary:             228 242 234;
+    --secondary-foreground:  var(--ink);
+    --muted:                 241 244 240;
+    --muted-foreground:      var(--soft);
+    --accent:                var(--navy-tint);
+    --accent-foreground:     var(--navy);
+    --destructive:           var(--red);
     --destructive-foreground: 255 255 255;
-    --border: var(--rule);
-    --input: var(--rule-2);
-    --ring: var(--navy);
+    --border:                var(--rule);
+    --input:                 var(--rule-2);
+    --ring:                  var(--navy);
 
-    --radius: 2px;
+    /* Cards & chips use slightly softened corners */
+    --radius: 7px;
   }
 }
 
@@ -69,7 +86,7 @@
 }
 
 @layer components {
-  /* mono eyebrow / label — the biggest "designed on purpose" signal */
+  /* mono eyebrow / label */
   .eyebrow {
     @apply font-mono text-[11px] uppercase tracking-[0.12em] text-faint;
   }
@@ -80,8 +97,13 @@
   .hr-rule {
     @apply border-t border-rule;
   }
-  /* faint critical-red wash (for warning/quiz-fail panels) */
+  /* faint critical-red wash */
   .tint-critical {
     background-color: rgb(var(--red) / 0.06);
+  }
+  /* amber card utility */
+  .card-amber {
+    background-color: rgb(var(--amber-bg));
+    border-color: rgb(var(--amber-border));
   }
 }
