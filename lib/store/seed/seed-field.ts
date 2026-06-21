@@ -191,7 +191,10 @@ interface JobDef {
 }
 
 function tplItemIds(jobTypeId: string): string[] {
-  return JOB_TYPES.find((t) => t.id === jobTypeId)!.checklistTemplate.map((i) => i.id);
+  // Guard the lookup: a missing job-type must not crash db() seeding (which would
+  // surface as an opaque "Jest worker" RSC error on every store-backed page).
+  const jobType = JOB_TYPES.find((t) => t.id === jobTypeId);
+  return jobType ? jobType.checklistTemplate.map((i) => i.id) : [];
 }
 
 const JOB_DEFS: JobDef[] = [
