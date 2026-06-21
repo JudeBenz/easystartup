@@ -4,34 +4,36 @@ import { ROLE_LABEL } from "@/lib/roles";
 import { fmtDate } from "@/lib/format";
 import { PageHeader } from "@/components/page-header";
 import { StatusRibbon } from "@/components/home/status-ribbon";
+import { EntryPanels } from "@/components/home/entry-panels";
 import { HomeTraining } from "@/components/home/home-training";
-import { HomeAutopilot } from "@/components/home/home-autopilot";
 
 export default async function HomePage() {
   const [role, user] = await Promise.all([getRole(), getActingUser()]);
   const org = getOrg();
   const firstName = user.name.split(" ")[0];
+  const isManager = role === "owner" || role === "trainer";
 
   return (
     <div>
       <PageHeader
         eyebrow={`${org.name} · ${ROLE_LABEL[role]} · ${fmtDate(demoToday())}`}
         title={`Good morning, ${firstName}.`}
-        description="Everything this shop knows — captured once, trained into everyone, and run on autopilot."
+        description={
+          isManager
+            ? "Command the shop. Live status, and the few strong ways in."
+            : "Everything you're trained on, and what's next."
+        }
       />
 
       <div className="mb-8">
         <StatusRibbon />
       </div>
 
-      <div className="grid gap-10 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <HomeTraining role={role} user={user} />
-        </div>
-        <div className="lg:col-span-1">
-          <HomeAutopilot role={role} />
-        </div>
-      </div>
+      {isManager ? (
+        <EntryPanels />
+      ) : (
+        <HomeTraining role={role} user={user} />
+      )}
     </div>
   );
 }
