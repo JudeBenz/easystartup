@@ -16,6 +16,7 @@ export * from "./checklists";
 export * from "./twin";
 export * from "./analytics";
 export * from "./autopilot";
+export * from "./compliance";
 
 // Fixed personas / org the role switcher and seed rely on.
 export {
