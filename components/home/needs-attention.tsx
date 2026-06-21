@@ -1,39 +1,50 @@
 import Link from "next/link";
 import { AlertTriangle, ChevronRight, ShieldAlert } from "lucide-react";
-import { getMorningStatus, getComplianceRows } from "@/lib/store";
+import { getJobsForDate, getComplianceRows, demoToday } from "@/lib/store";
+import { getUser } from "@/lib/store";
+import type { Job } from "@/types/domain";
 
 interface AttentionItem {
-  id:       string;
-  icon:     "blocker" | "cert";
-  title:    string;
-  sub:      string;
-  status:   string;
-  tone:     "amber" | "red";
-  href:     string;
+  id:     string;
+  icon:   "blocker" | "cert";
+  title:  string;
+  sub:    string;
+  status: string;
+  tone:   "amber" | "red";
+  href:   string;
 }
 
 /**
- * "Needs attention" list for command home. Shows top blockers + expired certs.
- * Each row: icon · title · mono sub · status swatch + label · chevron.
+ * "Needs attention" list for command home.
+ * Shows blocked jobs (linking to /operations) + expired/expiring certs (linking
+ * to the person's profile page). Reads real store data — not hardcoded.
  */
 export function NeedsAttention() {
-  const s         = getMorningStatus();
+  const today     = demoToday();
+  const blocked   = getJobsForDate(today).filter((j: Job) => j.status === "blocked");
   const certRows  = getComplianceRows()
     .filter((r) => r.status === "expired" || r.status === "expiring_soon")
     .slice(0, 3);
 
   const items: AttentionItem[] = [
-    // Autopilot blockers
-    ...s.blockers.slice(0, 2).map((b): AttentionItem => ({
-      id:     b.userId,
-      icon:   "blocker",
-      title:  b.userName,
-      sub:    b.blockingItemLabel,
-      status: "Blocked",
-      tone:   "amber",
-      href:   "/autopilot",
-    })),
-    // Compliance — expired first
+    // Blocked jobs — show job title + reason; link to operations view
+    ...blocked.slice(0, 2).map((j: Job): AttentionItem => {
+      const lead = j.assignedUserIds[0]
+        ? (getUser(j.assignedUserIds[0])?.name ?? "Unassigned")
+        : (j.managerId ? (getUser(j.managerId)?.name ?? "Manager") : "Unassigned");
+      return {
+        id:     j.id,
+        icon:   "blocker",
+        title:  j.title,
+        sub:    j.blockedReason
+          ? j.blockedReason.slice(0, 60) + (j.blockedReason.length > 60 ? "…" : "")
+          : `Assigned to ${lead}`,
+        status: "Blocked",
+        tone:   "amber",
+        href:   "/operations",
+      };
+    }),
+    // Compliance — expired first; link to the person's profile
     ...certRows.map((r): AttentionItem => ({
       id:     r.certId,
       icon:   "cert",
@@ -41,7 +52,7 @@ export function NeedsAttention() {
       sub:    r.procedureTitle,
       status: r.status === "expired" ? "Expired" : "Expiring soon",
       tone:   r.status === "expired" ? "red" : "amber",
-      href:   "/reports/compliance",
+      href:   `/people/${r.userId}`,
     })),
   ];
 

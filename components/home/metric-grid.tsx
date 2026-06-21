@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { getMorningStatus, getEmployees, getComplianceSummary } from "@/lib/store";
+import { getJobsForDate, getCrews, getComplianceSummary, demoToday } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import type { Job } from "@/types/domain";
 
 function pad(n: number) {
   return n >= 0 && n < 100 ? String(n).padStart(2, "0") : String(n);
@@ -44,35 +45,40 @@ function MetricCard({ label, value, sub, href, tone }: MetricCardProps) {
 
 /**
  * 2×2 metric card grid for the command home (owner/trainer).
- * Cards: Jobs today · Crews out · Blocked · Certs at risk.
+ * All four metrics read real data from the store.
  */
 export function MetricGrid() {
-  const s   = getMorningStatus();
-  const cs  = getComplianceSummary();
-  const emps = getEmployees();
-  const atRisk = cs.expired + cs.expiringSoon;
+  const today  = demoToday();
+  const jobs   = getJobsForDate(today);
+  const crews  = getCrews();
+  const cs     = getComplianceSummary();
+
+  const total    = jobs.length;
+  const complete = jobs.filter((j: Job) => j.status === "complete").length;
+  const blocked  = jobs.filter((j: Job) => j.status === "blocked").length;
+  const atRisk   = cs.expired + cs.expiringSoon;
 
   return (
     <div className="mt-5 grid grid-cols-2 gap-3">
       <MetricCard
         label="Jobs today"
-        value={s.total}
-        sub={`${pad(s.complete)} complete`}
-        href="/autopilot"
+        value={total}
+        sub={`${pad(complete)} complete`}
+        href="/operations"
         tone="green"
       />
       <MetricCard
         label="Crews out"
-        value={emps.length}
-        sub="on the floor"
-        href="/people"
+        value={crews.length}
+        sub={crews.length === 1 ? "1 active" : `${crews.length} active`}
+        href="/operations"
         tone="green"
       />
       <MetricCard
         label="Blocked"
-        value={s.blocked}
-        sub={s.blocked > 0 ? "need resolution" : "all clear"}
-        href="/autopilot"
+        value={blocked}
+        sub={blocked > 0 ? "need resolution" : "all clear"}
+        href="/operations"
         tone="amber"
       />
       <MetricCard
