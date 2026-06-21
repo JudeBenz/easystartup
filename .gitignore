@@ -39,6 +39,9 @@ yarn-error.log*
 # transient local server log
 /.server.log
 
+# npm lockfile — this is a pnpm repo (use pnpm-lock.yaml)
+/package-lock.json
+
 # vercel
 .vercel
 
