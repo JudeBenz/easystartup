@@ -5,16 +5,22 @@ import type {
   Certification,
   Checklist,
   ChecklistRun,
+  Crew,
+  Job,
+  JobType,
   Membership,
+  Message,
   Organization,
   Procedure,
   ProcedureVersion,
+  Site,
   SpaceMap,
   Step,
   User,
 } from "@/types/domain";
 import { buildAssignments } from "./seed-assignments";
 import { buildChecklists } from "./seed-checklists";
+import { buildField } from "./seed-field";
 import { buildPeople } from "./seed-people";
 import { buildProcedures } from "./seed-procedures";
 import { buildTwin } from "./seed-twin";
@@ -34,6 +40,12 @@ export interface DemoData {
   checklists: Checklist[];
   checklistRuns: ChecklistRun[];
   spaceMaps: SpaceMap[];
+  // Service management (field/distributed operation).
+  sites: Site[];
+  crews: Crew[];
+  jobTypes: JobType[];
+  jobs: Job[];
+  messages: Message[];
 }
 
 /**
@@ -48,6 +60,7 @@ export function buildSeed(): DemoData {
   const asg = buildAssignments();
   const chk = buildChecklists();
   const twin = buildTwin();
+  const field = buildField();
 
   return {
     organizations: people.organizations,
@@ -60,7 +73,13 @@ export function buildSeed(): DemoData {
     attempts: asg.attempts,
     certifications: asg.certifications,
     checklists: chk.checklists,
-    checklistRuns: chk.checklistRuns,
+    // Job checklist runs live in the same array (reused ChecklistRun type).
+    checklistRuns: [...chk.checklistRuns, ...field.checklistRuns],
     spaceMaps: twin.spaceMaps,
+    sites: field.sites,
+    crews: field.crews,
+    jobTypes: field.jobTypes,
+    jobs: field.jobs,
+    messages: field.messages,
   };
 }
