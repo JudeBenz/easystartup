@@ -23,20 +23,20 @@ const STATUS_LABEL: Record<ZoneStatus, string> = {
 };
 
 // ── Coordinate mapping ────────────────────────────────────────────────────────
-// Seed space: 0-100 (x = right, y = down)
-// 3D space:   -5 to +5 (x = right, z = forward, y = up)
+// Seed space 0-100 → 3D space -5 to +5
 
-const S = 0.1;          // scale: 100 → 10 units
-const OFF = -5;         // center: (0+100)/2 * S = 5 → subtract 5
-const BLOCK_H = 0.55;   // extrusion height in 3D units
+const S       = 0.1;    // scale: 100 → 10 units
+const OFF     = -5;     // center offset
+const BLOCK_H = 0.55;   // extrusion height
 const SCAN_DUR = 1.6;   // seconds for full-floor scan
 
 function toFloor(zone: EnrichedZone) {
-  const cx = zone.x * S + OFF + (zone.w * S) / 2;
-  const cz = zone.y * S + OFF + (zone.h * S) / 2;
-  const w  = zone.w * S;
-  const d  = zone.h * S;
-  return { cx, cz, w, d };
+  return {
+    cx: zone.x * S + OFF + (zone.w * S) / 2,
+    cz: zone.y * S + OFF + (zone.h * S) / 2,
+    w:  zone.w * S,
+    d:  zone.h * S,
+  };
 }
 
 // ── Zone block ────────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ function ZoneBlock({
   onSelect: () => void;
 }) {
   const { cx, cz, w, d } = toFloor(zone);
-  const color = STATUS_HEX[zone.status];
+  const color   = STATUS_HEX[zone.status];
   const [hovered, setHovered] = useState(false);
 
   // Each zone reveals as the scan line passes its x-centre
@@ -62,14 +62,15 @@ function ZoneBlock({
 
   if (scaleY < 0.005) return null;
 
-  const opacity = selected ? 1 : hovered ? 0.9 : 0.78;
+  const opacity = selected ? 1 : hovered ? 0.92 : 0.78;
+  const yOff    = hovered ? 0.06 : 0;   // hover raise — whole group lifts
 
   return (
-    <group position={[cx, 0, cz]}>
+    <group position={[cx, yOff, cz]}>
       {/*
-        Scale the inner group from the floor (y = 0).
-        Mesh's bottom is at y = 0, top at y = BLOCK_H.
-        Group scale [1, scaleY, 1] keeps y = 0 fixed and raises the top.
+        Inner group scales from the floor (y = 0 in group space).
+        Mesh bottom sits at y = 0, top at y = BLOCK_H.
+        Group scale [1, scaleY, 1] keeps the base fixed while the top rises.
       */}
       <group scale={[1, scaleY, 1]}>
         <mesh
@@ -86,12 +87,30 @@ function ZoneBlock({
           }}
         >
           <boxGeometry args={[w, BLOCK_H, d]} />
-          <meshLambertMaterial color={color} transparent opacity={opacity} />
+          <meshStandardMaterial
+            color={color}
+            roughness={0.85}
+            metalness={0}
+            transparent
+            opacity={opacity}
+          />
           <Edges color="#17181B" threshold={15} />
         </mesh>
       </group>
 
-      {/* Label — outside scaled group, positioned above current block top */}
+      {/* Pin marker — small accent cap on top, fades in when block is risen */}
+      <mesh position={[0, BLOCK_H * scaleY + 0.04, 0]}>
+        <boxGeometry args={[0.1, 0.04, 0.1]} />
+        <meshStandardMaterial
+          color={color}
+          roughness={0.4}
+          metalness={0.1}
+          transparent
+          opacity={Math.max(0, (scaleY - 0.7) / 0.3)}
+        />
+      </mesh>
+
+      {/* Float label — outside scaled group so text stays readable */}
       <Html
         position={[0, BLOCK_H * scaleY + 0.18, 0]}
         center
@@ -108,6 +127,7 @@ function ZoneBlock({
             background: "rgba(244,242,236,0.9)",
             padding: "2px 6px",
             lineHeight: 1.4,
+            border: selected ? "1px solid #1C3A5E" : "1px solid rgba(0,0,0,0.06)",
           }}>
             {zone.label}
           </div>
@@ -136,67 +156,73 @@ function ScanPlane({ progress }: { progress: number }) {
   return (
     <mesh position={[x, 0.06, 0]}>
       <planeGeometry args={[0.1, 10]} />
-      <meshBasicMaterial
-        color="#1C3A5E"
-        transparent
-        opacity={0.22}
-        side={THREE.DoubleSide}
-      />
+      <meshBasicMaterial color="#1C3A5E" transparent opacity={0.22} side={THREE.DoubleSide} />
     </mesh>
   );
 }
 
-// ── Inner scene (needs useFrame context) ─────────────────────────────────────
+// ── Scene content (needs useFrame context inside Canvas) ──────────────────────
 
 function SceneContent({
   zones,
   selectedId,
   onSelect,
   onReady,
+  skipScan,
 }: {
   zones: EnrichedZone[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   onReady: () => void;
+  skipScan: boolean;
 }) {
-  const progressRef = useRef(0);
+  const progressRef  = useRef(0);
   const [scanProgress, setScanProgress] = useState(0);
-  const started     = useRef(false);
-  const readyFired  = useRef(false);
+  const started      = useRef(false);
+  const readyFired   = useRef(false);
+  // Stable ref so the effect doesn't re-fire when the callback identity changes
+  const onReadyRef   = useRef(onReady);
+  onReadyRef.current = onReady;
 
   useEffect(() => {
+    if (skipScan) {
+      progressRef.current = 1;
+      setScanProgress(1);
+      if (!readyFired.current) {
+        readyFired.current = true;
+        onReadyRef.current();
+      }
+      return;
+    }
     const t = setTimeout(() => { started.current = true; }, 220);
     return () => clearTimeout(t);
-  }, []);
+  }, [skipScan]);
 
   useFrame((_, dt) => {
-    if (!started.current || progressRef.current >= 1) return;
+    if (skipScan || !started.current || progressRef.current >= 1) return;
     progressRef.current = Math.min(1, progressRef.current + dt / SCAN_DUR);
     setScanProgress(progressRef.current);
     if (progressRef.current >= 1 && !readyFired.current) {
       readyFired.current = true;
-      onReady();
+      onReadyRef.current();
     }
   });
 
   return (
     <>
-      {/* Lighting — warm ambient + one directional, no neon */}
+      {/* Warm ambient + one key light — no neon */}
       <ambientLight intensity={0.62} color="#F8F5EE" />
       <directionalLight position={[8, 14, 6]}  intensity={0.72} />
       <directionalLight position={[-4, 5, -4]} intensity={0.18} color="#E8EEF6" />
 
-      {/* Baseplate */}
+      {/* Baseplate — warm paper */}
       <mesh position={[0, -0.03, 0]}>
         <boxGeometry args={[10.6, 0.06, 10.6]} />
-        <meshLambertMaterial color="#F4F2EC" />
+        <meshStandardMaterial color="#F4F2EC" roughness={0.9} metalness={0} />
       </mesh>
 
       {/* Hairline floor grid */}
-      <gridHelper
-        args={[10, 20, "#DEDBD0", "#E8E5DA"]}
-        position={[0, 0.001, 0]}
-      />
+      <gridHelper args={[10, 20, "#DEDBD0", "#E8E5DA"]} position={[0, 0.001, 0]} />
 
       {/* Boundary rect */}
       <Line
@@ -205,7 +231,6 @@ function SceneContent({
         lineWidth={1}
       />
 
-      {/* Zone blocks */}
       {zones.map((zone) => (
         <ZoneBlock
           key={zone.id}
@@ -216,10 +241,9 @@ function SceneContent({
         />
       ))}
 
-      {/* Scan sweep */}
       <ScanPlane progress={scanProgress} />
 
-      {/* Invisible backdrop — click to deselect */}
+      {/* Invisible backdrop — click empty floor to deselect */}
       <mesh
         position={[0, -0.002, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -234,7 +258,7 @@ function SceneContent({
 
 // ── Exported canvas wrapper ───────────────────────────────────────────────────
 
-export function Twin3DCanvas({
+export function TwinScene({
   zones,
   selectedId,
   onSelect,
@@ -245,6 +269,13 @@ export function Twin3DCanvas({
   onSelect: (id: string | null) => void;
   onReady: () => void;
 }) {
+  // Synchronous check — avoids a flash of scan animation for reduced-motion users
+  const [skipScan] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false
+  );
+
   return (
     <Canvas
       camera={{ position: [8, 8, 7], fov: 42, near: 0.1, far: 120 }}
@@ -257,6 +288,7 @@ export function Twin3DCanvas({
         selectedId={selectedId}
         onSelect={onSelect}
         onReady={onReady}
+        skipScan={skipScan}
       />
       <OrbitControls
         makeDefault
@@ -265,9 +297,10 @@ export function Twin3DCanvas({
         maxDistance={18}
         minPolarAngle={Math.PI / 8}
         maxPolarAngle={Math.PI / 2.05}
-        enablePan
-        panSpeed={0.6}
+        enablePan={false}
         rotateSpeed={0.7}
+        enableDamping
+        dampingFactor={0.08}
       />
     </Canvas>
   );
