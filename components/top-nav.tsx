@@ -27,6 +27,7 @@ const PILLARS: NavPillar[] = [
       { href: "/home",        label: "Home" },
       { href: "/operations",  label: "Operations" },
       { href: "/jobs",        label: "Jobs" },
+      { href: "/crews",       label: "Crews" },
       { href: "/autopilot",   label: "Autopilot" },
       { href: "/people",      label: "People" },
       { href: "/spaces",      label: "Spaces" },

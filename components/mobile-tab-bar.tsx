@@ -28,6 +28,7 @@ const TABS = [
       p === "/home" ||
       p === "/operations" ||
       p.startsWith("/jobs") ||
+      p.startsWith("/crews") ||
       p.startsWith("/autopilot") ||
       p.startsWith("/people") ||
       p.startsWith("/reports") ||
