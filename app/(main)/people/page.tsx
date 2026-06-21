@@ -13,7 +13,9 @@ import { StatStrip } from "@/components/stat-strip";
 import { StatusDot } from "@/components/status-dot";
 import { fmtDate, fmtDateShort } from "@/lib/format";
 import type { Role } from "@/types/domain";
-import { initialsOf } from "@/lib/store";
+import { initialsOf } from "@/lib/utils";
+import { getTrainingMatrix } from "@/lib/store";
+import { TrainingMatrixTable } from "@/components/people/training-matrix";
 
 const ROLE_LABEL: Record<Role, string> = {
   owner: "Owner",
@@ -22,7 +24,8 @@ const ROLE_LABEL: Record<Role, string> = {
 };
 
 export default function PeoplePage() {
-  const org = getOrg();
+  const org    = getOrg();
+  const matrix = getTrainingMatrix();
   const users = getUsers();
   const memberships = getMemberships();
   const certs = getCertifications();
@@ -108,14 +111,17 @@ export default function PeoplePage() {
                 key={user.id}
                 className="grid grid-cols-[2fr_1fr_2fr_1fr_1fr] divide-x divide-rule border-b border-rule last:border-b-0 hover:bg-navy-tint/40 transition-colors"
               >
-                {/* Name */}
+                {/* Name → profile link */}
                 <div className="flex items-center gap-3 px-4 py-3">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center bg-ink font-mono text-[10px] font-bold text-panel">
                     {initialsOf(user.name)}
                   </span>
-                  <span className="font-display text-sm font-semibold text-ink">
+                  <Link
+                    href={`/people/${user.id}`}
+                    className="font-display text-sm font-semibold text-ink hover:text-navy hover:underline transition-colors"
+                  >
                     {user.name}
-                  </span>
+                  </Link>
                 </div>
                 {/* Role */}
                 <div className="flex items-center px-4 py-3">
@@ -148,7 +154,7 @@ export default function PeoplePage() {
       </section>
 
       {/* ── 02 / Certification ledger ────────────────────────────────────── */}
-      <section>
+      <section className="mb-8">
         <div className="mb-3 flex items-center gap-3">
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-navy">02</span>
           <h2 className="font-display text-base font-semibold text-ink">Certifications</h2>
@@ -239,6 +245,16 @@ export default function PeoplePage() {
             })}
           </div>
         )}
+      </section>
+
+      {/* ── 03 / Training matrix ─────────────────────────────────────────── */}
+      <section>
+        <div className="mb-3 flex items-center gap-3">
+          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-navy">03</span>
+          <h2 className="font-display text-base font-semibold text-ink">Training matrix</h2>
+          <span className="flex-1 border-t border-rule" />
+        </div>
+        <TrainingMatrixTable matrix={matrix} />
       </section>
     </div>
   );
