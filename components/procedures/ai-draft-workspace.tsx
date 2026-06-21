@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Sparkles, Wand2 } from "lucide-react";
+import { Keyboard, Mic, Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateProcedureDraft, type AiDraft } from "@/lib/ai-actions";
 import {
@@ -93,26 +93,40 @@ export function AiDraftWorkspace() {
           hand it to you to review before publishing.
         </p>
 
-        {/* Type | Dictate toggle (only when the browser supports speech) */}
+        {/* Type | Dictate toggle (only when the browser supports speech).
+            Full-width with 48px tap targets so Dictate is thumb-friendly on phones. */}
         {voiceSupported && (
-          <div className="mt-4 inline-flex border border-rule2">
-            {(["type", "dictate"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMode(m)}
-                aria-pressed={mode === m}
-                className={cn(
-                  "px-3 py-1.5 font-display text-xs font-semibold transition-colors",
-                  m === "dictate" && "border-l border-rule2",
-                  mode === m
-                    ? "bg-ink text-paper"
-                    : "text-soft hover:bg-navy-tint hover:text-navy"
-                )}
-              >
-                {m === "type" ? "Type" : "Dictate"}
-              </button>
-            ))}
+          <div className="mt-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
+              How do you want to start?
+            </p>
+            <div
+              role="group"
+              aria-label="Choose input method"
+              className="mt-2 grid grid-cols-2 gap-px border border-rule2 bg-rule2"
+            >
+              {(["type", "dictate"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMode(m)}
+                  aria-pressed={mode === m}
+                  className={cn(
+                    "flex min-h-[48px] items-center justify-center gap-2 font-display text-sm font-semibold transition-colors",
+                    mode === m
+                      ? "bg-ink text-paper"
+                      : "bg-panel text-soft hover:bg-navy-tint hover:text-navy"
+                  )}
+                >
+                  {m === "type" ? (
+                    <Keyboard className="h-4 w-4" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
+                  {m === "type" ? "Type" : "Dictate"}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {voiceChecked && !voiceSupported && (
