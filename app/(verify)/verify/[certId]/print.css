@@ -1,0 +1,22 @@
+/* Certificate print layout — single page, no chrome, clean on A4/Letter. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+  }
+  .cert-page {
+    min-height: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+  .cert-doc {
+    border: 1px solid #17181b !important;
+    max-width: 100% !important;
+  }
+  @page {
+    margin: 16mm;
+  }
+}

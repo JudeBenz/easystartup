@@ -48,6 +48,11 @@ export function getCertification(
   );
 }
 
+/** Look up a certification by its own id (used by the public /verify page). */
+export function getCertificationById(id: string): Certification | undefined {
+  return db().certifications.find((c) => c.id === id);
+}
+
 // ---- mutations -------------------------------------------------------------
 
 export interface RecordAttemptInput {
