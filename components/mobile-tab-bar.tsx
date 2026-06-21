@@ -7,22 +7,21 @@ import { cn } from "@/lib/utils";
 
 /**
  * 4-pillar bottom tab bar — mobile only (hidden md+).
- * Create · Operations · Comms · Settings.
+ * Create · Home · Messages · Settings.
  * Each tab is ≥44px tall for accessibility.
  */
 
 const TABS = [
   {
     label: "Create",
-    href:  "/procedures/new",
+    href:  "/procedures",
     Icon:  FilePlus2,
-    // Active when on any create/procedure/job-type path
     match: (p: string) =>
       p.startsWith("/procedures") || p.startsWith("/job-types"),
   },
   {
-    label: "Operations",
-    href:  "/operations",
+    label: "Home",
+    href:  "/home",
     Icon:  LayoutDashboard,
     match: (p: string) =>
       p === "/home" ||
@@ -31,15 +30,15 @@ const TABS = [
       p.startsWith("/crews") ||
       p.startsWith("/autopilot") ||
       p.startsWith("/people") ||
+      p.startsWith("/spaces") ||
       p.startsWith("/reports") ||
-      p.startsWith("/twin") ||
-      p.startsWith("/spaces"),
+      p.startsWith("/twin"),
   },
   {
-    label: "Comms",
-    href:  "/home",           // placeholder — route not yet built
+    label: "Messages",
+    href:  "/messages",
     Icon:  MessageSquare,
-    match: (p: string) => p.startsWith("/comms"),
+    match: (p: string) => p.startsWith("/messages"),
   },
   {
     label: "Settings",

@@ -5,11 +5,6 @@ import { NavLink } from "./nav-link";
 import { RoleSwitcher } from "./role-switcher";
 import { AccountMenu } from "./account-menu";
 
-/**
- * Nav source of truth. Pillars map to the 4-tab mobile bottom bar.
- * Add new routes here — they automatically appear in both desktop and mobile nav.
- * Builder A: "Create" and "Operations" pillars accept new routes.
- */
 interface NavRoute { href: string; label: string; }
 interface NavPillar { label: string; routes: NavRoute[]; }
 
@@ -24,15 +19,17 @@ const PILLARS: NavPillar[] = [
   {
     label: "Operations",
     routes: [
-      { href: "/home",        label: "Home" },
-      { href: "/operations",  label: "Operations" },
-      { href: "/jobs",        label: "Jobs" },
-      { href: "/crews",       label: "Crews" },
-      { href: "/autopilot",   label: "Autopilot" },
-      { href: "/people",      label: "People" },
-      { href: "/spaces",      label: "Spaces" },
-      { href: "/reports",     label: "Reports" },
-      { href: "/twin",        label: "Twin" },
+      { href: "/home",    label: "Home" },
+      { href: "/jobs",    label: "Jobs" },
+      { href: "/people",  label: "People" },
+      { href: "/reports", label: "Reports" },
+      { href: "/twin",    label: "Twin" },
+    ],
+  },
+  {
+    label: "Comms",
+    routes: [
+      { href: "/messages", label: "Messages" },
     ],
   },
   {

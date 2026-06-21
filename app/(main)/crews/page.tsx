@@ -31,6 +31,22 @@ export default async function CrewsPage() {
         countLabel={crews.length === 1 ? "Crew" : "Crews"}
       />
 
+      {/* Section tabs: Jobs | Crews */}
+      <div className="mb-6 flex border-b border-rule">
+        <Link
+          href="/jobs"
+          className="border-b-2 border-transparent -mb-px px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-soft"
+        >
+          Jobs
+        </Link>
+        <Link
+          href="/crews"
+          className="border-b-2 border-navy -mb-px px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] text-navy"
+        >
+          Crews
+        </Link>
+      </div>
+
       {crews.length === 0 ? (
         <Empty>
           <EmptyIcon>

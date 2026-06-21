@@ -32,6 +32,22 @@ export default async function SpacesPage() {
         description="Every place work happens — the jobs done there and the people who do them."
       />
 
+      {/* Section tabs: People | Spaces */}
+      <div className="mb-6 flex border-b border-rule">
+        <Link
+          href="/people"
+          className="border-b-2 border-transparent -mb-px px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] text-faint transition-colors hover:text-soft"
+        >
+          People
+        </Link>
+        <Link
+          href="/spaces"
+          className="border-b-2 border-navy -mb-px px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] text-navy"
+        >
+          Spaces
+        </Link>
+      </div>
+
       <StatStrip
         className="mb-8"
         stats={[
