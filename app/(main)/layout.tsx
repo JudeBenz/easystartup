@@ -8,10 +8,10 @@ export default function MainLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <TopNav />
-      <main className="mx-auto w-full max-w-[1280px] flex-1 px-6 py-8">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6">
         {children}
       </main>
-      <footer className="mx-auto w-full max-w-[1280px] px-6 py-6">
+      <footer className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6">
         <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
           EasyStartUp — Start your business up. Every day. Eventually without you.
         </p>

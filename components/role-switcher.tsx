@@ -22,7 +22,7 @@ export function RoleSwitcher({ role }: { role: Role }) {
       role="group"
       aria-label="Acting role"
     >
-      <span className="px-2 font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
+      <span className="hidden px-2 font-mono text-[10px] uppercase tracking-[0.12em] text-faint sm:inline-block">
         View as
       </span>
       {ROLES.map((r) => {
@@ -34,7 +34,7 @@ export function RoleSwitcher({ role }: { role: Role }) {
             disabled={pending}
             onClick={() => startTransition(() => setRole(r))}
             className={cn(
-              "border-l border-rule2 px-3 py-1.5 font-display text-xs font-semibold transition-colors",
+              "border-l border-rule2 px-2.5 py-1.5 font-display text-xs font-semibold transition-colors first:border-l-0 sm:border-l sm:px-3",
               active
                 ? "bg-ink text-paper"
                 : "text-soft hover:bg-navy-tint hover:text-navy"
