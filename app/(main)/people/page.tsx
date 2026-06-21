@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   getUsers,
   getMemberships,
@@ -152,6 +153,12 @@ export default function PeoplePage() {
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-navy">02</span>
           <h2 className="font-display text-base font-semibold text-ink">Certifications</h2>
           <span className="flex-1 border-t border-rule" />
+          <Link
+            href="/reports/compliance"
+            className="font-mono text-[10px] uppercase tracking-[0.1em] text-navy hover:underline"
+          >
+            Compliance center →
+          </Link>
         </div>
 
         {certs.length === 0 ? (
