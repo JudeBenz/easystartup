@@ -149,21 +149,9 @@ function JobRow({
             {` · ${crew ? crew.name : "Unassigned"}`}
           </span>
         </span>
-        <span className="hidden shrink-0 sm:block">
+        <span className="shrink-0">
           <StatusDot tone={meta.tone}>{meta.label}</StatusDot>
         </span>
-        <span
-          aria-hidden
-          className={`h-[9px] w-[9px] shrink-0 sm:hidden ${
-            meta.tone === "green"
-              ? "bg-green"
-              : meta.tone === "navy"
-                ? "bg-navy"
-                : meta.tone === "amber"
-                  ? "bg-amber"
-                  : "bg-faint"
-          }`}
-        />
       </Link>
     </li>
   );

@@ -191,19 +191,9 @@ export default async function CrewDetailPage({
                       <span className="min-w-0 flex-1 truncate font-display text-sm font-semibold text-ink group-hover:text-navy">
                         {job.title}
                       </span>
-                      <span
-                        aria-hidden
-                        className={`h-[9px] w-[9px] shrink-0 ${
-                          meta.tone === "green"
-                            ? "bg-green"
-                            : meta.tone === "navy"
-                              ? "bg-navy"
-                              : meta.tone === "amber"
-                                ? "bg-amber"
-                                : "bg-faint"
-                        }`}
-                      />
-                      <span className="sr-only">{meta.label}</span>
+                      <span className="shrink-0">
+                        <StatusDot tone={meta.tone}>{meta.label}</StatusDot>
+                      </span>
                     </Link>
                   </li>
                 );
