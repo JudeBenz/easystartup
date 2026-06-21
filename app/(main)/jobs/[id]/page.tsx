@@ -2,15 +2,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Check, ImageOff } from "lucide-react";
 import {
+  canDispatch,
   demoToday,
   getCrew,
   getCrewMembers,
+  getCrews,
   getJob,
   getJobType,
   getProcedure,
   getRun,
   getSite,
   getUser,
+  getUsersByRole,
+  missingCertsForDispatch,
 } from "@/lib/store";
 import { getRole } from "@/lib/session";
 import { fmtDate, fmtTime, jobStatusMeta } from "@/lib/format";
@@ -23,6 +27,7 @@ import {
 import { PageHeader } from "@/components/page-header";
 import { StatStrip } from "@/components/stat-strip";
 import { StatusDot } from "@/components/status-dot";
+import { DispatchDialog } from "@/components/jobs/dispatch-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -68,18 +73,62 @@ export default async function JobDetailPage({
       ? `Today · ${fmtTime(job.scheduledAt)}`
       : `${fmtDate(job.scheduledAt)} · ${fmtTime(job.scheduledAt)}`;
 
+  // Dispatch dialog inputs — cert eligibility per worker candidate (employees).
+  const showDispatch = canManage && !isClosed;
+  const dispatchCrews = showDispatch
+    ? getCrews().map((c) => ({
+        id: c.id,
+        name: c.name,
+        truck: c.truck,
+        memberUserIds: c.memberUserIds,
+      }))
+    : [];
+  const dispatchManagers = showDispatch
+    ? [...getUsersByRole("owner"), ...getUsersByRole("trainer")].map((u) => ({
+        id: u.id,
+        name: u.name,
+      }))
+    : [];
+  const dispatchCandidates = showDispatch
+    ? getUsersByRole("employee").map((u) => ({
+        id: u.id,
+        name: u.name,
+        eligible: canDispatch(u.id, job.jobTypeId),
+        missingCertTitles: missingCertsForDispatch(u.id, job.jobTypeId)
+          .map((pid) => getProcedure(pid)?.title ?? pid),
+      }))
+    : [];
+
   return (
     <div>
       <PageHeader
         eyebrow={`${jobType?.name ?? "Job"} · ${jobType?.kind === "field" ? "Field" : "In-house"}`}
         title={job.title}
         actions={
-          <Link
-            href="/jobs"
-            className="font-mono text-[11px] uppercase tracking-[0.1em] text-navy hover:underline"
-          >
-            ← Jobs
-          </Link>
+          <div className="flex items-center gap-3">
+            {showDispatch && (
+              <DispatchDialog
+                jobId={job.id}
+                jobTitle={job.title}
+                jobTypeName={jobType?.name ?? "this job"}
+                crews={dispatchCrews}
+                managers={dispatchManagers}
+                candidates={dispatchCandidates}
+                initial={{
+                  crewId: job.crewId ?? "",
+                  managerId: job.managerId ?? "",
+                  assignedUserIds: job.assignedUserIds,
+                }}
+                triggerVariant="outline"
+              />
+            )}
+            <Link
+              href="/jobs"
+              className="font-mono text-[11px] uppercase tracking-[0.1em] text-navy hover:underline"
+            >
+              ← Jobs
+            </Link>
+          </div>
         }
       />
 

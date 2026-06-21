@@ -2,9 +2,11 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { AlertTriangle, Check } from "lucide-react";
 import { toast } from "sonner";
 import { createJobAction, type JobInput } from "@/app/_actions/job-actions";
 import { fmtDuration } from "@/lib/format";
+import { initialsOf } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,12 +34,18 @@ export function JobCreateForm({
   crews,
   managers,
   defaultDate,
+  crewMembers = {},
+  missingByType = {},
 }: {
   jobTypes: JobTypeOption[];
   sites: Array<NamedOption & { kind: "internal" | "customer" }>;
   crews: NamedOption[];
   managers: NamedOption[];
   defaultDate: string;
+  /** crewId → members (for the dispatch-readiness preview). */
+  crewMembers?: Record<string, NamedOption[]>;
+  /** jobTypeId → userId → missing required-cert titles (empty = eligible). */
+  missingByType?: Record<string, Record<string, string[]>>;
 }) {
   const router = useRouter();
   const [jobTypeId, setJobTypeId] = useState(jobTypes[0]?.id ?? "");
@@ -55,6 +63,15 @@ export function JobCreateForm({
     () => jobTypes.find((t) => t.id === jobTypeId),
     [jobTypes, jobTypeId]
   );
+
+  // Dispatch-readiness preview: the chosen crew's members vs. this type's certs.
+  const crewReadiness = useMemo(() => {
+    if (!crewId || !jobTypeId) return null;
+    const members = crewMembers[crewId] ?? [];
+    const miss = missingByType[jobTypeId] ?? {};
+    return members.map((m) => ({ ...m, missing: miss[m.id] ?? [] }));
+  }, [crewId, jobTypeId, crewMembers, missingByType]);
+  const blockedMembers = crewReadiness?.filter((m) => m.missing.length > 0) ?? [];
 
   function pickType(id: string) {
     setJobTypeId(id);
@@ -229,8 +246,43 @@ export function JobCreateForm({
               options={managers.map((m) => ({ value: m.id, label: m.name }))}
             />
           </Field>
+          {/* Cert-readiness preview for the chosen crew + job type */}
+          {crewReadiness && crewReadiness.length > 0 && (
+            <div className="sm:col-span-2">
+              <ul className="divide-y divide-rule rounded-md border border-rule">
+                {crewReadiness.map((m) => {
+                  const ok = m.missing.length === 0;
+                  return (
+                    <li
+                      key={m.id}
+                      className="flex items-center gap-3 px-3 py-2"
+                    >
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy-tint font-mono text-[10px] font-bold text-navy">
+                        {initialsOf(m.name)}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                        {m.name}
+                      </span>
+                      {ok ? (
+                        <span className="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-[0.08em] text-green">
+                          <Check className="h-3 w-3" /> Eligible
+                        </span>
+                      ) : (
+                        <span className="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-[0.08em] text-amber">
+                          <AlertTriangle className="h-3 w-3" /> Needs cert:{" "}
+                          {m.missing.join(", ")}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
           <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-faint sm:col-span-2">
-            Full crew dispatch + cert-gating happens on the job detail.
+            {blockedMembers.length > 0
+              ? "Some crew members lack a required cert — dispatching them on the job page will block the job."
+              : "Full crew dispatch + cert-gating happens on the job detail."}
           </p>
         </div>
       </section>
