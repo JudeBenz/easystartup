@@ -5,7 +5,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, Edges, Line } from "@react-three/drei";
 import * as THREE from "three";
 import type { EnrichedZone, ZoneStatus, EmployeeFigureData } from "./twin-types";
-import { PersonFigure } from "./twin-figures";
+import { PersonFigure, MachineProp, type MachineKind } from "./twin-figures";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
@@ -30,6 +30,17 @@ const S       = 0.1;    // scale: 100 → 10 units
 const OFF     = -5;     // center offset
 const BLOCK_H = 0.55;   // extrusion height
 const SCAN_DUR = 1.6;   // seconds for full-floor scan
+
+// Machine kind keyed to zone id
+const ZONE_MACHINE: Record<string, MachineKind> = {
+  zone_office:   "desk",
+  zone_cnc:      "cnc",
+  zone_welding:  "welder",
+  zone_storage:  "shelving",
+  zone_assembly: "shelving",
+  zone_qc:       "qc_bench",
+  zone_dock:     "dock",
+};
 
 // Offsets for placing multiple figures within a zone footprint
 const FIGURE_OFFSETS: [number, number][][] = [
@@ -247,15 +258,31 @@ function SceneContent({
         lineWidth={1}
       />
 
-      {zones.map((zone) => (
-        <ZoneBlock
-          key={zone.id}
-          zone={zone}
-          scanProgress={scanProgress}
-          selected={selectedId === zone.id}
-          onSelect={() => onSelect(selectedId === zone.id ? null : zone.id)}
-        />
-      ))}
+      {zones.map((zone) => {
+        const { cx, cz, w, d } = toFloor(zone);
+        const machineKind = ZONE_MACHINE[zone.id];
+        const machineVisible = skipScan ? 1 : Math.min(1, Math.max(0, (scanProgress - 0.7) / 0.2));
+        return (
+          <group key={zone.id}>
+            <ZoneBlock
+              zone={zone}
+              scanProgress={scanProgress}
+              selected={selectedId === zone.id}
+              onSelect={() => onSelect(selectedId === zone.id ? null : zone.id)}
+            />
+            {/* Machine prop — back-left corner, fades in after zone block appears */}
+            {machineKind && machineVisible > 0 && (
+              <group position={[cx - w * 0.28, BLOCK_H, cz - d * 0.25]}>
+                <MachineProp
+                  kind={machineKind}
+                  position={[0, 0, 0]}
+                  scale={Math.min(w, d) * 0.28}
+                />
+              </group>
+            )}
+          </group>
+        );
+      })}
 
       <ScanPlane progress={scanProgress} />
 

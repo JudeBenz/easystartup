@@ -6,6 +6,168 @@ import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import type { EmployeeFigureData, PersonCertStatus } from "./twin-types";
 
+// ── Machine props ─────────────────────────────────────────────────────────────
+// One low-poly silhouette per zone keyed to its job. Built from primitives only;
+// matte materials, palette tints, thin dark edges.
+
+export type MachineKind =
+  | "cnc"
+  | "laser"
+  | "welder"
+  | "shelving"
+  | "qc_bench"
+  | "dock"
+  | "desk";
+
+const MACHINE_COLOR: Record<MachineKind, string> = {
+  cnc:      "#1C3A5E",
+  laser:    "#1C3A5E",
+  welder:   "#A6660E",
+  shelving: "#8C8B85",
+  qc_bench: "#2C7048",
+  dock:     "#8C8B85",
+  desk:     "#CBC8BC",
+};
+
+/** A simple low-poly machine silhouette built from box/cylinder primitives. */
+export function MachineProp({
+  kind,
+  position,
+  scale = 1,
+}: {
+  kind:      MachineKind;
+  position:  [number, number, number];
+  scale?:    number;
+}) {
+  const color = MACHINE_COLOR[kind];
+  const s     = scale;
+
+  return (
+    <group position={position}>
+      {kind === "cnc" && (
+        <>
+          {/* Bed */}
+          <mesh position={[0, 0.12 * s, 0]}>
+            <boxGeometry args={[0.7 * s, 0.24 * s, 0.5 * s]} />
+            <meshStandardMaterial color={color} roughness={0.85} metalness={0} />
+          </mesh>
+          {/* Gantry arm */}
+          <mesh position={[0, 0.42 * s, 0]}>
+            <boxGeometry args={[0.7 * s, 0.06 * s, 0.06 * s]} />
+            <meshStandardMaterial color="#17181B" roughness={0.8} metalness={0} />
+          </mesh>
+          {/* Column */}
+          <mesh position={[0.3 * s, 0.3 * s, 0]}>
+            <boxGeometry args={[0.06 * s, 0.36 * s, 0.06 * s]} />
+            <meshStandardMaterial color="#17181B" roughness={0.8} metalness={0} />
+          </mesh>
+        </>
+      )}
+
+      {kind === "welder" && (
+        <>
+          {/* Worktable */}
+          <mesh position={[0, 0.18 * s, 0]}>
+            <boxGeometry args={[0.55 * s, 0.06 * s, 0.4 * s]} />
+            <meshStandardMaterial color="#CBC8BC" roughness={0.88} metalness={0} />
+          </mesh>
+          {/* Table legs */}
+          {([-0.22, 0.22] as const).flatMap((lx) =>
+            ([-0.16, 0.16] as const).map((lz) => (
+              <mesh key={`${lx}${lz}`} position={[lx * s, 0.08 * s, lz * s]}>
+                <boxGeometry args={[0.03 * s, 0.16 * s, 0.03 * s]} />
+                <meshStandardMaterial color="#8C8B85" roughness={0.9} metalness={0} />
+              </mesh>
+            ))
+          )}
+          {/* Welder unit — box + hose */}
+          <mesh position={[0.38 * s, 0.22 * s, 0]}>
+            <boxGeometry args={[0.18 * s, 0.28 * s, 0.18 * s]} />
+            <meshStandardMaterial color={color} roughness={0.85} metalness={0} />
+          </mesh>
+          {/* Wire coil (cylinder) */}
+          <mesh position={[0.38 * s, 0.4 * s, 0]}>
+            <cylinderGeometry args={[0.06 * s, 0.06 * s, 0.06 * s, 8]} />
+            <meshStandardMaterial color="#17181B" roughness={0.7} metalness={0} />
+          </mesh>
+        </>
+      )}
+
+      {kind === "shelving" && (
+        <>
+          {/* Back panel */}
+          <mesh position={[0, 0.3 * s, -0.05 * s]}>
+            <boxGeometry args={[0.7 * s, 0.6 * s, 0.04 * s]} />
+            <meshStandardMaterial color="#CBC8BC" roughness={0.9} metalness={0} />
+          </mesh>
+          {/* Three shelves */}
+          {[0.12, 0.3, 0.48].map((sy) => (
+            <mesh key={sy} position={[0, sy * s, 0]}>
+              <boxGeometry args={[0.7 * s, 0.03 * s, 0.22 * s]} />
+              <meshStandardMaterial color={color} roughness={0.88} metalness={0} />
+            </mesh>
+          ))}
+        </>
+      )}
+
+      {kind === "qc_bench" && (
+        <>
+          {/* Bench surface */}
+          <mesh position={[0, 0.22 * s, 0]}>
+            <boxGeometry args={[0.6 * s, 0.04 * s, 0.35 * s]} />
+            <meshStandardMaterial color="#E8E5DA" roughness={0.88} metalness={0} />
+          </mesh>
+          {/* Bench frame */}
+          <mesh position={[0, 0.1 * s, 0]}>
+            <boxGeometry args={[0.56 * s, 0.2 * s, 0.3 * s]} />
+            <meshStandardMaterial color={color} roughness={0.85} metalness={0} />
+          </mesh>
+          {/* Measurement arm */}
+          <mesh position={[0.22 * s, 0.42 * s, 0]}>
+            <boxGeometry args={[0.04 * s, 0.36 * s, 0.04 * s]} />
+            <meshStandardMaterial color="#17181B" roughness={0.8} metalness={0} />
+          </mesh>
+        </>
+      )}
+
+      {kind === "desk" && (
+        <>
+          {/* Desktop */}
+          <mesh position={[0, 0.2 * s, 0]}>
+            <boxGeometry args={[0.55 * s, 0.04 * s, 0.32 * s]} />
+            <meshStandardMaterial color="#E8E5DA" roughness={0.9} metalness={0} />
+          </mesh>
+          {/* Monitor */}
+          <mesh position={[0, 0.38 * s, -0.1 * s]}>
+            <boxGeometry args={[0.28 * s, 0.18 * s, 0.02 * s]} />
+            <meshStandardMaterial color="#17181B" roughness={0.7} metalness={0} />
+          </mesh>
+        </>
+      )}
+
+      {kind === "dock" && (
+        <>
+          {/* Loading platform */}
+          <mesh position={[0, 0.08 * s, 0]}>
+            <boxGeometry args={[0.8 * s, 0.08 * s, 0.45 * s]} />
+            <meshStandardMaterial color={color} roughness={0.88} metalness={0} />
+          </mesh>
+          {/* Bollard L */}
+          <mesh position={[-0.3 * s, 0.2 * s, -0.1 * s]}>
+            <cylinderGeometry args={[0.04 * s, 0.04 * s, 0.22 * s, 6]} />
+            <meshStandardMaterial color="#A6660E" roughness={0.8} metalness={0} />
+          </mesh>
+          {/* Bollard R */}
+          <mesh position={[0.3 * s, 0.2 * s, -0.1 * s]}>
+            <cylinderGeometry args={[0.04 * s, 0.04 * s, 0.22 * s, 6]} />
+            <meshStandardMaterial color="#A6660E" roughness={0.8} metalness={0} />
+          </mesh>
+        </>
+      )}
+    </group>
+  );
+}
+
 // ── Palette ───────────────────────────────────────────────────────────────────
 
 const BODY_COLOR: Record<PersonCertStatus, string> = {
