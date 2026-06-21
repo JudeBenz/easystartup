@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, AlertTriangle, Clock, Play, Ban } from "lucide-react";
+import { CheckCircle2, AlertTriangle, ChevronRight, Clock, Play, Ban } from "lucide-react";
 import { getRole } from "@/lib/session";
 import {
   getJobsForDate,
@@ -42,72 +42,76 @@ function JobRow({ job }: { job: Job }) {
   const isInProgress = job.status === "in_progress";
 
   return (
-    <div
+    <Link
+      href={`/jobs/${job.id}`}
       className={cn(
-        "border-b border-rule px-4 py-3 last:border-b-0",
-        isBlocked && "bg-amber-bg/60"
+        "flex items-start gap-2 border-b border-rule px-4 py-3 last:border-b-0 transition-colors hover:bg-paper focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-navy",
+        isBlocked && "bg-amber-bg/60 hover:bg-amber-bg"
       )}
     >
-      {/* Title row */}
-      <div className="flex items-start justify-between gap-2">
-        <p
-          className={cn(
-            "text-sm font-semibold leading-snug",
-            isComplete ? "text-soft line-through" : "text-ink"
-          )}
-        >
-          {job.title}
-        </p>
-
-        {/* Status badge */}
-        <div className="flex shrink-0 items-center gap-1 pl-2">
-          <Icon
-            className="h-3.5 w-3.5 shrink-0"
-            style={{ color: meta.color }}
-            aria-hidden="true"
-          />
-          <span
-            className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em]"
-            style={{ color: meta.color }}
+      <div className="min-w-0 flex-1">
+        {/* Title row */}
+        <div className="flex items-start justify-between gap-2">
+          <p
+            className={cn(
+              "text-sm font-semibold leading-snug",
+              isComplete ? "text-soft line-through" : "text-ink"
+            )}
           >
-            {meta.label}
+            {job.title}
+          </p>
+
+          {/* Status badge */}
+          <div className="flex shrink-0 items-center gap-1 pl-2">
+            <Icon
+              className="h-3.5 w-3.5 shrink-0"
+              style={{ color: meta.color }}
+              aria-hidden="true"
+            />
+            <span
+              className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em]"
+              style={{ color: meta.color }}
+            >
+              {meta.label}
+            </span>
+          </div>
+        </div>
+
+        {/* Meta row: site · job type · time */}
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+          {site && (
+            <span className="font-mono text-[10px] text-faint">{site.name}</span>
+          )}
+          {jobType && (
+            <span className="font-mono text-[10px] text-faint">
+              {jobType.category}
+            </span>
+          )}
+          <span className="font-mono text-[10px] text-faint">
+            {fmtDateShort(job.scheduledAt)}{" "}
+            {new Date(job.scheduledAt).toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+              timeZone: "UTC",
+            })}
           </span>
         </div>
-      </div>
 
-      {/* Meta row: site · job type · time */}
-      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
-        {site && (
-          <span className="font-mono text-[10px] text-faint">{site.name}</span>
+        {/* Blocked reason */}
+        {isBlocked && job.blockedReason && (
+          <p className="mt-2 text-[11px] text-amber leading-snug">
+            {job.blockedReason}
+          </p>
         )}
-        {jobType && (
-          <span className="font-mono text-[10px] text-faint">
-            {jobType.category}
-          </span>
+
+        {/* In-progress notes */}
+        {isInProgress && job.notes && (
+          <p className="mt-1.5 font-mono text-[10px] text-soft">{job.notes}</p>
         )}
-        <span className="font-mono text-[10px] text-faint">
-          {fmtDateShort(job.scheduledAt)}{" "}
-          {new Date(job.scheduledAt).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-            timeZone: "UTC",
-          })}
-        </span>
       </div>
-
-      {/* Blocked reason */}
-      {isBlocked && job.blockedReason && (
-        <p className="mt-2 text-[11px] text-amber leading-snug">
-          {job.blockedReason}
-        </p>
-      )}
-
-      {/* In-progress notes */}
-      {isInProgress && job.notes && (
-        <p className="mt-1.5 font-mono text-[10px] text-soft">{job.notes}</p>
-      )}
-    </div>
+      <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-faint" aria-hidden="true" />
+    </Link>
   );
 }
 

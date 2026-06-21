@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pin } from "lucide-react";
+import { ChevronRight, Pin } from "lucide-react";
 import { getRole, getActingUser } from "@/lib/session";
 import {
   getMessagesForUser,
@@ -167,14 +167,12 @@ export default async function MessagesPage() {
       {/* Regular messages */}
       {regular.length > 0 && (
         <section className="mb-5" aria-label="Messages">
-          {instructions.length > 0 && (
-            <div className="mb-3 flex items-center gap-2">
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
-                Messages
-              </p>
-              <span className="flex-1 border-t border-rule" />
-            </div>
-          )}
+          <div className="mb-3 flex items-center gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-faint">
+              Messages
+            </p>
+            <span className="flex-1 border-t border-rule" />
+          </div>
           <div className="overflow-hidden rounded-lg border border-rule bg-panel">
             {[...regular].reverse().map((m) => (
               <MessageRow key={m.id} msg={m} />
@@ -212,7 +210,7 @@ export default async function MessagesPage() {
                 <Link
                   key={job.id}
                   href={`/jobs/${job.id}`}
-                  className="flex items-start gap-3 border-b border-rule px-4 py-3.5 last:border-b-0 transition-colors hover:bg-paper focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-navy"
+                  className="flex items-center gap-3 border-b border-rule px-4 py-3.5 last:border-b-0 transition-colors hover:bg-paper focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-navy"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
@@ -230,6 +228,7 @@ export default async function MessagesPage() {
                       </p>
                     )}
                   </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-faint" aria-hidden="true" />
                 </Link>
               );
             })}
