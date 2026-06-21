@@ -67,37 +67,50 @@ interface RobotSpec {
 }
 
 const ROBOT_SPECS: Partial<Record<string, RobotSpec>> = {
-  zone_laser: {
-    spec_id: "RS-LSR-001",
-    procedure: "Laser Cutter Startup",
-    robot_class: "Vision + Motion Unit",
-    version: "0.1.0-draft",
-    steps: [
-      { id: "L01", verb: "VERIFY", target: "fume extraction fan RPM", sensor: "tachometer_port_A", threshold: "> 1 200 RPM", on_fail: "HALT_AND_ALERT", duration_s: 4, human_confirm: false },
-      { id: "L02", verb: "READ",   target: "laser head home position", sensor: "limit_switch_XY",  threshold: "== HOME",       on_fail: "HALT_AND_ALERT", duration_s: 6, human_confirm: false },
-      { id: "L03", verb: "RUN",    target: "20 mm calibration cut at std settings", sensor: "vision_caliper", threshold: "±0.2 mm",  on_fail: "RETRY_ONCE",     duration_s: 45, human_confirm: false },
-      { id: "L04", verb: "CONFIRM", target: "cut edges — no burn fringe", sensor: "vision_model_edge_qa", on_fail: "WARN_AND_LOG", duration_s: 8, human_confirm: true },
-    ],
-  },
-  zone_booth: {
-    spec_id: "RS-BTH-001",
-    procedure: "Spray Booth Safety",
+  zone_welding: {
+    spec_id: "RS-WELD-001",
+    procedure: "Welding Bay Setup",
     robot_class: "Safety Inspection Unit",
     version: "0.1.0-draft",
     steps: [
-      { id: "B01", verb: "SCAN",   target: "3-metre exclusion zone for ignition sources", sensor: "lidar_360", on_fail: "HALT_AND_ALERT", duration_s: 12, human_confirm: false },
-      { id: "B02", verb: "VERIFY", target: "booth extraction airflow", sensor: "vane_anemometer", threshold: "> 0.5 m/s", on_fail: "HALT_AND_ALERT", duration_s: 5, human_confirm: false },
-      { id: "B03", verb: "CONFIRM", target: "operator PPE — respirator, gloves, coveralls", sensor: "vision_model_ppe_classifier", threshold: "confidence > 0.95", on_fail: "HALT_AND_ALERT", duration_s: 6, human_confirm: true },
+      { id: "W01", verb: "VERIFY", target: "ground clamp connection to workpiece", sensor: "continuity_probe", threshold: "< 1 Ω", on_fail: "HALT_AND_ALERT", duration_s: 3, human_confirm: false },
+      { id: "W02", verb: "READ",   target: "shielding gas flow rate", sensor: "mass_flow_meter_A", threshold: "> 15 CFH", on_fail: "HALT_AND_ALERT", duration_s: 5, human_confirm: false },
+      { id: "W03", verb: "CONFIRM", target: "PPE — auto-darkening helmet, gloves, jacket", sensor: "vision_model_ppe_classifier", threshold: "confidence > 0.92", on_fail: "HALT_AND_ALERT", duration_s: 6, human_confirm: true },
+      { id: "W04", verb: "VERIFY", target: "welding certification on record (not expired)", sensor: "api_cert_ledger", threshold: "expiresAt > today", on_fail: "HALT_AND_ALERT", duration_s: 2, human_confirm: false },
     ],
   },
-  zone_front: {
-    spec_id: "RS-FRT-001",
-    procedure: "Open the Shop",
+  zone_cnc: {
+    spec_id: "RS-CNC-001",
+    procedure: "CNC Pre-Op",
+    robot_class: "Vision + Motion Unit",
+    version: "0.1.0-draft",
+    steps: [
+      { id: "C01", verb: "VERIFY", target: "torch consumables and focusing lens", sensor: "vision_model_wear_classifier", threshold: "wear_score < 0.7", on_fail: "WARN_AND_LOG", duration_s: 8, human_confirm: false },
+      { id: "C02", verb: "READ",   target: "coolant and hydraulic fluid levels", sensor: "float_sensor_array", threshold: "all > MIN", on_fail: "HALT_AND_ALERT", duration_s: 4, human_confirm: false },
+      { id: "C03", verb: "VERIFY", target: "E-stop and limit switches", sensor: "digital_io_probe", threshold: "all NORMAL", on_fail: "HALT_AND_ALERT", duration_s: 6, human_confirm: false },
+      { id: "C04", verb: "CONFIRM", target: "bed clear — no tooling or material left", sensor: "lidar_360", threshold: "volume_in_zone < 0.1 m³", on_fail: "RETRY_ONCE", duration_s: 12, human_confirm: true },
+    ],
+  },
+  zone_office: {
+    spec_id: "RS-OFF-001",
+    procedure: "Shop Opening Sequence",
     robot_class: "General Purpose Unit",
     version: "0.1.0-draft",
     steps: [
-      { id: "F01", verb: "READ",   target: "alarm panel status display", sensor: "optical_char_recognition", threshold: "== DISARMED", on_fail: "HALT_AND_ALERT", duration_s: 4, human_confirm: false },
-      { id: "F02", verb: "VERIFY", target: "register float vs. log", sensor: "api_pos_connector", threshold: "delta < $0.50", on_fail: "WARN_AND_LOG", duration_s: 10, human_confirm: false },
+      { id: "O01", verb: "READ",    target: "alarm panel — confirm DISARMED status", sensor: "optical_char_recognition", threshold: "== DISARMED", on_fail: "HALT_AND_ALERT", duration_s: 4, human_confirm: false },
+      { id: "O02", verb: "VERIFY",  target: "crew cert ledger for today's roster", sensor: "api_cert_ledger", threshold: "zero_expired", on_fail: "WARN_AND_LOG", duration_s: 3, human_confirm: false },
+      { id: "O03", verb: "CONFIRM", target: "job board updated and all stations staffed", sensor: "api_schedule_connector", threshold: "all_stations_assigned", on_fail: "WARN_AND_LOG", duration_s: 5, human_confirm: true },
+    ],
+  },
+  zone_qc: {
+    spec_id: "RS-QC-001",
+    procedure: "QC Station Open",
+    robot_class: "Vision + Motion Unit",
+    version: "0.1.0-draft",
+    steps: [
+      { id: "Q01", verb: "VERIFY", target: "measurement tool calibration (calipers, CMM)", sensor: "api_cal_ledger", threshold: "last_cal < 30 days", on_fail: "HALT_AND_ALERT", duration_s: 3, human_confirm: false },
+      { id: "Q02", verb: "SCAN",   target: "inspection queue — count parts staged", sensor: "vision_model_part_counter", threshold: ">= 1 part", on_fail: "WARN_AND_LOG", duration_s: 10, human_confirm: false },
+      { id: "Q03", verb: "CONFIRM", target: "reject bin clear before shift start", sensor: "load_cell_bin", threshold: "< 0.5 kg", on_fail: "WARN_AND_LOG", duration_s: 3, human_confirm: true },
     ],
   },
 };

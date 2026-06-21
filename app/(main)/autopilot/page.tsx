@@ -170,7 +170,7 @@ export default async function AutopilotPage() {
                       return (
                         <li
                           key={cwr.checklist.id}
-                          className="px-4 py-3"
+                          className="px-4 py-3 group transition-colors hover:bg-navy-tint/40"
                           style={
                             blocked_item
                               ? { background: "#F6ECD8" }
@@ -179,7 +179,7 @@ export default async function AutopilotPage() {
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                              <span className="font-display text-sm font-semibold text-ink">
+                              <span className="font-display text-sm font-semibold text-ink group-hover:text-navy transition-colors">
                                 {cwr.checklist.title}
                               </span>
                               {cwr.checklist.procedureId && (

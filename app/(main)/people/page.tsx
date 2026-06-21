@@ -105,7 +105,7 @@ export default function PeoplePage() {
             return (
               <div
                 key={user.id}
-                className="grid grid-cols-[2fr_1fr_2fr_1fr_1fr] divide-x divide-rule border-b border-rule last:border-b-0"
+                className="grid grid-cols-[2fr_1fr_2fr_1fr_1fr] divide-x divide-rule border-b border-rule last:border-b-0 hover:bg-navy-tint/40 transition-colors"
               >
                 {/* Name */}
                 <div className="flex items-center gap-3 px-4 py-3">
@@ -185,7 +185,7 @@ export default function PeoplePage() {
               return (
                 <div
                   key={cert.id}
-                  className="grid grid-cols-[2fr_3fr_1fr_2fr_2fr_1fr] divide-x divide-rule border-b border-rule last:border-b-0"
+                  className="grid grid-cols-[2fr_3fr_1fr_2fr_2fr_1fr] divide-x divide-rule border-b border-rule last:border-b-0 transition-colors"
                   style={isExpired ? { background: "#F6ECD8" } : undefined}
                 >
                   <div className="flex items-center px-4 py-2.5">
