@@ -3,6 +3,7 @@ import { getActingUser, getRole } from "@/lib/session";
 import { ROLE_LABEL } from "@/lib/roles";
 import { fmtDate } from "@/lib/format";
 import { PageHeader } from "@/components/page-header";
+import { StatusRibbon } from "@/components/home/status-ribbon";
 import { HomeTraining } from "@/components/home/home-training";
 import { HomeAutopilot } from "@/components/home/home-autopilot";
 
@@ -18,6 +19,10 @@ export default async function HomePage() {
         title={`Good morning, ${firstName}.`}
         description="Everything this shop knows — captured once, trained into everyone, and run on autopilot."
       />
+
+      <div className="mb-8">
+        <StatusRibbon />
+      </div>
 
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2">
