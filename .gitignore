@@ -36,6 +36,9 @@ yarn-error.log*
 # demo data write-through (local only, regenerated from seed)
 /.demo-data.json
 
+# transient local server log
+/.server.log
+
 # vercel
 .vercel
 
