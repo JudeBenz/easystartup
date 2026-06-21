@@ -168,6 +168,84 @@ export function MachineProp({
   );
 }
 
+// ── RobotFigure ───────────────────────────────────────────────────────────────
+// A low-poly matte robot that walks from its dock position to a target zone.
+// Walk is animated via position lerp in the parent's useFrame (passed as prop).
+// When `active`, pulses a calm navy ring on the floor.
+
+export function RobotFigure({
+  active,
+  opacity = 1,
+}: {
+  active:   boolean;
+  opacity?: number;
+}) {
+  const pulseRef  = useRef<THREE.Mesh>(null);
+  const frameRef  = useRef(0);
+
+  useFrame((_, dt) => {
+    frameRef.current += dt;
+    if (pulseRef.current && active) {
+      // Slow 2-second navy pulse: scale 0.9 → 1.3
+      const t = (Math.sin(frameRef.current * Math.PI) * 0.5 + 0.5);
+      const s = 0.9 + t * 0.4;
+      pulseRef.current.scale.set(s, 1, s);
+      (pulseRef.current.material as THREE.MeshBasicMaterial).opacity = 0.18 - t * 0.12;
+    }
+  });
+
+  return (
+    <group>
+      {/* Torso */}
+      <mesh position={[0, 0.26, 0]}>
+        <boxGeometry args={[0.18, 0.22, 0.12]} />
+        <meshStandardMaterial color="#1C3A5E" roughness={0.82} metalness={0} transparent opacity={opacity} />
+      </mesh>
+      {/* Head */}
+      <mesh position={[0, 0.46, 0]}>
+        <boxGeometry args={[0.14, 0.12, 0.10]} />
+        <meshStandardMaterial color="#17181B" roughness={0.80} metalness={0} transparent opacity={opacity} />
+      </mesh>
+      {/* Eye strip */}
+      <mesh position={[0, 0.47, 0.051]}>
+        <boxGeometry args={[0.08, 0.025, 0.005]} />
+        <meshStandardMaterial color="#F4F2EC" roughness={0.5} metalness={0} transparent opacity={opacity * 0.9} />
+      </mesh>
+      {/* Left arm */}
+      <mesh position={[-0.13, 0.24, 0]}>
+        <boxGeometry args={[0.05, 0.18, 0.06]} />
+        <meshStandardMaterial color="#1C3A5E" roughness={0.85} metalness={0} transparent opacity={opacity} />
+      </mesh>
+      {/* Right arm */}
+      <mesh position={[0.13, 0.24, 0]}>
+        <boxGeometry args={[0.05, 0.18, 0.06]} />
+        <meshStandardMaterial color="#1C3A5E" roughness={0.85} metalness={0} transparent opacity={opacity} />
+      </mesh>
+      {/* Left leg */}
+      <mesh position={[-0.05, 0.07, 0]}>
+        <boxGeometry args={[0.07, 0.14, 0.08]} />
+        <meshStandardMaterial color="#17181B" roughness={0.85} metalness={0} transparent opacity={opacity} />
+      </mesh>
+      {/* Right leg */}
+      <mesh position={[0.05, 0.07, 0]}>
+        <boxGeometry args={[0.07, 0.14, 0.08]} />
+        <meshStandardMaterial color="#17181B" roughness={0.85} metalness={0} transparent opacity={opacity} />
+      </mesh>
+
+      {/* Ground pulse ring — only when active */}
+      <mesh ref={pulseRef} position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.18, 0.26, 20]} />
+        <meshBasicMaterial
+          color="#1C3A5E"
+          transparent
+          opacity={active ? 0.14 : 0}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
+  );
+}
+
 // ── Palette ───────────────────────────────────────────────────────────────────
 
 const BODY_COLOR: Record<PersonCertStatus, string> = {

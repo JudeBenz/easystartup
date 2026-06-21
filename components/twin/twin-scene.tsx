@@ -5,7 +5,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, Edges, Line } from "@react-three/drei";
 import * as THREE from "three";
 import type { EnrichedZone, ZoneStatus, EmployeeFigureData } from "./twin-types";
-import { PersonFigure, MachineProp, type MachineKind } from "./twin-figures";
+import { PersonFigure, MachineProp, RobotFigure, type MachineKind } from "./twin-figures";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
@@ -184,6 +184,9 @@ function ScanPlane({ progress }: { progress: number }) {
 
 // ── Scene content (needs useFrame context inside Canvas) ──────────────────────
 
+// Robot dock — parked bottom-right corner
+const ROBOT_DOCK: [number, number, number] = [4.6, BLOCK_H, 4.6];
+
 function SceneContent({
   zones,
   employees,
@@ -207,9 +210,11 @@ function SceneContent({
   const [scanProgress, setScanProgress] = useState(0);
   const started      = useRef(false);
   const readyFired   = useRef(false);
-  // Stable ref so the effect doesn't re-fire when the callback identity changes
   const onReadyRef   = useRef(onReady);
   onReadyRef.current = onReady;
+
+  // Robot group ref — position updated imperatively in useFrame (no React state)
+  const robotGroupRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
     if (skipScan) {
@@ -226,12 +231,24 @@ function SceneContent({
   }, [skipScan]);
 
   useFrame((_, dt) => {
-    if (skipScan || !started.current || progressRef.current >= 1) return;
-    progressRef.current = Math.min(1, progressRef.current + dt / SCAN_DUR);
-    setScanProgress(progressRef.current);
-    if (progressRef.current >= 1 && !readyFired.current) {
-      readyFired.current = true;
-      onReadyRef.current();
+    // Scan animation
+    if (!skipScan && started.current && progressRef.current < 1) {
+      progressRef.current = Math.min(1, progressRef.current + dt / SCAN_DUR);
+      setScanProgress(progressRef.current);
+      if (progressRef.current >= 1 && !readyFired.current) {
+        readyFired.current = true;
+        onReadyRef.current();
+      }
+    }
+
+    // Robot walk — lerp group position toward selected zone or dock (~1.5s travel)
+    if (robotGroupRef.current) {
+      const selectedZone = zones.find((z) => z.id === selectedId);
+      const tx = selectedZone ? toFloor(selectedZone).cx + 0.35 : ROBOT_DOCK[0];
+      const tz = selectedZone ? toFloor(selectedZone).cz + 0.35 : ROBOT_DOCK[2];
+      const speed = skipScan ? 0.15 : dt * 2.2;
+      robotGroupRef.current.position.x = THREE.MathUtils.lerp(robotGroupRef.current.position.x, tx, speed);
+      robotGroupRef.current.position.z = THREE.MathUtils.lerp(robotGroupRef.current.position.z, tz, speed);
     }
   });
 
@@ -317,6 +334,13 @@ function SceneContent({
           });
         });
       })()}
+
+      {/* Robot — docked until a zone is selected, then walks to it */}
+      {(scanProgress >= 1 || skipScan) && (
+        <group ref={robotGroupRef} position={ROBOT_DOCK}>
+          <RobotFigure active={!!selectedId} opacity={1} />
+        </group>
+      )}
 
       {/* Invisible backdrop — click empty floor to deselect */}
       <mesh
