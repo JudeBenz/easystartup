@@ -13,19 +13,22 @@ export function NavLink({
 }) {
   const pathname = usePathname();
   const active =
-    pathname === href || (href !== "/home" && pathname.startsWith(href));
+    pathname === href ||
+    (href !== "/home" && pathname.startsWith(href));
 
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "relative px-1 py-3 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors",
-        active ? "text-ink" : "text-faint hover:text-ink"
+        active ? "text-ink" : "text-faint hover:text-soft"
       )}
     >
       {children}
       {active && (
-        <span className="absolute inset-x-0 -bottom-px h-0.5 bg-ink" />
+        // Green active underline replaces old ink underline
+        <span className="absolute inset-x-0 -bottom-px h-0.5 bg-navy" />
       )}
     </Link>
   );
