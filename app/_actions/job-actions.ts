@@ -2,13 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import {
-  addJobProof,
-  completeJob,
-  createJob,
-  createJobType,
-  toggleRunItem,
-} from "@/lib/store";
+import { createJob, createJobType } from "@/lib/store";
 
 /**
  * Service-management write surface (job types + jobs). Validation mirrors the
@@ -90,33 +84,4 @@ export async function createJobAction(input: JobInput): Promise<ActionResult> {
   } catch (e) {
     return { ok: false, error: messageOf(e) };
   }
-}
-
-// ── Job-detail run mutations (called from inline forms on /jobs/[id]) ─────────
-
-export async function toggleJobItemAction(
-  runId: string,
-  itemId: string,
-  jobId: string
-): Promise<void> {
-  toggleRunItem(runId, itemId);
-  revalidatePath(`/jobs/${jobId}`);
-  revalidatePath("/jobs");
-}
-
-export async function completeJobAction(jobId: string): Promise<void> {
-  completeJob(jobId);
-  revalidatePath(`/jobs/${jobId}`);
-  revalidatePath("/jobs");
-  revalidatePath("/home");
-}
-
-export async function addJobProofAction(
-  jobId: string,
-  mediaUrl: string
-): Promise<void> {
-  const url = mediaUrl.trim();
-  if (!url) return;
-  addJobProof(jobId, url);
-  revalidatePath(`/jobs/${jobId}`);
 }
