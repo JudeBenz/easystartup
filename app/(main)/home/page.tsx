@@ -1,39 +1,26 @@
-import { demoToday, getOrg } from "@/lib/store";
-import { getActingUser, getRole } from "@/lib/session";
-import { ROLE_LABEL } from "@/lib/roles";
-import { fmtDate } from "@/lib/format";
-import { PageHeader } from "@/components/page-header";
-import { StatusRibbon } from "@/components/home/status-ribbon";
-import { EntryPanels } from "@/components/home/entry-panels";
+import { getRole, getActingUser } from "@/lib/session";
+import { CommandHero } from "@/components/home/command-hero";
+import { MetricGrid } from "@/components/home/metric-grid";
+import { NeedsAttention } from "@/components/home/needs-attention";
 import { HomeTraining } from "@/components/home/home-training";
 
 export default async function HomePage() {
   const [role, user] = await Promise.all([getRole(), getActingUser()]);
-  const org = getOrg();
-  const firstName = user.name.split(" ")[0];
-  const isManager = role === "owner" || role === "trainer";
+  const isManager    = role === "owner" || role === "trainer";
 
+  if (!isManager) {
+    // Employee home — Builder A's training home, re-skinned via token changes
+    return <HomeTraining role={role} user={user} />;
+  }
+
+  // Manager / owner command home — full-bleed green hero + metric grid
   return (
-    <div>
-      <PageHeader
-        eyebrow={`${org.name} · ${ROLE_LABEL[role]} · ${fmtDate(demoToday())}`}
-        title={`Good morning, ${firstName}.`}
-        description={
-          isManager
-            ? "Command the shop. Live status, and the few strong ways in."
-            : "Everything you're trained on, and what's next."
-        }
-      />
-
-      <div className="mb-8">
-        <StatusRibbon />
+    <div className="-mx-4 -mt-8 sm:-mx-6">
+      <CommandHero />
+      <div className="px-4 pb-10 pt-1 sm:px-6">
+        <MetricGrid />
+        <NeedsAttention />
       </div>
-
-      {isManager ? (
-        <EntryPanels />
-      ) : (
-        <HomeTraining role={role} user={user} />
-      )}
     </div>
   );
 }
