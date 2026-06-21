@@ -27,11 +27,11 @@ function ItemBanner({ item }: { item: ChecklistItem }) {
   }
   if (item.type === "ppe") {
     return (
-      <div className="mb-2 border border-rule bg-panel px-3 py-2 flex items-start gap-2">
+      <div className="mb-2 border border-navy px-3 py-2 flex items-start gap-2" style={{ background: "#E8EEF6" }}>
         <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-navy shrink-0 mt-0.5">
-          ■ PPE
+          ■ PPE required
         </span>
-        <span className="text-sm text-soft">{item.label}</span>
+        <span className="text-sm text-navy">{item.label}</span>
       </div>
     );
   }
