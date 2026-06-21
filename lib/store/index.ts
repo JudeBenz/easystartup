@@ -20,6 +20,14 @@ export * from "./autopilot";
 export * from "./compliance";
 export * from "./training-matrix";
 
+// Service management (jobs, crews, sites, job types, dispatch, messages).
+export * from "./sites";
+export * from "./crews";
+export * from "./jobtypes";
+export * from "./jobs";
+export * from "./dispatch";
+export * from "./messages";
+
 // Fixed personas / org the role switcher and seed rely on.
 export {
   ORG_ID,

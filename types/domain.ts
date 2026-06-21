@@ -182,3 +182,89 @@ export interface SpaceMap {
   name: string;
   zones: Zone[];
 }
+
+// ---------------------------------------------------------------------------
+// Service management — field/distributed operation (jobs, crews, sites, msgs)
+// ---------------------------------------------------------------------------
+// Sits on top of the existing procedures/checklists/certs layer: a Job runs a
+// JobType, whose checklistTemplate instantiates into a ChecklistRun (reused, not
+// a parallel type) and whose requiredCertProcedureIds cert-gate dispatch.
+
+export interface Site {
+  id: string;
+  orgId: string;
+  name: string;
+  kind: "internal" | "customer";
+  address?: string;
+  lat?: number;
+  lng?: number;
+}
+
+export interface Crew {
+  id: string;
+  orgId: string;
+  name: string;
+  leadUserId: string;
+  memberUserIds: string[];
+  truck?: string;
+}
+
+export interface JobType {
+  id: string;
+  orgId: string;
+  name: string;
+  category: string;
+  kind: "in_house" | "field";
+  /** Procedures that document/train this job type. */
+  procedureIds: string[];
+  /** Template instantiated into a ChecklistRun when a Job is created. */
+  checklistTemplate: ChecklistItem[];
+  /** Procedures the worker must hold a current cert on to be dispatched. */
+  requiredCertProcedureIds: string[];
+  ppe: string[];
+  estDurationMin: number;
+}
+
+export type JobStatus =
+  | "scheduled"
+  | "in_progress"
+  | "blocked"
+  | "complete"
+  | "cancelled";
+
+export interface Job {
+  id: string;
+  orgId: string;
+  jobTypeId: string;
+  title: string;
+  siteId?: string;
+  scheduledAt: string;
+  status: JobStatus;
+  crewId?: string;
+  managerId?: string;
+  assignedUserIds: string[];
+  /** The ChecklistRun instantiated from the JobType's checklistTemplate. */
+  checklistRunId?: string;
+  proofMediaUrls: string[];
+  notes?: string;
+  blockedReason?: string;
+  completedAt?: string;
+}
+
+/** Audience for a Message: everyone, a crew, a person, or a job thread. */
+export interface MessageScope {
+  type: "all" | "crew" | "user" | "job";
+  id?: string;
+}
+
+export interface Message {
+  id: string;
+  orgId: string;
+  fromUserId: string;
+  scope: MessageScope;
+  body: string;
+  createdAt: string;
+  jobId?: string;
+  /** A directive ("confirm PPE before first task"), surfaced differently in UI. */
+  isInstruction?: boolean;
+}
