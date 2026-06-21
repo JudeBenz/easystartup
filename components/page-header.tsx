@@ -1,6 +1,7 @@
 /**
- * Masthead — mono eyebrow over a Space Grotesk title on a 2px ink rule (§6).
- * Used at the top of every page for a consistent "operations instrument" feel.
+ * Masthead — mono eyebrow over a Space Grotesk title.
+ * Re-skinned for light-money palette: green eyebrow, ink title,
+ * hairline underline in rule color (not the old 2px ink rule).
  */
 export function PageHeader({
   eyebrow,
@@ -8,13 +9,13 @@ export function PageHeader({
   description,
   actions,
 }: {
-  eyebrow?: string;
-  title: string;
+  eyebrow?:    string;
+  title:       string;
   description?: string;
-  actions?: React.ReactNode;
+  actions?:    React.ReactNode;
 }) {
   return (
-    <div className="mb-8 border-b-2 border-ink pb-4">
+    <div className="mb-8 border-b border-rule pb-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           {eyebrow && (
