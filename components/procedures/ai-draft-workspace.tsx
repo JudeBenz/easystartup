@@ -1,11 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateProcedureDraft, type AiDraft } from "@/lib/ai-actions";
+import {
+  VoiceCapture,
+  isVoiceSupported,
+} from "@/components/procedures/voice-capture";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   ProcedureEditor,
   type EditorInitial,
@@ -36,18 +41,27 @@ function toInitial(draft: AiDraft): EditorInitial {
 
 export function AiDraftWorkspace() {
   const [phase, setPhase] = useState<"prompt" | "editing">("prompt");
+  const [mode, setMode] = useState<"type" | "dictate">("type");
   const [prompt, setPrompt] = useState("");
+  const [voiceText, setVoiceText] = useState("");
   const [initial, setInitial] = useState<EditorInitial | undefined>();
   const [notConfigured, setNotConfigured] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceChecked, setVoiceChecked] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  function draft() {
-    if (!prompt.trim()) {
+  useEffect(() => {
+    setVoiceSupported(isVoiceSupported());
+    setVoiceChecked(true);
+  }, []);
+
+  function runDraft(text: string) {
+    if (!text.trim()) {
       toast.error("Describe the procedure first.");
       return;
     }
     startTransition(async () => {
-      const res = await generateProcedureDraft(prompt);
+      const res = await generateProcedureDraft(text);
       if (res.ok) {
         setInitial(toInitial(res.draft));
         setPhase("editing");
@@ -74,39 +88,86 @@ export function AiDraftWorkspace() {
           </h2>
         </div>
         <p className="mt-2 text-sm text-soft">
-          Describe the task in plain language. We&apos;ll structure it into steps,
-          add a safety warning and a quiz, and hand it to you to review before
-          publishing.
+          Describe the task in plain language — type it, or talk it through.
+          We&apos;ll structure it into steps, add a safety warning and a quiz, and
+          hand it to you to review before publishing.
         </p>
 
-        <Textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder={EXAMPLE}
-          rows={4}
-          className="mt-4"
-        />
+        {/* Type | Dictate toggle (only when the browser supports speech) */}
+        {voiceSupported && (
+          <div className="mt-4 inline-flex border border-rule2">
+            {(["type", "dictate"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                aria-pressed={mode === m}
+                className={cn(
+                  "px-3 py-1.5 font-display text-xs font-semibold transition-colors",
+                  m === "dictate" && "border-l border-rule2",
+                  mode === m
+                    ? "bg-ink text-paper"
+                    : "text-soft hover:bg-navy-tint hover:text-navy"
+                )}
+              >
+                {m === "type" ? "Type" : "Dictate"}
+              </button>
+            ))}
+          </div>
+        )}
+        {voiceChecked && !voiceSupported && (
+          <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.12em] text-faint">
+            Voice dictation isn&apos;t available in this browser — type below.
+          </p>
+        )}
 
-        <div className="mt-3 flex items-center gap-2">
-          <Button onClick={draft} disabled={pending}>
-            <Sparkles className="h-4 w-4" />
-            {pending ? "Drafting…" : "Draft procedure"}
-          </Button>
-          <button
-            type="button"
-            onClick={() => setPrompt(EXAMPLE)}
-            className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint hover:text-navy"
-          >
-            Use example
-          </button>
-        </div>
+        {mode === "dictate" && voiceSupported ? (
+          <div className="mt-4">
+            <VoiceCapture onTranscript={setVoiceText} />
+            <div className="mt-3">
+              <Button
+                onClick={() => runDraft(voiceText)}
+                disabled={pending || !voiceText.trim()}
+              >
+                <Sparkles className="h-4 w-4" />
+                {pending ? "Generating…" : "Generate from this"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder={EXAMPLE}
+              rows={4}
+              className="mt-4"
+            />
+            <div className="mt-3 flex items-center gap-2">
+              <Button onClick={() => runDraft(prompt)} disabled={pending}>
+                <Sparkles className="h-4 w-4" />
+                {pending ? "Drafting…" : "Draft procedure"}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setPrompt(EXAMPLE)}
+                className="font-mono text-[10px] uppercase tracking-[0.12em] text-faint hover:text-navy"
+              >
+                Use example
+              </button>
+            </div>
+          </>
+        )}
 
         {notConfigured && (
           <div className="mt-4 border-l-4 border-amber bg-amber-bg px-4 py-3 text-sm text-ink">
-            <p className="font-display font-semibold">AI drafting isn&apos;t configured</p>
+            <p className="font-display font-semibold">
+              AI drafting isn&apos;t configured
+            </p>
             <p className="mt-1 text-ink/80">
-              Set a server-only <code className="font-mono text-xs">ANTHROPIC_API_KEY</code>{" "}
-              to enable AI drafts. You can still build the procedure by hand.
+              Set a server-only{" "}
+              <code className="font-mono text-xs">ANTHROPIC_API_KEY</code> to
+              enable AI drafts. You can still build the procedure by hand.
             </p>
           </div>
         )}
