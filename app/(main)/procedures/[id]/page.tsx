@@ -81,6 +81,22 @@ export default async function ProcedureDetailPage({
         }
       />
 
+      {procedure.status === "draft" && (
+        <div className="mb-6 border-l-4 border-amber bg-amber-bg px-4 py-3 text-sm text-ink">
+          <span className="font-display font-semibold">This is a draft.</span>{" "}
+          {canAuthor ? (
+            <>
+              Publish it to assign training and let employees run it.{" "}
+              <Link href={`/procedures/${id}/edit`} className="text-navy underline">
+                Open the editor →
+              </Link>
+            </>
+          ) : (
+            "It isn't published yet, so it can't be assigned or trained."
+          )}
+        </div>
+      )}
+
       <StatStrip
         className="mb-8"
         stats={[

@@ -196,6 +196,10 @@ export function ProcedureEditor({ initial }: { initial?: EditorInitial }) {
   function onPublish() {
     const input = buildInput();
     if (!input) return;
+    if (input.steps.length === 0) {
+      toast.error("Add at least one step before publishing.");
+      return;
+    }
     startTransition(async () => {
       const res = await publishProcedureDraft(input);
       if (!res.ok) {
@@ -344,7 +348,11 @@ export function ProcedureEditor({ initial }: { initial?: EditorInitial }) {
           <Button type="button" variant="outline" onClick={onSave} disabled={pending}>
             Save draft
           </Button>
-          <Button type="button" onClick={onPublish} disabled={pending}>
+          <Button
+            type="button"
+            onClick={onPublish}
+            disabled={pending || steps.length === 0}
+          >
             {pending ? "Working…" : "Publish"}
           </Button>
         </div>
