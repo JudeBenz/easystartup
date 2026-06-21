@@ -6,6 +6,7 @@ import {
   ArrowDown,
   ArrowUp,
   Plus,
+  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
@@ -16,11 +17,22 @@ import {
   saveProcedure,
   type ProcedureInput,
 } from "@/lib/editor-actions";
+import {
+  generateQuizAction,
+  improveStepAction,
+  suggestWarningAction,
+} from "@/lib/ai-actions";
 import { STEP_TYPE_LABEL } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 interface EditorStep {
@@ -85,6 +97,7 @@ export function ProcedureEditor({ initial }: { initial?: EditorInitial }) {
     }))
   );
   const [pending, startTransition] = useTransition();
+  const [aiConfigured, setAiConfigured] = useState(true);
 
   function newLocalId() {
     counter.current += 1;
@@ -114,6 +127,35 @@ export function ProcedureEditor({ initial }: { initial?: EditorInitial }) {
       [next[i], next[j]] = [next[j], next[i]];
       return next;
     });
+  }
+
+  /** Insert an AI-suggested step (quiz / warning) right after the given row. */
+  function insertAfter(
+    localId: string,
+    partial: Partial<EditorStep> & { type: StepType }
+  ) {
+    setSteps((s) => {
+      const i = s.findIndex((st) => st.localId === localId);
+      if (i < 0) return s;
+      const lid = newLocalId();
+      const built: EditorStep = { ...blankStep(lid, partial.type), ...partial, localId: lid };
+      const next = s.slice();
+      next.splice(i + 1, 0, built);
+      return next;
+    });
+  }
+
+  /** Nearby steps as plain text — context for quiz/warning suggestions. */
+  function stepContext(i: number): string {
+    const start = Math.max(0, i - 2);
+    const end = Math.min(steps.length, i + 3);
+    return steps
+      .slice(start, end)
+      .map(
+        (st, idx) =>
+          `${start + idx + 1}. [${st.type}] ${st.title}${st.body ? `: ${st.body}` : ""}`
+      )
+      .join("\n");
   }
 
   function addPpe() {
@@ -313,9 +355,13 @@ export function ProcedureEditor({ initial }: { initial?: EditorInitial }) {
               index={i}
               isFirst={i === 0}
               isLast={i === steps.length - 1}
+              aiConfigured={aiConfigured}
+              context={stepContext(i)}
               onPatch={(patch) => patchStep(s.localId, patch)}
               onRemove={() => removeStep(s.localId)}
               onMove={(dir) => moveStep(s.localId, dir)}
+              onInsertAfter={(partial) => insertAfter(s.localId, partial)}
+              onNotConfigured={() => setAiConfigured(false)}
             />
           ))}
         </div>
@@ -366,17 +412,25 @@ function StepEditor({
   index,
   isFirst,
   isLast,
+  aiConfigured,
+  context,
   onPatch,
   onRemove,
   onMove,
+  onInsertAfter,
+  onNotConfigured,
 }: {
   step: EditorStep;
   index: number;
   isFirst: boolean;
   isLast: boolean;
+  aiConfigured: boolean;
+  context: string;
   onPatch: (patch: Partial<EditorStep>) => void;
   onRemove: () => void;
   onMove: (dir: -1 | 1) => void;
+  onInsertAfter: (partial: Partial<EditorStep> & { type: StepType }) => void;
+  onNotConfigured: () => void;
 }) {
   return (
     <div className="border border-rule bg-panel">
@@ -470,7 +524,227 @@ function StepEditor({
         {step.type === "quiz" && (
           <QuizEditor step={step} onPatch={onPatch} />
         )}
+
+        {aiConfigured && (
+          <div className="border-t border-rule pt-3">
+            <StepAiMenu
+              step={step}
+              context={context}
+              onApplyImprove={(title, body) => onPatch({ title, body })}
+              onInsertAfter={onInsertAfter}
+              onNotConfigured={onNotConfigured}
+            />
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+type AiReview =
+  | { kind: "improve"; title: string; body: string }
+  | {
+      kind: "quiz";
+      quizQuestion: string;
+      quizChoices: string[];
+      quizCorrect: number;
+      quizExplanation: string;
+    }
+  | { kind: "warning"; warningLevel: WarningLevel; title: string; body: string };
+
+function StepAiMenu({
+  step,
+  context,
+  onApplyImprove,
+  onInsertAfter,
+  onNotConfigured,
+}: {
+  step: EditorStep;
+  context: string;
+  onApplyImprove: (title: string, body: string) => void;
+  onInsertAfter: (partial: Partial<EditorStep> & { type: StepType }) => void;
+  onNotConfigured: () => void;
+}) {
+  const [pending, startTransition] = useTransition();
+  const [review, setReview] = useState<AiReview | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const emptyStep = !step.title.trim() && !step.body.trim();
+
+  function fail(r: { reason: "not_configured" | "error"; message?: string }) {
+    if (r.reason === "not_configured") onNotConfigured();
+    else setError(r.message ?? "AI request failed.");
+  }
+
+  function run(kind: "improve" | "quiz" | "warning") {
+    if (pending) return;
+    setError(null);
+    setReview(null);
+    startTransition(async () => {
+      if (kind === "improve") {
+        const r = await improveStepAction({ title: step.title, body: step.body });
+        if (!r.ok) return fail(r);
+        setReview({ kind: "improve", title: r.title, body: r.body });
+      } else if (kind === "quiz") {
+        const r = await generateQuizAction({ context });
+        if (!r.ok) return fail(r);
+        setReview({
+          kind: "quiz",
+          quizQuestion: r.quizQuestion,
+          quizChoices: r.quizChoices,
+          quizCorrect: r.quizCorrect,
+          quizExplanation: r.quizExplanation,
+        });
+      } else {
+        const r = await suggestWarningAction({ context });
+        if (!r.ok) return fail(r);
+        setReview({
+          kind: "warning",
+          warningLevel: r.warningLevel,
+          title: r.title,
+          body: r.body,
+        });
+      }
+    });
+  }
+
+  function accept() {
+    if (!review) return;
+    if (review.kind === "improve") {
+      onApplyImprove(review.title, review.body);
+    } else if (review.kind === "quiz") {
+      onInsertAfter({
+        type: "quiz",
+        title: "Knowledge check",
+        quizQuestion: review.quizQuestion,
+        quizChoices: review.quizChoices,
+        quizCorrect: review.quizCorrect,
+        quizExplanation: review.quizExplanation,
+      });
+    } else {
+      onInsertAfter({
+        type: "warning",
+        title: review.title,
+        body: review.body,
+        warningLevel: review.warningLevel,
+      });
+    }
+    setReview(null);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="AI step actions"
+              className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-soft transition-colors hover:text-navy focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <Sparkles className="h-3.5 w-3.5" /> AI
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem
+              disabled={emptyStep || pending}
+              onSelect={() => run("improve")}
+            >
+              Improve wording
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={pending} onSelect={() => run("quiz")}>
+              Make quiz from steps
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={pending} onSelect={() => run("warning")}>
+              Suggest a warning
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {pending && (
+          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-navy">
+            <span aria-hidden className="inline-block h-[9px] w-[9px] animate-pulse bg-navy" />
+            Thinking…
+          </span>
+        )}
+      </div>
+
+      {error && (
+        <div
+          className="mt-2 border-l-4 border-amber bg-amber-bg px-3 py-2 text-xs text-ink"
+          aria-live="polite"
+        >
+          {error}
+        </div>
+      )}
+
+      {review && (
+        <div className="mt-2 border border-rule2 bg-navy-tint p-4" aria-live="polite">
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-navy">
+            Suggested
+          </p>
+
+          {review.kind === "improve" && (
+            <div className="mt-2">
+              <p className="font-display text-sm font-semibold text-ink">
+                {review.title}
+              </p>
+              <p className="mt-1 text-sm text-soft">{review.body}</p>
+            </div>
+          )}
+
+          {review.kind === "quiz" && (
+            <div className="mt-2">
+              <p className="font-display text-sm font-semibold text-ink">
+                {review.quizQuestion}
+              </p>
+              <ul className="mt-1.5 space-y-1">
+                {review.quizChoices.map((c, i) => (
+                  <li
+                    key={i}
+                    className={cn(
+                      "text-sm",
+                      i === review.quizCorrect ? "font-semibold text-green" : "text-soft"
+                    )}
+                  >
+                    {String.fromCharCode(65 + i)}. {c}
+                    {i === review.quizCorrect ? "  ✓" : ""}
+                  </li>
+                ))}
+              </ul>
+              {review.quizExplanation && (
+                <p className="mt-1.5 text-xs text-soft">{review.quizExplanation}</p>
+              )}
+            </div>
+          )}
+
+          {review.kind === "warning" && (
+            <div className="mt-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-amber">
+                {review.warningLevel}
+              </p>
+              <p className="mt-0.5 font-display text-sm font-semibold text-ink">
+                {review.title}
+              </p>
+              <p className="mt-1 text-sm text-soft">{review.body}</p>
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center gap-2">
+            <Button type="button" size="sm" onClick={accept}>
+              Accept
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setReview(null)}
+            >
+              Discard
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
