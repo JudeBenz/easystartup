@@ -31,27 +31,26 @@ export function DriverGrid() {
   }, [query, shuffled]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-white/55">
-          Grid is randomly shuffled — not sorted by stats. Search to find a
-          racer.
-        </p>
-        <label className="relative block w-full sm:max-w-xs">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
-            size={16}
-          />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search drivers…"
-            className="w-full rounded-sm border border-white/15 bg-black/30 py-2 pl-9 pr-3 text-sm text-white outline-none ring-aruba-teal placeholder:text-white/35 focus:border-aruba-teal/50 focus:ring-1"
-          />
-        </label>
-      </div>
+    <div className="space-y-4 sm:space-y-6">
+      <label className="relative block">
+        <Search
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40"
+          size={18}
+        />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search drivers…"
+          enterKeyHint="search"
+          className="w-full min-h-[48px] rounded-md border border-white/15 bg-black/30 py-3 pl-10 pr-4 text-base text-white outline-none placeholder:text-white/35 focus:border-aruba-teal/50 focus:ring-1 focus:ring-aruba-teal/30"
+        />
+      </label>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+      <p className="text-xs text-white/50 sm:text-sm">
+        Grid is randomly shuffled — not sorted by stats.
+      </p>
+
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
         {filtered.map((driver, i) => (
           <div
             key={driver.id}

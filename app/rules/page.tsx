@@ -1,19 +1,20 @@
+import { PageHeader } from "@/components/gp/page-header";
+
 export default function RulesPage() {
   return (
-    <div className="container py-10">
-      <div className="mb-8 max-w-2xl">
-        <div className="text-[11px] uppercase tracking-[0.25em] text-aruba-teal">
-          House rules
-        </div>
-        <h1 className="gp-display mt-2 text-5xl text-white md:text-6xl">
-          Rules & Purse
-        </h1>
-      </div>
+    <div className="gp-page">
+      <PageHeader
+        eyebrow="House rules"
+        title="Rules & Purse"
+        description="How the $500 works, how points stack, and how Race Control runs the weekend."
+      />
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <section className="gp-panel p-5">
-          <h2 className="gp-display text-2xl text-aruba-sand">The $500</h2>
-          <ul className="mt-3 space-y-2 text-white/75">
+      <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
+        <section className="gp-panel p-4 sm:p-5">
+          <h2 className="gp-display text-xl text-aruba-sand sm:text-2xl">
+            The $500
+          </h2>
+          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/75 sm:text-base">
             <li>• Pure winner-take-all cash for the championship leader.</li>
             <li>• No splitting. No second-place cut of the main purse.</li>
             <li>• Mini prizes never touch the $500.</li>
@@ -21,9 +22,9 @@ export default function RulesPage() {
           </ul>
         </section>
 
-        <section className="gp-panel p-5">
-          <h2 className="gp-display text-2xl text-aruba-teal">Points</h2>
-          <ul className="mt-3 space-y-2 text-white/75">
+        <section className="gp-panel p-4 sm:p-5">
+          <h2 className="gp-display text-xl text-aruba-teal sm:text-2xl">Points</h2>
+          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/75 sm:text-base">
             <li>• Finish order: 25-18-15-12-10-8-6-4-2-1 (then 0s).</li>
             <li>• Fastest lap: +1</li>
             <li>• Clean race (zero cups): +2</li>
@@ -31,9 +32,11 @@ export default function RulesPage() {
           </ul>
         </section>
 
-        <section className="gp-panel p-5">
-          <h2 className="gp-display text-2xl text-white">Race Control</h2>
-          <ul className="mt-3 space-y-2 text-white/75">
+        <section className="gp-panel p-4 sm:p-5">
+          <h2 className="gp-display text-xl text-white sm:text-2xl">
+            Race Control
+          </h2>
+          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/75 sm:text-base">
             <li>• One admin. One phone. Official.</li>
             <li>• After each heat: tap finishing order, save, announce mini prize.</li>
             <li>• Appeals cost nothing but respect the phone.</li>
@@ -41,9 +44,11 @@ export default function RulesPage() {
           </ul>
         </section>
 
-        <section className="gp-panel p-5">
-          <h2 className="gp-display text-2xl text-aruba-cup">Good vibes</h2>
-          <ul className="mt-3 space-y-2 text-white/75">
+        <section className="gp-panel p-4 sm:p-5">
+          <h2 className="gp-display text-xl text-aruba-cup sm:text-2xl">
+            Good vibes
+          </h2>
+          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/75 sm:text-base">
             <li>• Cheer loud. Race happy.</li>
             <li>• Fill cups with sand so wind doesn’t steal the chicane.</li>
             <li>• Photograph layouts once — instant course book content.</li>

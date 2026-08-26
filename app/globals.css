@@ -24,6 +24,8 @@
     --input: 36 54 66;
     --ring: 46 196 182;
     --radius: 0.35rem;
+    --gp-tab-height: 4.25rem;
+    --gp-nav-height: 3.5rem;
   }
 
   * {
@@ -32,6 +34,7 @@
 
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
@@ -39,6 +42,10 @@
     background-image: theme("backgroundImage.sand-grid");
     background-attachment: fixed;
     min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   ::selection {
@@ -56,11 +63,37 @@
   }
 
   .gp-stat-bar {
-    @apply h-2 overflow-hidden rounded-sm bg-white/10;
+    @apply h-2.5 overflow-hidden rounded-sm bg-white/10 sm:h-2;
   }
 
   .gp-stat-fill {
     @apply h-full rounded-sm transition-all duration-700;
+  }
+
+  .gp-main {
+    padding-bottom: calc(var(--gp-tab-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (min-width: 1024px) {
+    .gp-main {
+      padding-bottom: 0;
+    }
+  }
+
+  .gp-page {
+    @apply container py-6 sm:py-8 md:py-10;
+  }
+
+  .gp-touch {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .gp-btn-primary {
+    @apply inline-flex min-h-[48px] items-center justify-center rounded-md bg-aruba-teal px-5 py-3 text-sm font-semibold text-aruba-deep transition active:scale-[0.98] hover:bg-aruba-sand;
+  }
+
+  .gp-btn-secondary {
+    @apply inline-flex min-h-[48px] items-center justify-center rounded-md border border-white/25 bg-black/30 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition active:scale-[0.98] hover:border-aruba-teal hover:text-aruba-teal;
   }
 
   .foil-shine {
@@ -84,5 +117,15 @@
       rgba(245, 215, 110, 0.0)
     );
     animation: ray-spin 28s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foil-shine,
+  .legendary-rays,
+  .animate-floaty,
+  .animate-gold-pulse,
+  .animate-shimmer {
+    animation: none !important;
   }
 }
