@@ -13,23 +13,22 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0C5A39",
+          background: "#e11d2e",
         }}
       >
         <span
           style={{
             fontFamily: "system-ui, sans-serif",
-            fontSize: 108,
+            fontSize: 72,
             fontWeight: 700,
-            color: "#F1F4F0",
+            color: "#ffffff",
             lineHeight: 1,
-            letterSpacing: "-0.04em",
           }}
         >
-          E
+          GP
         </span>
       </div>
     ),
-    { ...size }
+    { ...size },
   );
 }

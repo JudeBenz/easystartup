@@ -2,108 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
- * EasyStartUp tokens — light-money palette (supersedes warm-paper).
- * Values are space-separated RGB triplets (consumed via rgb(var(--x) / <alpha>)).
- * CSS variable NAMES are unchanged so existing components auto-pick new colors.
- */
 @layer base {
   :root {
-    /* ── Surface palette ──────────────────────────────────────────── */
-    --paper:   241 244 240;   /* #F1F4F0 — page bg (green-tinted light)  */
-    --panel:   255 255 255;   /* #FFFFFF — cards / surfaces               */
-    --ink:     20  24  26;    /* #14181A — primary text (high contrast)   */
-    --soft:    76  86  79;    /* #4C564F — secondary text                 */
-    --faint:   121 131 124;   /* #79837C — labels / metadata              */
-    --rule:    224 230 223;   /* #E0E6DF — hairlines / card borders       */
-    --rule-2:  214 221 212;   /* #D6DDD4 — stronger dividers              */
-
-    /* ── Signature green (formerly "navy" — names kept for compat) ── */
-    --navy:      14 122 78;   /* #0E7A4E — primary accent: CTAs, active   */
-    --navy-hover: 11 107 67;  /* #0B6B43 — green-deep: hover, AA labels  */
-    --navy-tint: 228 242 234; /* #E4F2EA — green-tint: chips, avatar bg  */
-
-    /* ── Semantic green aliases (new) ─────────────────────────────── */
-    --green:      14 122 78;  /* #0E7A4E — same as --navy, sparklines     */
-    --green-bg:  228 242 234; /* #E4F2EA — same as --navy-tint            */
-    --green-deep: 11 107 67;  /* #0B6B43 — AA-safe text on light bg       */
-
-    /* ── Attention / status ────────────────────────────────────────── */
-    --amber:        154 100  16; /* #9A6410 — attention text/icon (AA)    */
-    --amber-strong: 122  79  12; /* #7A4F0C — amber numbers               */
-    --amber-bg:     251 241 221; /* #FBF1DD — amber card bg               */
-    --amber-border: 232 211 160; /* #E8D3A0 — amber card border           */
-    --gold:         183 121  31; /* #B7791F — premium/cert flourish only  */
-    --red:          192  57  43; /* #C0392B — critical only, sparing      */
-
-    /* ── Branded header (deep green) ──────────────────────────────── */
-    --header:      12  90  57; /* #0C5A39 — branded header bar           */
-    --header-soft: 143 199 168; /* #8FC7A8 — labels on green header      */
-    --header-mint: 111 216 158; /* #6FD89E — positive / sparkline in hdr */
-    --header-gold: 232 199 126; /* #E8C77E — blocked/attention in header */
-
-    /* ── shadcn semantic mapping ───────────────────────────────────── */
-    --background:            var(--paper);
-    --foreground:            var(--ink);
-    --card:                  var(--panel);
-    --card-foreground:       var(--ink);
-    --popover:               var(--panel);
-    --popover-foreground:    var(--ink);
-    --primary:               var(--navy);
-    --primary-foreground:    255 255 255;
-    --secondary:             228 242 234;
-    --secondary-foreground:  var(--ink);
-    --muted:                 241 244 240;
-    --muted-foreground:      var(--soft);
-    --accent:                var(--navy-tint);
-    --accent-foreground:     var(--navy);
-    --destructive:           var(--red);
+    --background: 7 13 18;
+    --foreground: 236 242 245;
+    --card: 15 26 34;
+    --card-foreground: 236 242 245;
+    --popover: 15 26 34;
+    --popover-foreground: 236 242 245;
+    --primary: 46 196 182;
+    --primary-foreground: 7 13 18;
+    --secondary: 24 38 48;
+    --secondary-foreground: 236 242 245;
+    --muted: 20 32 41;
+    --muted-foreground: 156 173 184;
+    --accent: 225 29 46;
+    --accent-foreground: 255 255 255;
+    --destructive: 225 29 46;
     --destructive-foreground: 255 255 255;
-    --border:                var(--rule);
-    --input:                 var(--rule-2);
-    --ring:                  var(--navy);
-
-    /* Cards & chips use slightly softened corners */
-    --radius: 7px;
+    --border: 36 54 66;
+    --input: 36 54 66;
+    --ring: 46 196 182;
+    --radius: 0.35rem;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+
+  html {
+    scroll-behavior: smooth;
   }
-  /* tabular, padded numerals for stat readouts */
-  .tnum {
-    font-feature-settings: "tnum" 1;
-    font-variant-numeric: tabular-nums;
+
+  body {
+    @apply bg-aruba-deep text-foreground antialiased;
+    background-image: theme("backgroundImage.sand-grid");
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: rgba(46, 196, 182, 0.35);
   }
 }
 
 @layer components {
-  /* mono eyebrow / label */
-  .eyebrow {
-    @apply font-mono text-[11px] uppercase tracking-[0.12em] text-faint;
+  .gp-display {
+    @apply font-display uppercase tracking-[0.04em];
   }
-  .label-mono {
-    @apply font-mono text-[11px] uppercase tracking-[0.1em];
+
+  .gp-panel {
+    @apply rounded-md border border-white/10 bg-aruba-panel/80 backdrop-blur-sm;
   }
-  /* hairline rule */
-  .hr-rule {
-    @apply border-t border-rule;
+
+  .gp-stat-bar {
+    @apply h-2 overflow-hidden rounded-sm bg-white/10;
   }
-  /* faint critical-red wash */
-  .tint-critical {
-    background-color: rgb(var(--red) / 0.06);
+
+  .gp-stat-fill {
+    @apply h-full rounded-sm transition-all duration-700;
   }
-  /* amber card utility */
-  .card-amber {
-    background-color: rgb(var(--amber-bg));
-    border-color: rgb(var(--amber-border));
+
+  .foil-shine {
+    background: linear-gradient(
+      110deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.35) 40%,
+      transparent 60%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3.5s linear infinite;
+  }
+
+  .legendary-rays {
+    background: conic-gradient(
+      from 0deg,
+      rgba(245, 215, 110, 0.0),
+      rgba(245, 215, 110, 0.35),
+      rgba(255, 233, 160, 0.0),
+      rgba(245, 215, 110, 0.25),
+      rgba(245, 215, 110, 0.0)
+    );
+    animation: ray-spin 28s linear infinite;
   }
 }
