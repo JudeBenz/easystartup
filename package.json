@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "dev:showshow": "pnpm --filter showshow dev",
+    "build:showshow": "pnpm --filter showshow build",
+    "start:showshow": "pnpm --filter showshow start"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
