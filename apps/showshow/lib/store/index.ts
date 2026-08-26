@@ -387,6 +387,96 @@ export async function getEditionOptions(): Promise<{ edition: ShowEdition; showN
     .sort((a, b) => a.edition.startDate.localeCompare(b.edition.startDate));
 }
 
+export async function listJuryFeedback() {
+  const db = await getDb();
+  return db.juryFeedback
+    .slice()
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map((row) => {
+      const artist = db.artists.find((a) => a.id === row.artistId)!;
+      const edition = db.editions.find((e) => e.id === row.editionId)!;
+      const show = db.shows.find((s) => s.id === edition.showId)!;
+      return { row, artist, edition, show };
+    });
+}
+
+export async function createJuryFeedback(input: {
+  artistId: string;
+  editionId: string;
+  outcome: "accepted" | "waitlisted" | "declined";
+  notes?: string;
+  imageUrls?: string[];
+}) {
+  return mutateDb((db) => {
+    const row = {
+      id: nanoid(10),
+      artistId: input.artistId,
+      editionId: input.editionId,
+      imageUrls: input.imageUrls ?? [],
+      outcome: input.outcome,
+      notes: input.notes,
+      createdAt: new Date().toISOString(),
+    };
+    db.juryFeedback.push(row);
+    return row;
+  });
+}
+
+export async function listBoothSit() {
+  const db = await getDb();
+  const resolve = (editionId: string, artistId: string) => {
+    const edition = db.editions.find((e) => e.id === editionId)!;
+    const show = db.shows.find((s) => s.id === edition.showId)!;
+    const artist = db.artists.find((a) => a.id === artistId)!;
+    return { edition, show, artist };
+  };
+  return {
+    offers: db.boothOffers.map((o) => ({ offer: o, ...resolve(o.editionId, o.artistId) })),
+    requests: db.boothRequests.map((r) => ({ request: r, ...resolve(r.editionId, r.artistId) })),
+  };
+}
+
+export async function createBoothOffer(input: {
+  artistId: string;
+  editionId: string;
+  availableWindows: string;
+  notes?: string;
+}) {
+  return mutateDb((db) => {
+    const row = { id: nanoid(10), ...input };
+    db.boothOffers.push(row);
+    return row;
+  });
+}
+
+export async function createBoothRequest(input: {
+  artistId: string;
+  editionId: string;
+  neededWindow: string;
+}) {
+  return mutateDb((db) => {
+    const row = {
+      id: nanoid(10),
+      ...input,
+      status: "open" as const,
+    };
+    db.boothRequests.push(row);
+    return row;
+  });
+}
+
+export async function listAlerts() {
+  const db = await getDb();
+  return db.alerts
+    .slice()
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map((alert) => {
+      const edition = db.editions.find((e) => e.id === alert.editionId)!;
+      const show = db.shows.find((s) => s.id === edition.showId)!;
+      return { alert, edition, show };
+    });
+}
+
 export async function stats() {
   const db = await getDb();
   return {

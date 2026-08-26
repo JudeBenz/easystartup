@@ -6,6 +6,9 @@ import { SESSION_COOKIE } from "@/lib/session-cookie";
 import {
   addComment,
   createAnnouncement,
+  createBoothOffer,
+  createBoothRequest,
+  createJuryFeedback,
   createRoiReport,
   openWaitlistBooth,
   resetDb,
@@ -95,4 +98,33 @@ export async function openWaitlistAction(formData: FormData) {
     String(formData.get("boothLabel") || "") || undefined,
   );
   revalidatePath("/director");
+}
+
+export async function createJuryFeedbackAction(formData: FormData) {
+  await createJuryFeedback({
+    artistId: String(formData.get("artistId")),
+    editionId: String(formData.get("editionId")),
+    outcome: String(formData.get("outcome")) as "accepted" | "waitlisted" | "declined",
+    notes: String(formData.get("notes") || "") || undefined,
+  });
+  revalidatePath("/jury");
+}
+
+export async function createBoothOfferAction(formData: FormData) {
+  await createBoothOffer({
+    artistId: String(formData.get("artistId")),
+    editionId: String(formData.get("editionId")),
+    availableWindows: String(formData.get("availableWindows")),
+    notes: String(formData.get("notes") || "") || undefined,
+  });
+  revalidatePath("/booth-sit");
+}
+
+export async function createBoothRequestAction(formData: FormData) {
+  await createBoothRequest({
+    artistId: String(formData.get("artistId")),
+    editionId: String(formData.get("editionId")),
+    neededWindow: String(formData.get("neededWindow")),
+  });
+  revalidatePath("/booth-sit");
 }
