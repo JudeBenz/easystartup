@@ -28,7 +28,7 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Aruba Solo Cup GP",
   description:
-    "Family RC Grand Prix in Aruba. $500 winner-take-all. GTA-style driver dossiers. Race Control on one phone.",
+    "Family RC Grand Prix in Aruba. MJX Hyper GO 14303 Citroën C3 rally cars. $500 winner-take-all.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

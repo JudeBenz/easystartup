@@ -1,4 +1,6 @@
 import { PageHeader } from "@/components/gp/page-header";
+import { OfficialCar } from "@/components/gp/official-car";
+import { OFFICIAL_CAR } from "@/lib/gp/car";
 
 export default function RulesPage() {
   return (
@@ -9,7 +11,22 @@ export default function RulesPage() {
         description="How the $500 works, how points stack, and how Race Control runs the weekend."
       />
 
+      <div className="mb-6 sm:mb-8">
+        <OfficialCar />
+      </div>
+
       <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
+        <section className="gp-panel p-4 sm:p-5 lg:col-span-2">
+          <h2 className="gp-display text-xl text-white sm:text-2xl">
+            The car
+          </h2>
+          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/75 sm:text-base">
+            {OFFICIAL_CAR.notes.map((note) => (
+              <li key={note}>• {note}</li>
+            ))}
+          </ul>
+        </section>
+
         <section className="gp-panel p-4 sm:p-5">
           <h2 className="gp-display text-xl text-aruba-sand sm:text-2xl">
             The $500

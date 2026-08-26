@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 
 const PRIMARY = [
   { href: "/", label: "HQ" },
+  { href: "/cars", label: "The Car" },
   { href: "/drivers", label: "Drivers" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/circuits", label: "Circuits" },

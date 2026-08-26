@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Driver } from "@/lib/gp/drivers";
+import { OFFICIAL_CAR } from "@/lib/gp/car";
 import { StatBars } from "./stat-bars";
 
 export function StandardProfile({ driver }: { driver: Driver }) {
@@ -140,6 +141,9 @@ export function StandardProfile({ driver }: { driver: Driver }) {
           )}
 
           <div className="flex flex-wrap gap-2 text-[11px] sm:text-xs">
+            <span className="rounded-md border border-aruba-teal/30 bg-aruba-teal/10 px-2 py-1 text-aruba-teal">
+              {OFFICIAL_CAR.shortName} · {OFFICIAL_CAR.body}
+            </span>
             {driver.sponsors.map((s) => (
               <span
                 key={s}

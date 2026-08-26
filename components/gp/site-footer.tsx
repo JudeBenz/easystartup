@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OFFICIAL_CAR } from "@/lib/gp/car";
 
 export function SiteFooter() {
   return (
@@ -9,11 +10,14 @@ export function SiteFooter() {
             Aruba Solo Cup GP
           </div>
           <p className="mt-1 max-w-md text-sm text-white/55">
-            Family RC racing. Red cups. One phone for Race Control. $500 winner
-            takes all.
+            {OFFICIAL_CAR.name} Citroën C3 rally cars. Red cups. One phone for
+            Race Control. $500 winner takes all.
           </p>
         </div>
         <div className="hidden flex-wrap gap-4 text-sm text-aruba-teal sm:flex">
+          <Link href="/cars" className="hover:underline">
+            The Car
+          </Link>
           <Link href="/drivers" className="hover:underline">
             Drivers
           </Link>

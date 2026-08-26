@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Driver } from "@/lib/gp/drivers";
+import { OFFICIAL_CAR } from "@/lib/gp/car";
 import { StatBars } from "./stat-bars";
 
 export function LegendaryProfile({ driver }: { driver: Driver }) {
@@ -134,6 +135,9 @@ export function LegendaryProfile({ driver }: { driver: Driver }) {
             </div>
 
             <div className="flex flex-wrap gap-2 text-[11px] text-aruba-gold/80 sm:text-xs">
+              <span className="rounded-md border border-aruba-gold/40 bg-aruba-gold/15 px-2 py-1 text-aruba-gold">
+                {OFFICIAL_CAR.shortName} · blessed chassis
+              </span>
               {driver.sponsors.map((s) => (
                 <span
                   key={s}

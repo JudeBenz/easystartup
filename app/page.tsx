@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { OfficialCar } from "@/components/gp/official-car";
 import { CIRCUITS } from "@/lib/gp/circuits";
+import { OFFICIAL_CAR } from "@/lib/gp/car";
 import { computeStandings } from "@/lib/gp/results";
 import { getDriver } from "@/lib/gp/drivers";
 
@@ -33,12 +35,17 @@ export default function HomePage() {
               <span className="block text-aruba-teal">Solo Cup GP</span>
             </h1>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-white/75 sm:mt-4 sm:text-base md:text-lg">
-              Family RC racing on red cups and coral sand. Twelve drivers. Six
-              circuits. One phone for Race Control. Grammy is inevitable.
+              Family RC racing on red cups and coral sand — every driver in the
+              same {OFFICIAL_CAR.shortName} Citroën C3 rally car. Twelve
+              drivers. Six circuits. One phone for Race Control. Grammy is
+              inevitable.
             </p>
             <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-3">
               <Link href="/drivers" className="gp-btn-primary w-full sm:w-auto">
                 Meet the grid
+              </Link>
+              <Link href="/cars" className="gp-btn-secondary w-full sm:w-auto">
+                The machine
               </Link>
               <Link
                 href="/leaderboard"
@@ -89,6 +96,21 @@ export default function HomePage() {
             Tap finish order after each heat. Leaderboard updates. Done.
           </p>
         </div>
+      </section>
+
+      <section className="container pb-8 sm:pb-12">
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <h2 className="gp-display text-xl text-white sm:text-2xl">
+            Official chassis
+          </h2>
+          <Link
+            href="/cars"
+            className="text-xs font-semibold text-aruba-teal hover:underline sm:text-sm"
+          >
+            Full dossier →
+          </Link>
+        </div>
+        <OfficialCar />
       </section>
 
       <section className="container pb-8 sm:pb-16">
