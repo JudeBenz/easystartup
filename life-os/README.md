@@ -19,7 +19,7 @@ pnpm dev          # http://localhost:3000
 | **Maze Bank** | Maze Bank website | Accounts, transactions, monthly budget |
 | **Life Calendar** | — | Month view, events, recurring markers |
 | **Dynasty Projects** | Dynasty 8 | Projects, tasks, progress, status |
-| **LifeInvader** | LifeInvader | Stub — shows extensibility pattern |
+| **LifeInvader** | LifeInvader | AI chat — control everything by voice/text |
 | **System** | — | Export/import backup, install instructions |
 
 ## Desktop vs Mobile
@@ -35,6 +35,25 @@ pnpm dev          # http://localhost:3000
 3. Add a Zustand slice in `src/lib/store/` if it needs persisted data
 
 See `DESIGN.md` for the full architecture, sync plan, and roadmap.
+
+## LifeInvader AI — talk to control everything
+
+Open **LifeInvader** (or click the 🤖 floating button) and say things like:
+
+- "Add dentist to calendar Thursday at 2pm"
+- "Log $50 for groceries"
+- "Add task: file taxes"
+- "What's my balance?"
+
+**Providers** (see `AI-SETUP.md`):
+
+| Provider | Setup |
+|----------|-------|
+| **Grok** | `XAI_API_KEY` in `.env.local` |
+| **Ollama** | `ollama pull qwen3` — runs locally, private |
+| **Offline** | Works now with rule-based parsing |
+
+No custom model training needed — function calling handles the logic.
 
 ## Sync (Phase 2)
 

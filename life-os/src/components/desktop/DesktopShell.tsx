@@ -5,6 +5,7 @@ import { getModule } from "@/lib/modules/registry";
 import { useLifeStore } from "@/lib/store";
 import { DesktopIconGrid, DesktopArea, Taskbar } from "./Taskbar";
 import { WindowFrame } from "./WindowFrame";
+import { FloatingAssistant } from "./FloatingAssistant";
 import { MobileLauncher } from "./MobileLauncher";
 
 export function DesktopShell() {
@@ -90,6 +91,7 @@ export function DesktopShell() {
       </DesktopArea>
 
       <Taskbar />
+      <FloatingAssistant />
     </div>
   );
 }

@@ -81,9 +81,10 @@ Adding a new tracker = create component + one registry entry. No shell changes n
 - Kanban-style columns or list view
 - Progress percentage per project
 
-### 4. LifeInvader — Notes & Habits *(stub)*
-- Placeholder module showing the extensibility pattern
-- Future: daily habits streak, quick notes
+### 4. LifeInvader — AI Assistant ✅
+- Natural language control of calendar, budget, projects
+- Providers: Grok (xAI), Ollama (local Qwen3), offline rule-based fallback
+- Tool-calling agent loop — see `AI-SETUP.md`
 
 ### 5. Settings / Sync
 - Export / import JSON backup
@@ -179,7 +180,8 @@ All entities carry `updatedAt` for future sync conflict resolution.
 - [x] Local persistence
 - [ ] Supabase sync
 - [ ] Capacitor build + store deploy
-- [ ] LifeInvader (habits)
+- [x] LifeInvader AI chat (Grok / Ollama / offline)
+- [ ] Voice input (Web Speech API)
 - [ ] Fitness tracker module
 - [ ] Meal planner module
 - [ ] Custom user modules (JSON config)

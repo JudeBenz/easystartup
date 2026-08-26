@@ -59,12 +59,12 @@ export const MODULES: LifeModule[] = [
   {
     id: "lifeinvader",
     name: "LifeInvader",
-    subtitle: "Notes & Habits",
+    subtitle: "AI Assistant",
     shortName: "Social",
     color: "#c0392b",
     iconBg: "bg-red-700",
     glyph: "📱",
-    defaultSize: { w: 480, h: 400 },
+    defaultSize: { w: 520, h: 580 },
     component: LifeInvaderApp,
   },
   {

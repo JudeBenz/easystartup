@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type { WindowState } from "@/types/domain";
 import { createBudgetSlice, type BudgetSlice } from "./budget";
 import { createCalendarSlice, type CalendarSlice } from "./calendar";
+import { createChatSlice, type ChatSlice } from "./chat";
 import { createProjectsSlice, type ProjectsSlice } from "./projects";
 
 interface ShellSlice {
@@ -22,13 +23,13 @@ interface ShellSlice {
   importData: (json: string) => void;
 }
 
-export type LifeStore = BudgetSlice & CalendarSlice & ProjectsSlice & ShellSlice;
+export type LifeStore = BudgetSlice & CalendarSlice & ProjectsSlice & ChatSlice & ShellSlice;
 
 const DEFAULT_SIZES: Record<string, { w: number; h: number }> = {
   "maze-bank": { w: 720, h: 520 },
   calendar: { w: 680, h: 540 },
   "dynasty-projects": { w: 760, h: 560 },
-  lifeinvader: { w: 480, h: 400 },
+  lifeinvader: { w: 520, h: 580 },
   settings: { w: 420, h: 380 },
 };
 
@@ -38,6 +39,7 @@ export const useLifeStore = create<LifeStore>()(
       ...createBudgetSlice(set as never),
       ...createCalendarSlice(set as never),
       ...createProjectsSlice(set as never),
+      ...createChatSlice(set as never),
 
       windows: [],
       activeModuleId: null,
@@ -177,6 +179,8 @@ export const useLifeStore = create<LifeStore>()(
         events: state.events,
         projects: state.projects,
         tasks: state.tasks,
+        chatMessages: state.chatMessages,
+        aiProvider: state.aiProvider,
       }),
     },
   ),
