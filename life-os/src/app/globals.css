@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+:root {
+  --gta-desktop: #0c1a3a;
+  --gta-taskbar: #2e8b57;
+  --gta-titlebar: #0a246a;
+}
+
+@theme inline {
+  --font-sans: Tahoma, "Segoe UI", Arial, sans-serif;
+  --font-mono: "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* Allow text selection inside app windows */
+[class*="overflow"] input,
+[class*="overflow"] textarea,
+[class*="overflow"] table,
+[class*="overflow"] label span {
+  user-select: text;
+}
+
+/* Scrollbars — XP style */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-left: 1px solid #ccc;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, #ece9d8, #d4d0c8);
+  border: 1px solid #888;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c0c0c0;
+}
+
+/* PWA safe areas */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
