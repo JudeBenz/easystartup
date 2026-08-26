@@ -11,7 +11,7 @@ const LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/circuits", label: "Circuits" },
   { href: "/rules", label: "Rules" },
-  { href: "/race-control", label: "Race Control" },
+  { href: "/race-control", label: "Control" },
 ];
 
 export function SiteNav() {
