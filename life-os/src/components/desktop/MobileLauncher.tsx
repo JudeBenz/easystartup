@@ -192,7 +192,7 @@ export function MobileLauncher() {
                 type="button"
                 onClick={() => openApp(mod.id)}
                 className="phone-icon-btn flex flex-col items-center gap-1.5 active:scale-90"
-                style={{ animationDelay: `${i * 40}md` }}
+                style={{ animationDelay: `${i * 40}ms` }}
               >
                 <div
                   className="relative flex h-[4.25rem] w-[4.25rem] items-center justify-center overflow-hidden rounded-[1.15rem] text-[1.75rem] transition-transform"
