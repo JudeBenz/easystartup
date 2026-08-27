@@ -71,10 +71,9 @@ export function RaceGame() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [playerId, setPlayerId] = useState("ben");
   const [circuitId, setCircuitId] = useState("slalom");
-  const [aiIds, setAiIds] = useState<string[]>(() =>
-    pickDefaultAi("ben", 3),
-  );
+  const [aiIds, setAiIds] = useState<string[]>(["grammy", "hap", "maddie"]);
   const [snapshot, setSnapshot] = useState<RaceSnapshot | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<RaceEngine | null>(null);
@@ -93,24 +92,33 @@ export function RaceGame() {
   }
 
   function startRace() {
-    const track = buildTrack(circuitId);
-    const player = createEntrantFromDriver(playerDriver, "player");
-    const ais = aiIds
-      .map((id) => DRIVERS.find((d) => d.id === id))
-      .filter((d): d is Driver => !!d && d.id !== playerId)
-      .map((d) => createEntrantFromDriver(d, "ai"));
+    try {
+      setError(null);
+      const driver =
+        DRIVERS.find((d) => d.id === playerId) ?? DRIVERS[0];
+      const track = buildTrack(circuitId);
+      const player = createEntrantFromDriver(driver, "player");
+      const ais = aiIds
+        .map((id) => DRIVERS.find((d) => d.id === id))
+        .filter((d): d is Driver => !!d && d.id !== driver.id)
+        .slice(0, 4)
+        .map((d) => createEntrantFromDriver(d, "ai"));
 
-    if (ais.length === 0) {
-      // fallback one AI
-      const fallback = DRIVERS.find((d) => d.id !== playerId) ?? DRIVERS[0];
-      ais.push(createEntrantFromDriver(fallback, "ai"));
+      if (ais.length === 0) {
+        const fallback =
+          DRIVERS.find((d) => d.id !== driver.id) ?? DRIVERS[0];
+        ais.push(createEntrantFromDriver(fallback, "ai"));
+      }
+
+      const field = createField(player, ais);
+      engineRef.current = new RaceEngine(track, field);
+      controlsRef.current = { ...DEFAULT_CONTROLS };
+      setSnapshot(engineRef.current.getSnapshot());
+      setPhase("racing");
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : "Failed to start race");
     }
-
-    const field = createField(player, ais);
-    engineRef.current = new RaceEngine(track, field);
-    controlsRef.current = { ...DEFAULT_CONTROLS };
-    setSnapshot(engineRef.current.getSnapshot());
-    setPhase("racing");
   }
 
   const draw = useCallback((snap: RaceSnapshot) => {
@@ -474,17 +482,25 @@ export function RaceGame() {
           </div>
         </section>
 
-        <button
-          type="button"
-          onClick={startRace}
-          className="gp-btn-primary w-full text-base"
-        >
-          Start race · 4 buttons
-        </button>
+        {error && (
+          <p className="rounded-md border border-aruba-cup/40 bg-aruba-cup/10 px-3 py-2 text-sm text-aruba-cup">
+            {error}
+          </p>
+        )}
 
-        <p className="text-center text-xs text-white/45">
-          Controls: Left · Gas · Brake · Right (also WASD / arrows)
-        </p>
+        <div className="relative z-30 pb-4">
+          <button
+            type="button"
+            id="start-race-btn"
+            onClick={() => startRace()}
+            className="gp-btn-primary w-full text-base"
+          >
+            Start race · 4 buttons
+          </button>
+          <p className="mt-2 text-center text-xs text-white/45">
+            Controls: Left · Gas · Brake · Right (also WASD / arrows)
+          </p>
+        </div>
       </div>
     );
   }
@@ -524,7 +540,13 @@ export function RaceGame() {
 
       {/* 4-button controls */}
       {phase === "racing" && (
-        <div className="grid grid-cols-4 gap-2">
+        <div
+          className="sticky z-20 grid grid-cols-4 gap-2 bg-aruba-deep/90 p-2 backdrop-blur-md lg:static lg:bg-transparent lg:p-0 lg:backdrop-blur-none"
+          style={{
+            bottom:
+              "calc(var(--gp-tab-height) + env(safe-area-inset-bottom, 0px))",
+          }}
+        >
           {(
             [
               { key: "left", label: "◀ Left", color: "bg-white/10" },
@@ -540,7 +562,11 @@ export function RaceGame() {
               style={{ WebkitUserSelect: "none", touchAction: "none" }}
               onPointerDown={(e) => {
                 e.preventDefault();
-                (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+                try {
+                  (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                } catch {
+                  /* ignore synthetic events */
+                }
                 setControl(btn.key, true);
               }}
               onPointerUp={() => setControl(btn.key, false)}
