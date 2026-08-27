@@ -83,14 +83,7 @@ export function QuickAssistSheet({
       const provider =
         aiProvider === "auto" ? undefined : (aiProvider as AIProvider);
       const result = await runLifeAgent(trimmed, messages, provider);
-
-      let reply = result.assistantMessage;
-      if (result.toolResults.length > 0) {
-        const badges = result.toolResults
-          .map((t) => (t.success ? `✓ ${t.message}` : `✗ ${t.message}`))
-          .join("\n");
-        reply = badges + (reply ? `\n\n${reply}` : "");
-      }
+      const reply = result.assistantMessage;
 
       addChatMessage(createChatMessage("assistant", reply));
       setLastReply(reply);
@@ -141,9 +134,9 @@ export function QuickAssistSheet({
       <div className="phone-sheet flex max-h-[88dvh] w-full flex-col rounded-t-3xl bg-[#121820] pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between px-4 pt-4">
           <div>
-            <p className="text-sm font-bold text-white">LifeInvader</p>
+            <p className="text-sm font-bold text-white">Command</p>
             <p className="text-[11px] text-white/45">
-              Talk or type — control the whole phone
+              Dictate or type — results show as text
             </p>
           </div>
           <button
@@ -208,10 +201,10 @@ export function QuickAssistSheet({
               </button>
               <p className="text-center text-xs text-white/50">
                 {!voiceSupported
-                  ? "Voice needs Safari/Chrome — you can still type below"
+                  ? "Mic needs Safari/Chrome — type a command below"
                   : listening
                     ? "Listening… tap to stop"
-                    : "Tap the mic and speak a command"}
+                    : "Tap mic to dictate, or type below"}
               </p>
 
               {lastReply ? (

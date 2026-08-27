@@ -50,16 +50,7 @@ export function LifeInvaderApp() {
       const provider =
         aiProvider === "auto" ? undefined : (aiProvider as AIProvider);
       const result = await runLifeAgent(trimmed, messages, provider);
-
-      let reply = result.assistantMessage;
-      if (result.toolResults.length > 0) {
-        const badges = result.toolResults
-          .map((t) => (t.success ? `✓ ${t.message}` : `✗ ${t.message}`))
-          .join("\n");
-        reply = badges + (reply ? `\n\n${reply}` : "");
-      }
-
-      addChatMessage(createChatMessage("assistant", reply));
+      addChatMessage(createChatMessage("assistant", result.assistantMessage));
       setActiveProvider(result.provider);
     } catch (err) {
       addChatMessage(
@@ -103,8 +94,8 @@ export function LifeInvaderApp() {
       <header className="border-b border-red-800/20 bg-gradient-to-r from-red-700 to-red-600 px-4 py-2 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold">LifeInvader AI</h2>
-            <p className="text-xs text-red-200">Talk to control your life</p>
+            <h2 className="text-base font-bold">LifeInvader</h2>
+            <p className="text-xs text-red-200">Dictate or type — text results only</p>
           </div>
           <div className="flex items-center gap-2">
             <select
@@ -130,8 +121,8 @@ export function LifeInvaderApp() {
           </div>
         </div>
         <p className="mt-1 text-[10px] text-red-200/80">
-          Provider: {activeProvider} · ~$0/mo on Gemini free tier · Mic is free
-          (browser)
+          Provider: {activeProvider} · replies are text confirmations (no voice
+          out)
         </p>
       </header>
 
@@ -140,10 +131,11 @@ export function LifeInvaderApp() {
           <div className="rounded-lg border border-dashed border-red-200 bg-white/80 p-4 text-center">
             <p className="text-3xl">🤖</p>
             <p className="mt-2 text-xs font-medium text-gray-700">
-              Your voice-controlled life assistant
+              Command bar for your life apps
             </p>
             <p className="mt-1 text-[11px] text-gray-500">
-              Ask me to add events, log spending, or create tasks.
+              Dictate or type — it runs the action and shows a short text
+              confirmation.
             </p>
             <div className="mt-3 flex flex-wrap justify-center gap-1.5">
               {[
@@ -204,7 +196,7 @@ export function LifeInvaderApp() {
               type="button"
               onClick={toggleVoice}
               disabled={loading}
-              title={listening ? "Stop listening" : "Speak a command"}
+              title={listening ? "Stop listening" : "Dictate a command"}
               className={`rounded px-3 py-2 text-sm ${
                 listening
                   ? "bg-red-600 text-white animate-pulse"
@@ -220,7 +212,7 @@ export function LifeInvaderApp() {
             placeholder={
               listening
                 ? "Listening…"
-                : "Tell LifeInvader what to track…"
+                : "Type a command…"
             }
             disabled={loading || listening}
             className="flex-1 rounded border border-gray-300 px-3 py-2 text-xs focus:border-red-400 focus:outline-none"

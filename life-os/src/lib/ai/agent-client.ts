@@ -105,8 +105,16 @@ export async function runLifeAgent(
     finalContent = toolResults.map((t) => t.message).join(". ") + ".";
   }
 
+  // Prefer concise action text over chatty model narration when tools ran
+  const displayMessage =
+    toolResults.length > 0
+      ? toolResults
+          .map((t) => (t.success ? t.message : `Failed: ${t.message}`))
+          .join("\n")
+      : finalContent || "Done.";
+
   return {
-    assistantMessage: finalContent || "Done.",
+    assistantMessage: displayMessage,
     toolResults,
     provider: providerUsed,
   };
