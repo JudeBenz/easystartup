@@ -1,4 +1,4 @@
-export type AIProvider = "grok" | "ollama" | "mock";
+export type AIProvider = "gemini" | "grok" | "ollama" | "mock";
 
 export interface ChatMessage {
   id: string;

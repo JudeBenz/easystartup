@@ -47,13 +47,15 @@ Open **LifeInvader** (or click the 🤖 floating button) and say things like:
 
 **Providers** (see `AI-SETUP.md`):
 
-| Provider | Setup |
-|----------|-------|
-| **Grok** | `XAI_API_KEY` in `.env.local` |
-| **Ollama** | `ollama pull qwen3` — runs locally, private |
-| **Offline** | Works now with rule-based parsing |
+| Provider | Cost | Role |
+|----------|------|------|
+| **Gemini Flash** (default) | **~$0/mo free tier** | Best option under $10 — works phone + PC |
+| **Ollama** | $0 | Local privacy option |
+| **Offline rules** | $0 | Works with no API key |
 
-No custom model training needed — function calling handles the logic.
+Get a free key: https://aistudio.google.com/apikey → put in `.env.local` as `GEMINI_API_KEY`.
+
+Voice: tap 🎤 in LifeInvader (browser speech — free).
 
 ## Sync (Phase 2)
 

@@ -82,8 +82,9 @@ Adding a new tracker = create component + one registry entry. No shell changes n
 - Progress percentage per project
 
 ### 4. LifeInvader — AI Assistant ✅
-- Natural language control of calendar, budget, projects
-- Providers: Grok (xAI), Ollama (local Qwen3), offline rule-based fallback
+- Natural language + voice mic control of calendar, budget, projects
+- **Default provider: Gemini Flash (free tier, ~$0/mo)** — under $10 budget
+- Fallbacks: Ollama (local $0), offline rules, optional Grok
 - Tool-calling agent loop — see `AI-SETUP.md`
 
 ### 5. Settings / Sync

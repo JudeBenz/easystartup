@@ -29,12 +29,15 @@ export async function GET() {
   const provider = resolveProvider();
   return NextResponse.json({
     provider,
+    geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
     grokConfigured: Boolean(process.env.XAI_API_KEY),
     ollamaUrl: process.env.OLLAMA_BASE_URL ?? "http://127.0.0.1:11434",
     ollamaModel: process.env.OLLAMA_MODEL ?? "qwen3",
+    recommended: "gemini",
+    monthlyCost: "~$0 on Gemini Flash free tier (well under $10)",
     hint:
       provider === "mock"
-        ? "Using rule-based mock. Set XAI_API_KEY for Grok or run Ollama for full NLU."
+        ? "Set GEMINI_API_KEY (free at aistudio.google.com) for full NLU. Offline rules work until then."
         : `Active provider: ${provider}`,
   });
 }

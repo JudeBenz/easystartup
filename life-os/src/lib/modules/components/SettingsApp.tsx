@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLifeStore } from "@/lib/store";
 
 export function SettingsApp() {
@@ -8,6 +8,24 @@ export function SettingsApp() {
   const importData = useLifeStore((s) => s.importData);
   const fileRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [aiStatus, setAiStatus] = useState<{
+    provider: string;
+    geminiConfigured: boolean;
+    hint: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/chat")
+      .then((r) => r.json())
+      .then((d) =>
+        setAiStatus({
+          provider: d.provider,
+          geminiConfigured: d.geminiConfigured,
+          hint: d.hint,
+        }),
+      )
+      .catch(() => null);
+  }, []);
 
   function handleExport() {
     const json = exportData();
@@ -41,6 +59,38 @@ export function SettingsApp() {
       </header>
 
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <section className="rounded border border-gray-300 bg-white p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            AI Assistant
+          </h3>
+          <div className="mt-2 flex items-center gap-2">
+            <span
+              className={`inline-block h-2.5 w-2.5 rounded-full ${
+                aiStatus?.geminiConfigured ? "bg-emerald-500" : "bg-yellow-400"
+              }`}
+            />
+            <span className="text-xs">
+              {aiStatus ? `Provider: ${aiStatus.provider}` : "Checking…"}
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-gray-500">
+            Default is Gemini Flash (~$0/mo free tier). Add{" "}
+            <code className="rounded bg-gray-100 px-1">GEMINI_API_KEY</code> from{" "}
+            <a
+              href="https://aistudio.google.com/apikey"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sky-700 underline"
+            >
+              Google AI Studio
+            </a>
+            . Voice mic in LifeInvader is free via the browser.
+          </p>
+          {aiStatus?.hint && (
+            <p className="mt-1 text-[10px] text-gray-400">{aiStatus.hint}</p>
+          )}
+        </section>
+
         <section className="rounded border border-gray-300 bg-white p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
             Sync Status
@@ -97,15 +147,9 @@ export function SettingsApp() {
             <li>Tap Share → &quot;Add to Home Screen&quot;</li>
             <li>Launch Life OS like a native app</li>
           </ol>
-          <p className="mt-2 text-xs text-gray-400">
-            For App Store / Play Store builds, wrap with Capacitor (config
-            included in repo).
-          </p>
         </section>
 
-        {status && (
-          <p className="text-xs text-emerald-600">{status}</p>
-        )}
+        {status && <p className="text-xs text-emerald-600">{status}</p>}
       </div>
     </div>
   );
