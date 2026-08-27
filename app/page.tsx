@@ -44,6 +44,9 @@ export default function HomePage() {
               <Link href="/drivers" className="gp-btn-primary w-full sm:w-auto">
                 Meet the grid
               </Link>
+              <Link href="/race" className="gp-btn-primary w-full sm:w-auto">
+                Play race
+              </Link>
               <Link href="/cars" className="gp-btn-secondary w-full sm:w-auto">
                 The machine
               </Link>

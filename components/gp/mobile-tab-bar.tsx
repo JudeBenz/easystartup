@@ -4,14 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Flag,
+  Gamepad2,
   LayoutGrid,
-  Radio,
   Trophy,
   Waves,
 } from "lucide-react";
 
 const TABS = [
   { href: "/", label: "HQ", icon: Waves, match: (p: string) => p === "/" },
+  {
+    href: "/race",
+    label: "Race",
+    icon: Gamepad2,
+    match: (p: string) => p.startsWith("/race"),
+  },
   {
     href: "/drivers",
     label: "Grid",
@@ -29,12 +35,6 @@ const TABS = [
     label: "Tracks",
     icon: Flag,
     match: (p: string) => p.startsWith("/circuits"),
-  },
-  {
-    href: "/race-control",
-    label: "Control",
-    icon: Radio,
-    match: (p: string) => p.startsWith("/race-control"),
   },
 ] as const;
 

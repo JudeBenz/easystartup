@@ -7,9 +7,10 @@ import { Menu, X } from "lucide-react";
 
 const PRIMARY = [
   { href: "/", label: "HQ" },
+  { href: "/race", label: "Race" },
   { href: "/cars", label: "The Car" },
   { href: "/drivers", label: "Drivers" },
-  { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/leaderboard", label: "Board" },
   { href: "/circuits", label: "Circuits" },
   { href: "/race-control", label: "Control" },
 ];
