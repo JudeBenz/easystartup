@@ -178,7 +178,7 @@ export const useLifeStore = create<LifeStore>()(
       },
     }),
     {
-      name: "life-os-storage",
+      name: "life-os-storage-v3",
       partialize: (state) => ({
         accounts: state.accounts,
         transactions: state.transactions,

@@ -5,14 +5,6 @@ import { createChatMessage, runLifeAgent } from "@/lib/ai/agent-client";
 import { useLifeStore } from "@/lib/store";
 import type { AIProvider } from "@/types/ai";
 
-const EXAMPLE_PROMPTS = [
-  "Add gym to calendar tomorrow at 6pm",
-  "Log $45 for groceries",
-  "Add task: finish taxes",
-  "What's my balance?",
-  "Mark design desktop shell as done",
-];
-
 type SpeechRecognitionLike = {
   continuous: boolean;
   interimResults: boolean;
@@ -169,26 +161,14 @@ export function LifeInvaderApp() {
               Your voice-controlled life assistant
             </p>
             <p className="mt-1 text-[11px] text-gray-500">
-              Powered by Gemini Flash (free). Tap the mic or type a command.
+              Ask me to add events, log spending, or create tasks.
             </p>
-            {setupHint.includes("GEMINI") && (
-              <p className="mt-2 rounded bg-amber-50 px-2 py-1.5 text-[10px] text-amber-800">
-                Add a free{" "}
-                <a
-                  className="underline"
-                  href="https://aistudio.google.com/apikey"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Gemini API key
-                </a>{" "}
-                to <code className="font-mono">.env.local</code> as{" "}
-                <code className="font-mono">GEMINI_API_KEY</code>. Offline mode
-                works until then.
-              </p>
-            )}
             <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-              {EXAMPLE_PROMPTS.map((p) => (
+              {[
+                "Log $20 for coffee",
+                "Add gym tomorrow at 6pm",
+                "Create project: Home reno",
+              ].map((p) => (
                 <button
                   key={p}
                   type="button"
