@@ -296,6 +296,16 @@ a:hover {
   color: var(--warn);
 }
 
+/* Leaflet map */
+.ss-leaflet .leaflet-container {
+  font: inherit;
+  background: var(--paper);
+}
+.ss-map-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
 /* Comfortable reading measure */
 .ss-prose {
   max-width: 65ch;
