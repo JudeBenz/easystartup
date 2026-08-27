@@ -72,10 +72,13 @@ store submission (unless you change native plugins).
 
 ## Phone ↔ computer data sync
 
-| What updates live today | Status |
-|-------------------------|--------|
-| App UI / features after deploy | ✅ Yes (PWA / live Capacitor URL) |
-| Your calendar/budget data across devices | 📋 Phase 2 (Supabase) — for now use **System → Export/Import backup**, or the same browser account if you only use one device |
+| What updates live | Status |
+|-------------------|--------|
+| App UI / features after deploy | ✅ PWA / live Capacitor URL |
+| Calendar, budget, projects across devices | ✅ **Supabase realtime** — see `SYNC.md` |
+
+Sign in with the **same email** (magic link) on phone and computer in **System** settings.
+
 
 ---
 

@@ -17,11 +17,11 @@ Your life, organized like a Los Santos workstation: open **Maze Bank** to check 
 | **Desktop (browser)** | Next.js PWA | Full GTA desktop — icons, draggable windows, taskbar |
 | **Phone (browser)** | PWA "Add to Home Screen" | App launcher grid → full-screen modules; **live updates on deploy** |
 | **Phone (native)** | Capacitor wrapper | Same live URL via `CAPACITOR_SERVER_URL` — store shell, web updates |
-| **Sync** | Supabase (Phase 2) | Auth + Postgres + realtime; local-first until then |
+| **Sync** | Supabase (free tier) | Auth + Postgres + realtime — phone ↔ computer |
 
 **Phase 1 (this build):** Local-first with `localStorage` persistence, sync-ready data layer, PWA installable, Capacitor config stubbed.
 
-**Phase 2:** Supabase auth + cloud sync + conflict resolution.
+**Phase 2:** ✅ Supabase auth + cloud sync + realtime (see `SYNC.md`).
 
 **Phase 3:** New module marketplace / user-defined trackers.
 

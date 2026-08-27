@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { RegisterSW } from "@/components/pwa/RegisterSW";
+import { SyncProvider } from "@/lib/sync/SyncProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -35,9 +36,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full">
       <body className="h-full overflow-hidden">
-        {children}
-        <RegisterSW />
-        <InstallPrompt />
+        <SyncProvider>
+          {children}
+          <RegisterSW />
+          <InstallPrompt />
+        </SyncProvider>
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import { createBudgetSlice, type BudgetSlice } from "./budget";
 import { createCalendarSlice, type CalendarSlice } from "./calendar";
 import { createChatSlice, type ChatSlice } from "./chat";
 import { createProjectsSlice, type ProjectsSlice } from "./projects";
+import { createSyncSlice, type SyncSlice } from "@/lib/sync/sync-slice";
 
 interface ShellSlice {
   windows: WindowState[];
@@ -23,14 +24,19 @@ interface ShellSlice {
   importData: (json: string) => void;
 }
 
-export type LifeStore = BudgetSlice & CalendarSlice & ProjectsSlice & ChatSlice & ShellSlice;
+export type LifeStore = BudgetSlice &
+  CalendarSlice &
+  ProjectsSlice &
+  ChatSlice &
+  SyncSlice &
+  ShellSlice;
 
 const DEFAULT_SIZES: Record<string, { w: number; h: number }> = {
   "maze-bank": { w: 720, h: 520 },
   calendar: { w: 680, h: 540 },
   "dynasty-projects": { w: 760, h: 560 },
   lifeinvader: { w: 520, h: 580 },
-  settings: { w: 420, h: 380 },
+  settings: { w: 480, h: 560 },
 };
 
 export const useLifeStore = create<LifeStore>()(
@@ -40,6 +46,7 @@ export const useLifeStore = create<LifeStore>()(
       ...createCalendarSlice(set as never),
       ...createProjectsSlice(set as never),
       ...createChatSlice(set as never),
+      ...createSyncSlice(set as never),
 
       windows: [],
       activeModuleId: null,
@@ -181,6 +188,8 @@ export const useLifeStore = create<LifeStore>()(
         tasks: state.tasks,
         chatMessages: state.chatMessages,
         aiProvider: state.aiProvider,
+        lastSyncedAt: state.lastSyncedAt,
+        syncUserEmail: state.syncUserEmail,
       }),
     },
   ),

@@ -2,17 +2,31 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLifeStore } from "@/lib/store";
+import { isSupabaseConfigured } from "@/lib/sync/supabase-client";
+import { signInWithMagicLink, signOut } from "@/lib/sync/SyncProvider";
+import { pullAndMerge, pushAll } from "@/lib/sync/engine";
+import { getSupabase } from "@/lib/sync/supabase-client";
 
 export function SettingsApp() {
   const exportData = useLifeStore((s) => s.exportData);
   const importData = useLifeStore((s) => s.importData);
+  const syncStatus = useLifeStore((s) => s.syncStatus);
+  const syncError = useLifeStore((s) => s.syncError);
+  const lastSyncedAt = useLifeStore((s) => s.lastSyncedAt);
+  const syncUserEmail = useLifeStore((s) => s.syncUserEmail);
+
   const fileRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authMsg, setAuthMsg] = useState<string | null>(null);
   const [aiStatus, setAiStatus] = useState<{
     provider: string;
     geminiConfigured: boolean;
     hint: string;
   } | null>(null);
+
+  const configured = isSupabaseConfigured();
 
   useEffect(() => {
     fetch("/api/chat")
@@ -51,14 +65,156 @@ export function SettingsApp() {
     e.target.value = "";
   }
 
+  async function handleMagicLink(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setAuthBusy(true);
+    setAuthMsg(null);
+    try {
+      const msg = await signInWithMagicLink(email);
+      setAuthMsg(msg);
+    } catch (err) {
+      setAuthMsg(err instanceof Error ? err.message : "Sign-in failed");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function handleSignOut() {
+    setAuthBusy(true);
+    try {
+      await signOut();
+      setAuthMsg("Signed out. Data stays on this device.");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function handleForceSync() {
+    setAuthBusy(true);
+    setAuthMsg(null);
+    try {
+      const supabase = getSupabase();
+      const { data } = await supabase!.auth.getUser();
+      if (!data.user) throw new Error("Not signed in");
+      await pullAndMerge(data.user.id);
+      await pushAll(data.user.id);
+      setAuthMsg("Force sync complete.");
+    } catch (err) {
+      setAuthMsg(err instanceof Error ? err.message : "Sync failed");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  const statusColor =
+    syncStatus === "synced"
+      ? "bg-emerald-500"
+      : syncStatus === "connecting"
+        ? "bg-sky-400"
+        : syncStatus === "error"
+          ? "bg-red-500"
+          : "bg-yellow-400";
+
   return (
     <div className="flex h-full flex-col bg-[#f5f5f5] text-sm text-gray-900">
       <header className="border-b border-gray-400/30 bg-gradient-to-r from-slate-700 to-slate-600 px-4 py-3 text-white">
         <h2 className="text-base font-bold">System Settings</h2>
-        <p className="text-xs text-slate-300">Sync &amp; Backup</p>
+        <p className="text-xs text-slate-300">Sync · Backup · AI</p>
       </header>
 
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <section className="rounded border border-gray-300 bg-white p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            Cloud Sync (phone ↔ computer)
+          </h3>
+          <div className="mt-2 flex items-center gap-2">
+            <span className={`inline-block h-2.5 w-2.5 rounded-full ${statusColor}`} />
+            <span className="text-xs capitalize">{syncStatus}</span>
+            {lastSyncedAt && (
+              <span className="text-[10px] text-gray-400">
+                · {new Date(lastSyncedAt).toLocaleString()}
+              </span>
+            )}
+          </div>
+          {syncError && (
+            <p className="mt-1 text-[10px] text-red-600">{syncError}</p>
+          )}
+
+          {!configured ? (
+            <div className="mt-2 space-y-1 text-xs text-gray-500">
+              <p>
+                Add free Supabase keys to enable realtime sync (under $10/mo —
+                free tier is enough):
+              </p>
+              <code className="block rounded bg-gray-100 p-2 text-[10px]">
+                NEXT_PUBLIC_SUPABASE_URL=…
+                <br />
+                NEXT_PUBLIC_SUPABASE_ANON_KEY=…
+              </code>
+              <p>
+                Then run <code className="rounded bg-gray-100 px-1">supabase/schema.sql</code>{" "}
+                in the SQL editor. See <strong>SYNC.md</strong>.
+              </p>
+            </div>
+          ) : syncUserEmail ? (
+            <div className="mt-3 space-y-2">
+              <p className="text-xs text-gray-600">
+                Signed in as <strong>{syncUserEmail}</strong>
+              </p>
+              <p className="text-[11px] text-gray-500">
+                Changes on phone and computer sync live. Sign in with the same
+                email on every device.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={authBusy}
+                  onClick={handleForceSync}
+                  className="rounded bg-slate-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                >
+                  Sync now
+                </button>
+                <button
+                  type="button"
+                  disabled={authBusy}
+                  onClick={handleSignOut}
+                  className="rounded border border-gray-300 px-3 py-1.5 text-xs hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleMagicLink} className="mt-3 space-y-2">
+              <p className="text-[11px] text-gray-500">
+                Sign in with a magic link — same email on phone + computer =
+                shared data.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@email.com"
+                  className="flex-1 rounded border border-gray-300 px-2 py-1.5 text-xs"
+                />
+                <button
+                  type="submit"
+                  disabled={authBusy}
+                  className="rounded bg-emerald-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+                >
+                  Send link
+                </button>
+              </div>
+            </form>
+          )}
+          {authMsg && (
+            <p className="mt-2 text-[11px] text-emerald-700">{authMsg}</p>
+          )}
+        </section>
+
         <section className="rounded border border-gray-300 bg-white p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
             AI Assistant
@@ -74,34 +230,8 @@ export function SettingsApp() {
             </span>
           </div>
           <p className="mt-2 text-xs text-gray-500">
-            Default is Gemini Flash (~$0/mo free tier). Add{" "}
-            <code className="rounded bg-gray-100 px-1">GEMINI_API_KEY</code> from{" "}
-            <a
-              href="https://aistudio.google.com/apikey"
-              target="_blank"
-              rel="noreferrer"
-              className="text-sky-700 underline"
-            >
-              Google AI Studio
-            </a>
-            . Voice mic in LifeInvader is free via the browser.
-          </p>
-          {aiStatus?.hint && (
-            <p className="mt-1 text-[10px] text-gray-400">{aiStatus.hint}</p>
-          )}
-        </section>
-
-        <section className="rounded border border-gray-300 bg-white p-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Sync Status
-          </h3>
-          <div className="mt-2 flex items-center gap-2">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-yellow-400" />
-            <span className="text-xs">Offline — local storage only</span>
-          </div>
-          <p className="mt-2 text-xs text-gray-500">
-            Cloud sync via Supabase is planned for Phase 2. Your data is saved
-            locally in this browser and persists across sessions.
+            Default is Gemini Flash (~$0/mo). Set{" "}
+            <code className="rounded bg-gray-100 px-1">GEMINI_API_KEY</code>.
           </p>
         </section>
 
@@ -110,8 +240,7 @@ export function SettingsApp() {
             Backup &amp; Restore
           </h3>
           <p className="mt-1 text-xs text-gray-500">
-            Export your data as JSON to move between devices until cloud sync
-            ships.
+            Manual JSON backup (also useful before enabling sync).
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -143,21 +272,13 @@ export function SettingsApp() {
             Install on Phone
           </h3>
           <p className="mt-1 text-xs text-gray-500">
-            Deploy once, then Add to Home Screen. New features appear when you
-            reopen the app after we deploy — no App Store wait. Full guide:{" "}
-            <code className="rounded bg-gray-100 px-1">PHONE.md</code>
+            Deploy → Add to Home Screen. Sign in with the same email for sync.
+            Guide: <code className="rounded bg-gray-100 px-1">PHONE.md</code>
           </p>
           <ol className="mt-2 list-inside list-decimal space-y-1 text-xs text-gray-600">
-            <li>
-              Deploy to Vercel (<code className="rounded bg-gray-100 px-1">npx vercel --prod</code>)
-            </li>
-            <li>Open the URL on your phone</li>
-            <li>
-              <strong>iPhone:</strong> Safari → Share → Add to Home Screen
-            </li>
-            <li>
-              <strong>Android:</strong> Chrome → Install app / Add to Home screen
-            </li>
+            <li>Deploy to Vercel</li>
+            <li>Open URL on phone → Add to Home Screen</li>
+            <li>Open System → send magic link with your email</li>
           </ol>
         </section>
 

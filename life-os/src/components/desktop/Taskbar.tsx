@@ -10,6 +10,7 @@ export function Taskbar() {
   const openModule = useLifeStore((s) => s.openModule);
   const focusModule = useLifeStore((s) => s.focusModule);
   const minimizeModule = useLifeStore((s) => s.minimizeModule);
+  const syncStatus = useLifeStore((s) => s.syncStatus);
 
   const [time, setTime] = useState("");
 
@@ -27,11 +28,23 @@ export function Taskbar() {
     return () => clearInterval(id);
   }, []);
 
+  const syncLabel =
+    syncStatus === "synced"
+      ? "☁ Synced"
+      : syncStatus === "connecting"
+        ? "☁ Syncing…"
+        : syncStatus === "error"
+          ? "⚠ Sync error"
+          : syncStatus === "unconfigured"
+            ? "🔒 Local only"
+            : "☁ Offline";
+
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-[9999] flex h-10 items-stretch border-t border-[#0d5c2e] bg-gradient-to-b from-[#3cb371] to-[#2e8b57] shadow-lg">
       {/* Start button */}
       <button
         type="button"
+        onClick={() => openModule("settings")}
         className="flex items-center gap-1.5 border-r border-[#0d5c2e]/50 px-3 text-xs font-bold text-white hover:brightness-110"
       >
         <span className="text-base">🖥️</span>
@@ -72,7 +85,14 @@ export function Taskbar() {
 
       {/* System tray */}
       <div className="flex items-center gap-2 border-l border-[#0d5c2e]/50 px-3 text-xs text-white">
-        <span className="hidden sm:inline">🔒 Sync pending</span>
+        <button
+          type="button"
+          onClick={() => openModule("settings")}
+          className="hidden sm:inline hover:underline"
+          title="Open System settings for sync"
+        >
+          {syncLabel}
+        </button>
         <span className="font-mono tabular-nums">{time}</span>
       </div>
     </footer>

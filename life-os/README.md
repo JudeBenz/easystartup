@@ -38,13 +38,11 @@ See `DESIGN.md` for the full architecture, sync plan, and roadmap.
 
 ## Phone app (home screen + live updates)
 
-See **`PHONE.md`** for the full guide.
+See **`PHONE.md`** + **`SYNC.md`**.
 
-1. Deploy: `cd life-os && npx vercel --prod` (add `GEMINI_API_KEY` in Vercel)
-2. On phone: open the URL → **Add to Home Screen** / **Install app**
-3. Every time we push/deploy, reopen Life OS on your phone → you get the update
-
-Optional Capstore wrapper can load the same live URL (`CAPACITOR_SERVER_URL`).
+1. Deploy: `cd life-os && npx vercel --prod`
+2. On phone: **Add to Home Screen**
+3. Open **System** → magic-link sign-in with the **same email** on phone + computer → data syncs live
 
 ## LifeInvader AI — talk to control everything
 
