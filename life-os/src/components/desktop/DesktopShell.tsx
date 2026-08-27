@@ -7,6 +7,7 @@ import { DesktopIconGrid, DesktopArea, Taskbar } from "./Taskbar";
 import { WindowFrame } from "./WindowFrame";
 import { FloatingAssistant } from "./FloatingAssistant";
 import { MobileLauncher } from "./MobileLauncher";
+import { PinLock } from "@/components/phone/PinLock";
 
 export function DesktopShell() {
   const windows = useLifeStore((s) => s.windows);
@@ -29,10 +30,15 @@ export function DesktopShell() {
   }, []);
 
   if (isMobile) {
-    return <MobileLauncher />;
+    return (
+      <PinLock>
+        <MobileLauncher />
+      </PinLock>
+    );
   }
 
   return (
+    <PinLock>
     <div className="h-screen overflow-hidden">
       {/* Wallpaper */}
       <div
@@ -93,5 +99,6 @@ export function DesktopShell() {
       <Taskbar />
       <FloatingAssistant />
     </div>
+    </PinLock>
   );
 }
