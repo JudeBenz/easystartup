@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "deploy": "vercel --prod",
-    "cap:sync": "npx cap sync"
+    "cap:sync": "npx cap sync",
+    "sync:env": "node scripts/write-env.mjs",
+    "sync:schema": "node scripts/apply-schema.mjs",
+    "sync:setup": "node scripts/write-env.mjs && node scripts/apply-schema.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
