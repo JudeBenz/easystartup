@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+:root {
+  --gta-desktop: #0c1a3a;
+  --gta-taskbar: #2e8b57;
+  --gta-titlebar: #0a246a;
+}
+
+@theme inline {
+  --font-sans: Tahoma, "Segoe UI", Arial, sans-serif;
+  --font-mono: "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  background: #000;
+}
+
+/* Allow text selection inside app windows */
+.phone-app-body input,
+.phone-app-body textarea,
+.phone-app-body table,
+[class*="overflow"] input,
+[class*="overflow"] textarea,
+[class*="overflow"] table,
+[class*="overflow"] label span {
+  user-select: text;
+}
+
+/* Desktop XP scrollbars */
+@media (min-width: 769px) {
+  ::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-left: 1px solid #ccc;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #ece9d8, #d4d0c8);
+    border: 1px solid #888;
+  }
+}
+
+/* Phone: thin scrollbars, no body safe-area padding (handled in phone chrome) */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+  }
+
+  .phone-app-body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .phone-app-body > * {
+    max-width: 100%;
+  }
+
+  .phone-sheet {
+    animation: phoneSheetUp 0.28s ease-out;
+  }
+}
+
+@keyframes phoneSheetUp {
+  from {
+    transform: translateY(40%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pin-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-10px);
+  }
+  40% {
+    transform: translateX(10px);
+  }
+  60% {
+    transform: translateX(-8px);
+  }
+  80% {
+    transform: translateX(8px);
+  }
+}
