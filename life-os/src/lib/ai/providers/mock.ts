@@ -27,13 +27,13 @@ export async function callMock(
 
   const toolCalls: ToolCall[] = [];
 
-  // Calendar: "add X to calendar" / "schedule X"
+  // Calendar: "add X to calendar" / "schedule X tomorrow at 2pm"
   const calendarMatch =
-    lower.match(
-      /(?:add|schedule|put)\s+(.+?)\s+(?:to|on|for)\s+(?:the\s+)?calendar(?:\s+(?:on|for)\s+(.+?))?(?:\s+at\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?))?\.?$/i,
+    text.match(
+      /(?:add|schedule|put)\s+(.+?)\s+(?:to|on|for)\s+(?:the\s+)?calendar(?:\s+(?:on|for)?\s*(today|tomorrow|[A-Za-z]+ \d{1,2}|\d{4}-\d{2}-\d{2}))?(?:\s+at\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?))?/i,
     ) ??
-    lower.match(
-      /(?:add|schedule)\s+(.+?)\s+(?:on|for)\s+(.+?)(?:\s+at\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?))?\.?$/i,
+    text.match(
+      /(?:add|schedule)\s+(.+?)\s+(?:on|for)\s+(today|tomorrow|[A-Za-z]+ \d{1,2})(?:\s+at\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?))?/i,
     );
 
   if (
