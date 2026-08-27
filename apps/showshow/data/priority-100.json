@@ -209,14 +209,14 @@
   },
   {
     "slug": "crafts-at-rhinebeck",
-    "name": "Crafts at Rhinebeck",
+    "name": "Rhinebeck Crafts Festival",
     "city": "Rhinebeck",
     "region": "NY",
-    "lat": 41.9268,
-    "lng": -73.9126,
-    "officialWebsiteUrl": "https://craftsatrhinebeck.org",
-    "seasonHint": "June and October",
-    "notes": "Hudson Valley juried craft fair replacing suspended Washington Square Outdoor Art Exhibit."
+    "lat": 41.937494,
+    "lng": -73.909128,
+    "officialWebsiteUrl": "https://www.artrider.com/rhinebeck-crafts-festival-2026",
+    "seasonHint": "early June",
+    "notes": "Live Hudson Valley multi-day juried crafts/fine art festival (Artrider); New York outdoor replacement for Washington Square. Distinct from Fall Crafts at Lyndhurst already in inventory."
   },
   {
     "name": "Boston Arts Festival",
@@ -561,11 +561,11 @@
     "name": "Carmel Art Festival",
     "city": "Carmel-by-the-Sea",
     "region": "CA",
-    "lat": 36.5552,
-    "lng": -121.9233,
-    "officialWebsiteUrl": "https://carmelartfestivalcalifornia.com",
-    "seasonHint": "May",
-    "notes": "Monterey Peninsula plein air / outdoor festival replacing inactive Sausalito Labor Day fair."
+    "lat": 36.555407,
+    "lng": -121.920523,
+    "officialWebsiteUrl": "https://www.carmelartfestivalcalifornia.art/",
+    "seasonHint": "mid May",
+    "notes": "Live California multi-day outdoor juried plein air festival in Devendorf Park; coastal CA replacement for Sausalito. Format is plein air competition + public park sales (not standard craft-booth grid)."
   },
   {
     "name": "Santa Fe International Folk Art Market",
@@ -672,15 +672,15 @@
     "selectionReason": "regional_anchor"
   },
   {
-    "slug": "artfest-fort-collins",
-    "name": "ArtFest Fort Collins",
-    "city": "Fort Collins",
+    "slug": "denver-arts-festival",
+    "name": "Denver Arts Festival",
+    "city": "Denver",
     "region": "CO",
-    "lat": 40.5853,
-    "lng": -105.0844,
-    "officialWebsiteUrl": "https://www.artfestfortcollins.org",
-    "seasonHint": "August",
-    "notes": "Northern Colorado juried festival; replaces stale Boulder Creek listing."
+    "lat": 39.786643,
+    "lng": -104.892094,
+    "officialWebsiteUrl": "https://denverartsfestival.com/",
+    "seasonHint": "late May (Memorial Day weekend)",
+    "notes": "Live multi-day Colorado juried fine art/craft festival; Eureka Springs May Festival was citywide month programming rather than a classic booth fair, so swapped to this Front Range show for Boulder Creek."
   },
   {
     "name": "Festival of the Arts OKC",
@@ -905,14 +905,14 @@
   },
   {
     "slug": "salem-art-fair",
-    "name": "Salem Art Fair & Festival",
+    "name": "Salem Art Fair and Festival",
     "city": "Salem",
     "region": "OR",
-    "lat": 44.9233,
-    "lng": -123.0424,
-    "officialWebsiteUrl": "https://www.salemart.org",
-    "seasonHint": "July",
-    "notes": "Major Oregon outdoor art fair; replaces unreachable Lake Oswego listing."
+    "lat": 44.929384,
+    "lng": -123.034557,
+    "officialWebsiteUrl": "https://salemartfair.org/",
+    "seasonHint": "mid September",
+    "notes": "Live Oregon multi-day juried outdoor fine art festival at Bush’s Pasture Park; direct Pacific Northwest replacement for Lake Oswego."
   },
   {
     "name": "Bellevue Arts Fair / Pacific Northwest Arts Fair",
@@ -1062,22 +1062,22 @@
     "name": "East Lansing Art Festival",
     "city": "East Lansing",
     "region": "MI",
-    "lat": 42.7369,
-    "lng": -84.4839,
-    "officialWebsiteUrl": "https://www.elartfest.com",
-    "seasonHint": "May",
-    "notes": "Active Michigan State-area juried festival replacing ceased Grand Rapids Festival of the Arts."
+    "lat": 42.734955,
+    "lng": -84.480377,
+    "officialWebsiteUrl": "https://www.elartfest.com/",
+    "seasonHint": "mid May",
+    "notes": "Long-running Michigan street fine art festival; live official site actively planning 2027; strong Mid-Michigan replacement for Grand Rapids slot."
   },
   {
     "slug": "belle-isle-art-fair",
     "name": "Belle Isle Art Fair",
     "city": "Detroit",
     "region": "MI",
-    "lat": 42.3381,
-    "lng": -82.9857,
-    "officialWebsiteUrl": "https://www.belleisleartfair.com",
-    "seasonHint": "July",
-    "notes": "Juried outdoor fair on Belle Isle; replaces unreachable Art Detroit Fair listing."
+    "lat": 42.335024,
+    "lng": -82.999327,
+    "officialWebsiteUrl": "https://www.belleisleartfair.com/",
+    "seasonHint": "early August",
+    "notes": "Live Detroit juried outdoor fair on Belle Isle; natural geographic replacement for inactive Art Detroit Fair. Annual first weekend in August (Integrity Shows)."
   },
   {
     "name": "Cooper-Young Festival",
@@ -1093,15 +1093,15 @@
     "selectionReason": "regional_anchor"
   },
   {
-    "slug": "eureka-springs-may-festival",
-    "name": "Eureka Springs May Festival of the Arts",
-    "city": "Eureka Springs",
-    "region": "AR",
-    "lat": 36.4012,
-    "lng": -93.7379,
-    "officialWebsiteUrl": "https://www.eurekasprings.org",
-    "seasonHint": "May",
-    "notes": "Ozarks arts celebration replacing inactive Little Rock Riverfest listing."
+    "slug": "artfest-fort-myers",
+    "name": "ArtFest Fort Myers",
+    "city": "Fort Myers",
+    "region": "FL",
+    "lat": 26.646375,
+    "lng": -81.869821,
+    "officialWebsiteUrl": "https://artfestfortmyers.com/",
+    "seasonHint": "early February",
+    "notes": "Live multi-day juried riverfront fine art festival; suggested candidate verified. Southern multi-day replacement for Riverfest Little Rock."
   },
   {
     "name": "Anacortes Arts Festival",
@@ -1186,11 +1186,11 @@
     "name": "Penrod Arts Fair",
     "city": "Indianapolis",
     "region": "IN",
-    "lat": 39.8267,
-    "lng": -86.1855,
-    "officialWebsiteUrl": "https://www.penrod.org",
-    "seasonHint": "September",
-    "notes": "Long-running Indianapolis juried fair on Holcomb Gardens grounds."
+    "lat": 39.828463,
+    "lng": -86.188211,
+    "officialWebsiteUrl": "https://www.penrod.org/arts-fair/",
+    "seasonHint": "mid September",
+    "notes": "Major live Indiana outdoor arts fair on Newfields grounds; replaces Brown County. Single-day (Indiana’s Nicest Day) but nationally significant with 350+ artists."
   },
   {
     "name": "Geneva Fine Arts Fair",
@@ -1207,14 +1207,14 @@
   },
   {
     "slug": "fountain-hills-fine-art-festival",
-    "name": "Fountain Hills Fine Art Festival",
+    "name": "Fountain Festival of Fine Arts & Crafts",
     "city": "Fountain Hills",
     "region": "AZ",
-    "lat": 33.6117,
-    "lng": -111.7174,
-    "officialWebsiteUrl": "https://www.fountainhillsartleague.org",
-    "seasonHint": "November",
-    "notes": "Active Arizona outdoor juried festival; classic Scottsdale Arts Festival not returning."
+    "lat": 33.604786,
+    "lng": -111.719635,
+    "officialWebsiteUrl": "https://fhchamber.com/artfairs/",
+    "seasonHint": "mid November (also late February)",
+    "notes": "Major live multi-day juried outdoor fine art/craft festival in metro Phoenix area; clear Arizona replacement for Scottsdale Arts Festival."
   },
   {
     "name": "Hot Springs Arts & Crafts Fair",
@@ -1273,10 +1273,10 @@
     "name": "Las Olas Art Fair",
     "city": "Fort Lauderdale",
     "region": "FL",
-    "lat": 26.1195,
-    "lng": -80.1224,
-    "officialWebsiteUrl": "https://www.artfestival.com",
-    "seasonHint": "January",
-    "notes": "South Florida juried street fair circuit stop; replaces discontinued St. Augustine festival."
+    "lat": 26.119467,
+    "lng": -80.143264,
+    "officialWebsiteUrl": "https://www.artfestival.com/festivals/las-olas-art-fair-fort-lauderdale-florida",
+    "seasonHint": "mid October (also winter editions)",
+    "notes": "Long-running juried outdoor fine art show on Las Olas Blvd (Howard Alan Events); live 2026/2027 calendar. Florida replacement for St. Augustine."
   }
 ]

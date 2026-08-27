@@ -155,20 +155,19 @@
     "boothFeeMax": 1395,
     "notes": "30th annual Labor Day weekend. Booth: 10x10 $750; 15x10 $1155; 20x10 $1395; emerging $350. Blind jury (5 jurors). 2027 apps Nov 15, 2026–Feb 15, 2027. Hours Sat-Sun 10-5, Mon 10-4."
   },
-  "artfest-fort-collins": {
-    "sourceUrl": "https://www.artfestfortcollins.org",
-    "venueName": "Old Town Fort Collins",
-    "fullAddress": "Fort Collins, CO",
-    "captureConfidence": "low",
-    "notes": "Priority replacement; confirm current dates on official site."
-  },
   "artfest-fort-myers": {
     "sourceUrl": "https://artfestfortmyers.com/",
     "startDate": "2027-02-05",
     "endDate": "2027-02-07",
+    "applicationDeadline": null,
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null,
     "juryProcess": "Juried fine art festival with 200+ artists.",
     "venueName": "Downtown Fort Myers River District",
     "fullAddress": "Edwards Drive / Downtown River District, Fort Myers, FL 33901",
+    "attendance": null,
+    "directorEmail": null,
     "captureConfidence": "medium",
     "notes": "Official site and org channels promote 2027 Feb 5–7 riverfront festival; detailed booth/app fees left blank (not confirmed on primary public pages during capture)."
   },
@@ -222,7 +221,11 @@
     "endDate": "2026-08-02",
     "applicationDeadline": "2026-04-26",
     "juryProcess": "Juried fine art fair (~100 professional artists plus emerging Mint Artists Guild).",
-    "directorEmail": "Mark@integrityshows.com"
+    "directorEmail": "Mark@integrityshows.com",
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null,
+    "attendance": null
   },
   "bellevue-arts-fair": {
     "captureConfidence": "high",
@@ -345,7 +348,10 @@
     "applicationDeadline": "2026-09-30",
     "applicationFee": 95,
     "juryProcess": "60 juried plein air artist spots; applications with images/CV; finalists notified Oct 30, 2026.",
-    "directorEmail": "carmelartfest@gmail.com"
+    "directorEmail": "carmelartfest@gmail.com",
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "attendance": null
   },
   "celebration-of-fine-art-scottsdale": {
     "captureConfidence": "medium",
@@ -504,7 +510,13 @@
     "notes": "Official Artrider 2026 page lists June 6–7 at Dutchess County Fairgrounds with indoor+outdoor booths; 2027 dates not yet posted—annual early-June pattern.",
     "startDate": "2026-06-06",
     "endDate": "2026-06-07",
-    "juryProcess": "Curated Artrider crafts festival with 165+ makers (ceramics, glass, metal, wood, fine art, etc.)."
+    "juryProcess": "Curated Artrider crafts festival with 165+ makers (ceramics, glass, metal, wood, fine art, etc.).",
+    "applicationDeadline": null,
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null,
+    "attendance": null,
+    "directorEmail": null
   },
   "crested-butte-arts-festival": {
     "captureConfidence": "medium",
@@ -535,9 +547,15 @@
     "sourceUrl": "https://denverartsfestival.com/",
     "startDate": "2027-05-29",
     "endDate": "2027-05-30",
+    "applicationDeadline": null,
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null,
     "juryProcess": "Juried fine arts and fine crafts festival (Colorado + select national artists).",
     "venueName": "Conservatory Green, Central Park",
     "fullAddress": "8304 East 49th Place, Denver, CO 80238",
+    "attendance": null,
+    "directorEmail": null,
     "captureConfidence": "high",
     "notes": "Official site lists Memorial Weekend 2027 dates May 29–30 and Conservatory Green address; 2026 applications closed; 2027 app details not yet posted on site."
   },
@@ -577,14 +595,11 @@
     "endDate": "2027-05-16",
     "juryProcess": "Peer jury selects ~200 artists across ~17 mediums.",
     "attendance": 60000,
-    "directorEmail": "hmajano@cityofeastlansing.com"
-  },
-  "eureka-springs-may-festival": {
-    "sourceUrl": "https://www.eurekasprings.org",
-    "venueName": "Eureka Springs",
-    "fullAddress": "Eureka Springs, AR",
-    "captureConfidence": "low",
-    "notes": "City tourism site; refine artist prospectus URL when confirmed."
+    "directorEmail": "hmajano@cityofeastlansing.com",
+    "applicationDeadline": null,
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null
   },
   "fairhope-arts-and-crafts-festival": {
     "sourceUrl": "https://www.fairhopeartsandcraftsfestival.com/artists/artist-application",
@@ -649,7 +664,12 @@
     "startDate": "2026-11-13",
     "endDate": "2026-11-15",
     "applicationDeadline": "2026-08-31",
-    "juryProcess": "Juried festival; 400+ artists from across the country."
+    "juryProcess": "Juried festival; 400+ artists from across the country.",
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null,
+    "attendance": null,
+    "directorEmail": null
   },
   "gasparilla-festival-of-the-arts": {
     "applicationDeadline": "2026-09-07",
@@ -830,7 +850,13 @@
     "notes": "Producer calendar lists 39th Annual Las Olas Art Fair Oct 17–18, 2026 plus Jan 9–10 and Mar 6–7, 2027 editions; boulevard site also promotes the fair series.",
     "startDate": "2026-10-17",
     "endDate": "2026-10-18",
-    "juryProcess": "Juried selection of fine art for outdoor boulevard exhibition."
+    "juryProcess": "Juried selection of fine art for outdoor boulevard exhibition.",
+    "applicationDeadline": null,
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null,
+    "attendance": null,
+    "directorEmail": null
   },
   "lewiston-art-festival": {
     "captureConfidence": "medium",
@@ -1006,7 +1032,13 @@
     "notes": "Official FAQ lists Fair date as September 12, open 9:00 AM–5:00 PM; venue Newfields confirmed. Booth/app fees not published on visitor page.",
     "startDate": "2026-09-12",
     "endDate": "2026-09-12",
-    "juryProcess": "Large outdoor arts fair featuring 350+ artists on the Newfields campus."
+    "juryProcess": "Large outdoor arts fair featuring 350+ artists on the Newfields campus.",
+    "applicationDeadline": null,
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null,
+    "attendance": null,
+    "directorEmail": null
   },
   "piccolo-spoleto-outdoor-art": {
     "captureConfidence": "medium",
@@ -1115,7 +1147,12 @@
     "startDate": "2026-09-11",
     "endDate": "2026-09-13",
     "applicationDeadline": "2026-04-26",
-    "juryProcess": "Blind jury based on artist images (no names/location); five professional jurors for 2026."
+    "juryProcess": "Blind jury based on artist images (no names/location); five professional jurors for 2026.",
+    "boothFeeMin": null,
+    "boothFeeMax": null,
+    "applicationFee": null,
+    "attendance": null,
+    "directorEmail": null
   },
   "santa-fe-folk-art-market": {
     "captureConfidence": "medium",
