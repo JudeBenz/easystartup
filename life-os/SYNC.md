@@ -11,9 +11,12 @@ Paste into Cursor Cloud Agent secrets, then say “keys added”:
 
 | Secret | Where to get it |
 |--------|-----------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Project → Settings → API → Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project → Settings → API → anon public |
+| `SUPABASE_PROJECT_ID` | Project → Settings → General → **Reference ID** (also called Project ID) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project → Settings → API → **anon public** key |
 | `SUPABASE_ACCESS_TOKEN` | [Account → Access Tokens](https://supabase.com/dashboard/account/tokens) |
+
+(`NEXT_PUBLIC_SUPABASE_URL` also works instead of Project ID — we build `https://YOUR_ID.supabase.co` from the id.)
+
 
 Then we run:
 ```bash

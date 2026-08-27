@@ -3,36 +3,34 @@
  * Applies life-os/supabase/schema.sql to the linked Supabase project.
  *
  * Requires:
- *   NEXT_PUBLIC_SUPABASE_URL
+ *   SUPABASE_PROJECT_ID (or NEXT_PUBLIC_SUPABASE_URL)
  *   SUPABASE_ACCESS_TOKEN  (https://supabase.com/dashboard/account/tokens)
- *
- * Usage:
- *   node scripts/apply-schema.mjs
  */
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveProjectRef, resolveSupabaseUrl } from "./supabase-env.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const token = process.env.SUPABASE_ACCESS_TOKEN;
+const url = resolveSupabaseUrl();
+const token = process.env.SUPABASE_ACCESS_TOKEN?.trim();
 
 if (!url || !token) {
   console.error(
-    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_ACCESS_TOKEN.\n" +
+    "Missing SUPABASE_PROJECT_ID/NEXT_PUBLIC_SUPABASE_URL or SUPABASE_ACCESS_TOKEN.\n" +
       "Add them to the environment, then re-run.",
   );
   process.exit(1);
 }
 
-const refMatch = url.match(/https?:\/\/([a-z0-9-]+)\.supabase\.co/i);
-if (!refMatch) {
-  console.error("Could not parse project ref from NEXT_PUBLIC_SUPABASE_URL:", url);
+const projectRef = resolveProjectRef(url);
+if (!projectRef) {
+  console.error("Could not parse project id from:", url);
   process.exit(1);
 }
-const projectRef = refMatch[1];
+
 const schemaPath = resolve(root, "supabase/schema.sql");
 const sql = readFileSync(schemaPath, "utf8");
 
@@ -55,9 +53,7 @@ if (!res.ok) {
 }
 
 console.log("Schema applied successfully.");
-console.log(text.slice(0, 500));
 
-// Best-effort: set auth site URL + redirect allow list for magic links
 const siteUrl = process.env.LIFE_OS_SITE_URL || "http://localhost:3000";
 try {
   const authRes = await fetch(
