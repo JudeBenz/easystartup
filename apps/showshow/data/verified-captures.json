@@ -163,14 +163,14 @@
     "notes": "Apps open July 27, 2026. Standard booth $600; corner $725; double $1200; electricity $75. Blind ZAPP jury Nov 21–22, 2026; notify Dec 12; booth fees due Jan 11, 2027. ~135–150 artists; 85,000 attendees cited on site."
   },
   "artscape-baltimore": {
-    "captureConfidence": "medium",
+    "captureConfidence": "high",
     "endDate": "2026-05-24",
-    "fullAddress": "100 Holliday Street, Baltimore, MD",
+    "fullAddress": "Baltimore, MD",
     "juryProcess": "panel",
-    "sourceUrl": "https://www.artscape.org/",
+    "sourceUrl": "https://www.artscape.org/artscape-applications",
     "startDate": "2026-05-23",
-    "venueName": "Downtown Baltimore / 100 Holliday Street area",
-    "notes": "Artscape 2026 May 23–24 downtown. Includes Scout Art Fair and Artisan Market programming. Detailed booth fee tables not on artscape.org artisan-market page at capture."
+    "venueName": "Mount Vernon / Bolton Hill, Baltimore",
+    "notes": "Artscape 2026 May 23–24. Artists’ Market application closed at capture; booth fees not published on applications landing page. America’s largest free outdoor arts festival claim on site."
   },
   "bayou-city-art-festival": {
     "captureConfidence": "medium",
@@ -1112,13 +1112,13 @@
   "three-rivers-arts-festival": {
     "captureConfidence": "low",
     "fullAddress": "Arts Landing, Pittsburgh, PA",
-    "sourceUrl": "https://traf.trustarts.org/traf_home/visit/frequently-asked-questions",
+    "sourceUrl": "https://traf.trustarts.org/traf_home/artists/artist-market-info",
     "venueName": "Arts Landing, Pittsburgh Cultural District",
     "startDate": "2026-06-05",
     "endDate": "2026-06-14",
     "juryProcess": "panel",
     "directorEmail": "festivaloperations@trustarts.org",
-    "notes": "2026 Dollar Bank Three Rivers Arts Festival June 5–7 & 11–14 at new Arts Landing home. Free admission. Artist Market call closed; fee schedule not on current TRAF artist pages."
+    "notes": "2026 Artist Market call closed; 2027 process not yet posted. Booth fees not published on Cultural Trust artist-market page at capture."
   },
   "traditional-spanish-market-santa-fe": {
     "captureConfidence": "low",
