@@ -2,6 +2,7 @@ import type {
   Account,
   BudgetCategory,
   CalendarEvent,
+  Errand,
   Project,
   Task,
   Transaction,
@@ -13,7 +14,8 @@ export type SyncTable =
   | "budget_categories"
   | "events"
   | "projects"
-  | "tasks";
+  | "tasks"
+  | "errands";
 
 export interface SyncPayload {
   accounts: Account[];
@@ -192,6 +194,37 @@ export function rowToTask(r: Record<string, unknown>): Task {
     dueDate: r.due_date ? String(r.due_date) : undefined,
     priority: r.priority as Task["priority"],
     order: Number(r.sort_order),
+    updatedAt: new Date(String(r.updated_at)).toISOString(),
+  };
+}
+
+export function errandToRow(e: Errand, userId: string) {
+  return {
+    id: e.id,
+    user_id: userId,
+    title: e.title,
+    frequency: e.frequency,
+    last_completed_at: e.lastCompletedAt ?? null,
+    streak: e.streak,
+    color: e.color,
+    sort_order: e.order,
+    archived: e.archived,
+    updated_at: e.updatedAt,
+  };
+}
+
+export function rowToErrand(r: Record<string, unknown>): Errand {
+  return {
+    id: String(r.id),
+    title: String(r.title),
+    frequency: r.frequency as Errand["frequency"],
+    lastCompletedAt: r.last_completed_at
+      ? String(r.last_completed_at)
+      : undefined,
+    streak: Number(r.streak ?? 0),
+    color: String(r.color ?? "#2ecc71"),
+    order: Number(r.sort_order ?? 0),
+    archived: Boolean(r.archived),
     updatedAt: new Date(String(r.updated_at)).toISOString(),
   };
 }

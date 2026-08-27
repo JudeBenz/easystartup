@@ -4,6 +4,8 @@ import type { WindowState } from "@/types/domain";
 import { createBudgetSlice, type BudgetSlice } from "./budget";
 import { createCalendarSlice, type CalendarSlice } from "./calendar";
 import { createChatSlice, type ChatSlice } from "./chat";
+import { createErrandsSlice, type ErrandsSlice } from "./errands";
+import { createPhonePrefsSlice, type PhonePrefsSlice } from "./phone-prefs";
 import { createProjectsSlice, type ProjectsSlice } from "./projects";
 import { createSyncSlice, type SyncSlice } from "@/lib/sync/sync-slice";
 
@@ -27,8 +29,10 @@ interface ShellSlice {
 export type LifeStore = BudgetSlice &
   CalendarSlice &
   ProjectsSlice &
+  ErrandsSlice &
   ChatSlice &
   SyncSlice &
+  PhonePrefsSlice &
   ShellSlice;
 
 const DEFAULT_SIZES: Record<string, { w: number; h: number }> = {
@@ -36,6 +40,7 @@ const DEFAULT_SIZES: Record<string, { w: number; h: number }> = {
   calendar: { w: 680, h: 540 },
   "dynasty-projects": { w: 760, h: 560 },
   lifeinvader: { w: 520, h: 580 },
+  errands: { w: 420, h: 560 },
   settings: { w: 480, h: 560 },
 };
 
@@ -45,8 +50,10 @@ export const useLifeStore = create<LifeStore>()(
       ...createBudgetSlice(set as never),
       ...createCalendarSlice(set as never),
       ...createProjectsSlice(set as never),
+      ...createErrandsSlice(set as never),
       ...createChatSlice(set as never),
       ...createSyncSlice(set as never),
+      ...createPhonePrefsSlice(set as never),
 
       windows: [],
       activeModuleId: null,
@@ -152,9 +159,18 @@ export const useLifeStore = create<LifeStore>()(
           events,
           projects,
           tasks,
+          errands,
         } = get();
         return JSON.stringify(
-          { accounts, transactions, budgetCategories, events, projects, tasks },
+          {
+            accounts,
+            transactions,
+            budgetCategories,
+            events,
+            projects,
+            tasks,
+            errands,
+          },
           null,
           2,
         );
@@ -171,6 +187,7 @@ export const useLifeStore = create<LifeStore>()(
             events: data.events ?? get().events,
             projects: data.projects ?? get().projects,
             tasks: data.tasks ?? get().tasks,
+            errands: data.errands ?? get().errands,
           });
         } catch {
           console.error("Invalid import JSON");
@@ -178,7 +195,7 @@ export const useLifeStore = create<LifeStore>()(
       },
     }),
     {
-      name: "life-os-storage-v3",
+      name: "life-os-storage-v4",
       partialize: (state) => ({
         accounts: state.accounts,
         transactions: state.transactions,
@@ -186,10 +203,12 @@ export const useLifeStore = create<LifeStore>()(
         events: state.events,
         projects: state.projects,
         tasks: state.tasks,
+        errands: state.errands,
         chatMessages: state.chatMessages,
         aiProvider: state.aiProvider,
         lastSyncedAt: state.lastSyncedAt,
         syncUserEmail: state.syncUserEmail,
+        phonePrefs: state.phonePrefs,
       }),
     },
   ),

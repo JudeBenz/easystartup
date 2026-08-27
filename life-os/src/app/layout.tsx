@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { RegisterSW } from "@/components/pwa/RegisterSW";
+import { NotificationWatcher } from "@/components/phone/NotificationWatcher";
 import { SyncProvider } from "@/lib/sync/SyncProvider";
 import "./globals.css";
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
           <RegisterSW />
           <InstallPrompt />
+          <NotificationWatcher />
         </SyncProvider>
       </body>
     </html>

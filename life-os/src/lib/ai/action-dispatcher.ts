@@ -31,6 +31,10 @@ export function executeTool(
         return updateProjectStatus(args);
       case "open_app":
         return openApp(args);
+      case "add_errand":
+        return addErrandTool(args);
+      case "complete_errand":
+        return completeErrandTool(args);
       default:
         return { success: false, message: `Unknown tool: ${name}` };
     }
@@ -39,6 +43,29 @@ export function executeTool(
       success: false,
       message: err instanceof Error ? err.message : "Tool execution failed",
     };
+  }
+
+  function addErrandTool(args: Record<string, unknown>): ToolExecutionResult {
+    const title = String(args.title ?? "").trim();
+    if (!title) return { success: false, message: "title is required" };
+    const frequency = (args.frequency as
+      | "daily"
+      | "every_2_days"
+      | "every_3_days"
+      | "weekly") ?? "daily";
+    store.addErrand({ title, frequency });
+    store.openModule("errands");
+    return { success: true, message: `Added errand "${title}"` };
+  }
+
+  function completeErrandTool(args: Record<string, unknown>): ToolExecutionResult {
+    const title = String(args.title ?? "").toLowerCase();
+    const match = store.errands.find((e) =>
+      e.title.toLowerCase().includes(title),
+    );
+    if (!match) return { success: false, message: "Errand not found" };
+    store.toggleErrandToday(match.id);
+    return { success: true, message: `Completed "${match.title}"` };
   }
 
   function addCalendarEvent(args: Record<string, unknown>): ToolExecutionResult {
@@ -273,6 +300,7 @@ export function executeTool(
     const valid = [
       "maze-bank",
       "calendar",
+      "errands",
       "dynasty-projects",
       "lifeinvader",
       "settings",

@@ -37,7 +37,6 @@ export function LifeInvaderApp() {
   const [listening, setListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [activeProvider, setActiveProvider] = useState<string>("…");
-  const [setupHint, setSetupHint] = useState<string>("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
@@ -47,7 +46,6 @@ export function LifeInvaderApp() {
       .then((r) => r.json())
       .then((d) => {
         setActiveProvider(d.provider ?? "mock");
-        setSetupHint(d.hint ?? "");
       })
       .catch(() => setActiveProvider("mock"));
   }, []);

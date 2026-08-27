@@ -83,3 +83,26 @@ export interface AppMeta {
   version: string;
   lastSynced?: string;
 }
+
+export type ErrandFrequency = "daily" | "every_2_days" | "every_3_days" | "weekly";
+
+export interface Errand {
+  id: string;
+  title: string;
+  frequency: ErrandFrequency;
+  /** YYYY-MM-DD of last completion; undefined if never */
+  lastCompletedAt?: string;
+  /** streak of consecutive periods completed */
+  streak: number;
+  color: string;
+  order: number;
+  archived: boolean;
+  updatedAt: string;
+}
+
+export type PhoneThemeId = "ls-night" | "vinewood" | "sandy" | "downtown";
+
+export interface PhonePrefs {
+  themeId: PhoneThemeId;
+  notificationsEnabled: boolean;
+}

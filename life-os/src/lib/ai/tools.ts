@@ -160,7 +160,7 @@ export const LIFE_OS_TOOLS: ToolDefinition[] = [
     function: {
       name: "open_app",
       description:
-        "Open a Life OS desktop app window: maze-bank, calendar, dynasty-projects, lifeinvader, settings",
+        "Open a Life OS app: maze-bank, calendar, errands, dynasty-projects, lifeinvader, settings",
       parameters: {
         type: "object",
         properties: {
@@ -169,6 +169,7 @@ export const LIFE_OS_TOOLS: ToolDefinition[] = [
             enum: [
               "maze-bank",
               "calendar",
+              "errands",
               "dynasty-projects",
               "lifeinvader",
               "settings",
@@ -176,6 +177,38 @@ export const LIFE_OS_TOOLS: ToolDefinition[] = [
           },
         },
         required: ["appId"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_errand",
+      description: "Add a recurring daily/few-day checklist item (errand/habit)",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          frequency: {
+            type: "string",
+            enum: ["daily", "every_2_days", "every_3_days", "weekly"],
+          },
+        },
+        required: ["title"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "complete_errand",
+      description: "Mark an errand done for today by title",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+        },
+        required: ["title"],
       },
     },
   },

@@ -6,6 +6,9 @@ import { isSupabaseConfigured } from "@/lib/sync/supabase-client";
 import { signInWithMagicLink, signOut } from "@/lib/sync/SyncProvider";
 import { pullAndMerge, pushAll } from "@/lib/sync/engine";
 import { getSupabase } from "@/lib/sync/supabase-client";
+import { PHONE_THEMES } from "@/lib/store/phone-prefs";
+import type { PhoneThemeId } from "@/types/domain";
+import { haptic } from "@/lib/phone/haptics";
 
 export function SettingsApp() {
   const exportData = useLifeStore((s) => s.exportData);
@@ -14,6 +17,9 @@ export function SettingsApp() {
   const syncError = useLifeStore((s) => s.syncError);
   const lastSyncedAt = useLifeStore((s) => s.lastSyncedAt);
   const syncUserEmail = useLifeStore((s) => s.syncUserEmail);
+  const phonePrefs = useLifeStore((s) => s.phonePrefs);
+  const setPhoneTheme = useLifeStore((s) => s.setPhoneTheme);
+  const setNotificationsEnabled = useLifeStore((s) => s.setNotificationsEnabled);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -124,6 +130,65 @@ export function SettingsApp() {
       </header>
 
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <section className="rounded border border-gray-300 bg-white p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            Phone wallpaper
+          </h3>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {(Object.keys(PHONE_THEMES) as PhoneThemeId[]).map((id) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => {
+                  setPhoneTheme(id);
+                  haptic("light");
+                }}
+                className={`overflow-hidden rounded-xl border-2 text-left ${
+                  phonePrefs.themeId === id
+                    ? "border-sky-500"
+                    : "border-transparent"
+                }`}
+              >
+                <div
+                  className="h-14 w-full"
+                  style={{ background: PHONE_THEMES[id].background }}
+                />
+                <p className="bg-gray-50 px-2 py-1 text-[10px] font-medium">
+                  {PHONE_THEMES[id].name}
+                </p>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded border border-gray-300 bg-white p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            Reminders
+          </h3>
+          <label className="mt-2 flex items-center justify-between gap-3 text-xs">
+            <span>
+              Notify for upcoming events &amp; morning errands
+            </span>
+            <input
+              type="checkbox"
+              checked={phonePrefs.notificationsEnabled}
+              onChange={async (e) => {
+                const on = e.target.checked;
+                if (on && "Notification" in window) {
+                  const perm = await Notification.requestPermission();
+                  if (perm !== "granted") {
+                    setStatus("Notification permission denied.");
+                    return;
+                  }
+                }
+                setNotificationsEnabled(on);
+                haptic("success");
+              }}
+              className="h-4 w-4"
+            />
+          </label>
+        </section>
+
         <section className="rounded border border-gray-300 bg-white p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
             Cloud Sync (phone ↔ computer)

@@ -118,6 +118,26 @@ do $$ begin
   create policy "tasks_own" on public.tasks for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 exception when duplicate_object then null; end $$;
 
+-- Errands / habits checklist
+create table if not exists public.errands (
+  id text primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  frequency text not null default 'daily',
+  last_completed_at text,
+  streak integer not null default 0,
+  color text not null default '#2ecc71',
+  sort_order integer not null default 0,
+  archived boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.errands enable row level security;
+
+do $$ begin
+  create policy "errands_own" on public.errands for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+exception when duplicate_object then null; end $$;
+
 -- Realtime (ignore errors if table already in publication)
 do $$ begin
   alter publication supabase_realtime add table public.accounts;
@@ -136,4 +156,7 @@ do $$ begin
 exception when duplicate_object then null; when others then null; end $$;
 do $$ begin
   alter publication supabase_realtime add table public.tasks;
+exception when duplicate_object then null; when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.errands;
 exception when duplicate_object then null; when others then null; end $$;

@@ -73,4 +73,19 @@ body {
   .phone-app-body > * {
     max-width: 100%;
   }
+
+  .phone-sheet {
+    animation: phoneSheetUp 0.28s ease-out;
+  }
+}
+
+@keyframes phoneSheetUp {
+  from {
+    transform: translateY(40%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

@@ -5,18 +5,16 @@ import { MazeBankApp } from "./components/MazeBankApp";
 import { CalendarApp } from "./components/CalendarApp";
 import { DynastyProjectsApp } from "./components/DynastyProjectsApp";
 import { LifeInvaderApp } from "./components/LifeInvaderApp";
+import { ErrandsApp } from "./components/ErrandsApp";
 import { SettingsApp } from "./components/SettingsApp";
 
 export interface LifeModule {
   id: string;
   name: string;
   subtitle: string;
-  /** Short label for taskbar */
   shortName: string;
   color: string;
-  /** Tailwind bg class for icon tile */
   iconBg: string;
-  /** Emoji or single-char icon for desktop */
   glyph: string;
   defaultSize: { w: number; h: number };
   component: ComponentType;
@@ -46,6 +44,17 @@ export const MODULES: LifeModule[] = [
     component: CalendarApp,
   },
   {
+    id: "errands",
+    name: "Errands",
+    subtitle: "Daily checklist",
+    shortName: "Errands",
+    color: "#0e7490",
+    iconBg: "bg-cyan-700",
+    glyph: "✅",
+    defaultSize: { w: 420, h: 560 },
+    component: ErrandsApp,
+  },
+  {
     id: "dynasty-projects",
     name: "Dynasty 8",
     subtitle: "Projects",
@@ -70,7 +79,7 @@ export const MODULES: LifeModule[] = [
   {
     id: "settings",
     name: "Settings",
-    subtitle: "Sync & Backup",
+    subtitle: "Sync · Themes · Alerts",
     shortName: "Settings",
     color: "#4a5568",
     iconBg: "bg-slate-600",

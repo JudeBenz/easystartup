@@ -6,11 +6,13 @@ import { getSupabase, isSupabaseConfigured } from "./supabase-client";
 import {
   accountToRow,
   budgetToRow,
+  errandToRow,
   eventToRow,
   mergeByUpdatedAt,
   projectToRow,
   rowToAccount,
   rowToBudget,
+  rowToErrand,
   rowToEvent,
   rowToProject,
   rowToTask,
@@ -41,6 +43,7 @@ export async function pullAndMerge(userId: string): Promise<void> {
     "events",
     "projects",
     "tasks",
+    "errands",
   ] as const;
 
   const results = await Promise.all(
@@ -53,9 +56,8 @@ export async function pullAndMerge(userId: string): Promise<void> {
     if (res.error) throw res.error;
   }
 
-  const [accounts, transactions, budgets, events, projects, tasks] = results.map(
-    (r) => r.data ?? [],
-  );
+  const [accounts, transactions, budgets, events, projects, tasks, errands] =
+    results.map((r) => r.data ?? []);
 
   const state = useLifeStore.getState();
   applyingRemote = true;
@@ -84,6 +86,10 @@ export async function pullAndMerge(userId: string): Promise<void> {
       tasks: mergeByUpdatedAt(
         state.tasks,
         tasks.map((r) => rowToTask(r as Record<string, unknown>)),
+      ),
+      errands: mergeByUpdatedAt(
+        state.errands,
+        errands.map((r) => rowToErrand(r as Record<string, unknown>)),
       ),
       lastSyncedAt: new Date().toISOString(),
     });
@@ -121,6 +127,10 @@ export async function pushAll(userId: string): Promise<void> {
     ),
     supabase.from("tasks").upsert(
       state.tasks.map((t) => taskToRow(t, userId)),
+      { onConflict: "id" },
+    ),
+    supabase.from("errands").upsert(
+      state.errands.map((e) => errandToRow(e, userId)),
       { onConflict: "id" },
     ),
   ];
@@ -180,6 +190,10 @@ function applyRemoteRow(
         useLifeStore.setState({
           tasks: state.tasks.filter((t) => t.id !== id),
         });
+      } else if (table === "errands") {
+        useLifeStore.setState({
+          errands: state.errands.filter((e) => e.id !== id),
+        });
       }
       return;
     }
@@ -214,6 +228,11 @@ function applyRemoteRow(
       useLifeStore.setState({
         tasks: mergeByUpdatedAt(state.tasks, [item]),
       });
+    } else if (table === "errands") {
+      const item = rowToErrand(row);
+      useLifeStore.setState({
+        errands: mergeByUpdatedAt(state.errands, [item]),
+      });
     }
   } finally {
     applyingRemote = false;
@@ -236,6 +255,7 @@ function subscribeRealtime(userId: string) {
     "events",
     "projects",
     "tasks",
+    "errands",
   ];
 
   let ch = supabase.channel(`life-os-${userId}`);
@@ -279,7 +299,8 @@ export async function startSync(user: User): Promise<void> {
         state.budgetCategories !== prev.budgetCategories ||
         state.events !== prev.events ||
         state.projects !== prev.projects ||
-        state.tasks !== prev.tasks;
+        state.tasks !== prev.tasks ||
+        state.errands !== prev.errands;
       if (changed) schedulePush(user.id);
     });
 
