@@ -306,6 +306,30 @@ a:hover {
   border: none !important;
 }
 
+/* Show detail — presence without card stacks */
+@keyframes ss-show-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.ss-show-hero-copy {
+  animation: ss-show-rise 0.55s ease-out both;
+}
+.ss-show-hero-stats {
+  animation: ss-show-rise 0.55s ease-out 0.12s both;
+}
+.ss-ticket-strip {
+  animation: ss-show-rise 0.5s ease-out 0.18s both;
+}
+.ss-show-block {
+  animation: ss-show-rise 0.45s ease-out both;
+}
+
 /* Comfortable reading measure */
 .ss-prose {
   max-width: 65ch;

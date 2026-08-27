@@ -33,7 +33,7 @@ export async function buildSeed(): Promise<DemoData> {
     })),
   );
   const facts = await adapter.fetchFacts();
-  const now = "2026-03-15T12:00:00.000Z";
+  const now = "2026-01-01T12:00:00.000Z";
 
   const showsMap = new Map<string, DemoData["shows"][0]>();
   const editions: DemoData["editions"] = [];
@@ -87,7 +87,7 @@ export async function buildSeed(): Promise<DemoData> {
       directorName: fact.directorName,
       directorEmail: fact.directorEmail,
       directorPhone: fact.directorPhone,
-      status: fact.endDate < "2026-03-15" ? "completed" : "upcoming",
+      status: fact.endDate < now.split("T")[0] ? "completed" : "upcoming",
     });
 
     for (const link of fact.socialLinks) {
@@ -207,7 +207,7 @@ export async function buildSeed(): Promise<DemoData> {
     {
       id: "sg_lee",
       userId: "user_lee",
-      favoriteShowIds: ["show_sausalito-art-festival", "show_cherry-creek-arts-festival"],
+      favoriteShowIds: ["show_gold-coast-art-fair", "show_cherry-creek-arts-festival"],
       followedArtistIds: ["artist_aria", "artist_sam"],
     },
   ];
@@ -450,27 +450,34 @@ export async function buildSeed(): Promise<DemoData> {
     },
   ];
 
-  const comments: DemoData["comments"] = [
-    {
-      id: "c1",
-      editionId: upcoming.find((e) => e.id.includes("cherry-creek"))!.id,
-      authorUserId: "user_lee",
-      body: "Coming Saturday afternoon — any shade on the south blocks?",
-      createdAt: now,
-    },
-  ];
+  const cherryEdition =
+    upcoming.find((e) => e.id.includes("cherry-creek")) ?? upcoming[0];
 
-  const announcements: DemoData["announcements"] = [
-    {
-      id: "ann_1",
-      editionId: upcoming.find((e) => e.id.includes("cherry-creek"))!.id,
-      directorUserId: "user_jordan",
-      title: "Application deadline extended",
-      body: "Official deadline moved to January 22. Apply on the show website.",
-      kind: "deadline_extension",
-      createdAt: "2026-01-12T12:00:00.000Z",
-    },
-  ];
+  const comments: DemoData["comments"] = cherryEdition
+    ? [
+        {
+          id: "c1",
+          editionId: cherryEdition.id,
+          authorUserId: "user_lee",
+          body: "Coming Saturday afternoon — any shade on the south blocks?",
+          createdAt: now,
+        },
+      ]
+    : [];
+
+  const announcements: DemoData["announcements"] = cherryEdition
+    ? [
+        {
+          id: "ann_1",
+          editionId: cherryEdition.id,
+          directorUserId: "user_jordan",
+          title: "Application deadline extended",
+          body: "Official deadline moved to January 22. Apply on the show website.",
+          kind: "deadline_extension",
+          createdAt: "2026-01-12T12:00:00.000Z",
+        },
+      ]
+    : [];
 
   const waitlist: DemoData["waitlist"] = [
     {
@@ -514,16 +521,18 @@ export async function buildSeed(): Promise<DemoData> {
     },
   ];
 
-  const alerts: DemoData["alerts"] = [
-    {
-      id: "al_1",
-      editionId: upcoming.find((e) => e.id.includes("sausalito"))!.id,
-      kind: "weather",
-      title: "Wind advisory weekend of show",
-      body: "Historical pattern: afternoon gusts on the waterfront. Stake tents early.",
-      createdAt: now,
-    },
-  ];
+  const alerts: DemoData["alerts"] = upcoming.length
+    ? [
+        {
+          id: "al_1",
+          editionId: upcoming[0].id,
+          kind: "weather" as const,
+          title: "Wind advisory weekend of show",
+          body: "Afternoon gusts are common this weekend. Stake tents early and check guy-lines at lunch.",
+          createdAt: now,
+        },
+      ]
+    : [];
 
   const weather: DemoData["weather"] = upcoming.slice(0, 15).flatMap((e) => {
     const days = [e.startDate, e.endDate];
