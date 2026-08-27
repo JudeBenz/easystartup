@@ -175,13 +175,15 @@
   "bayou-city-art-festival": {
     "captureConfidence": "medium",
     "endDate": "2026-10-11",
-    "fullAddress": "Memorial Park S. Picnic Lane, Houston, TX",
+    "fullAddress": "Memorial Park S. Picnic Lane, Houston, TX; Art Colony Association, Inc. 7026 Old Katy Road, Houston, TX 77024",
     "juryProcess": "blind",
     "sourceUrl": "https://www.bayoucityartfestival.com/applytoparticipate",
     "startDate": "2026-10-09",
     "venueName": "Memorial Park",
-    "directorEmail": "Artist@bayoucityartfestival.com",
-    "notes": "Fall Memorial Park Oct 9-11, 2026 (apps closed). Downtown 2027 applications open Sept 1, 2026. Blind jury; top ~300 invited. Artist Relations: Wendi Meisberger, 713-521-0133. Dollar booth/app fees on ZAPP only."
+    "directorEmail": "kellyb@bayoucityartfestival.com",
+    "notes": "Memorial Park 2026 Oct 9–11 (apps closed). Downtown 2027 applications open Sept 1, 2026 via ZAPP. Blind jury then independent panel scores; ~300 artists invited. Booth/application fee dollars not published on official site. Artist Relations: wendi@bayoucityartfestival.com.",
+    "directorName": "Kelly Batterson",
+    "directorPhone": "713-521-0133"
   },
   "bellevue-arts-fair": {
     "captureConfidence": "medium",
@@ -499,7 +501,7 @@
     "captureConfidence": "low"
   },
   "festival-of-the-arts-okc": {
-    "sourceUrl": "https://www.artscouncilokc.com/festival-of-the-arts/",
+    "sourceUrl": "https://www.festivaloftheartsokc.com",
     "startDate": "2027-04-22",
     "endDate": "2027-04-25",
     "applicationDeadline": "2026-09-27",
@@ -508,7 +510,8 @@
     "fullAddress": "Bicentennial Park, downtown Oklahoma City, OK; Arts Council OKC, 400 W. California Ave, Oklahoma City, OK 73102",
     "attendance": 650000,
     "directorName": "Susan Tate",
-    "notes": "61st year April 22-25, 2027. Visual artist deadline Sept 27 (year implied 2026). Festival Director Susan Tate. Listed festivaloftheartsokc.com unreachable; artscouncilokc.com is live organizer site. Blind jury per call materials; dollar fees on ZAPP not restated on ACOKC pages. Phone 405-270-4848."
+    "notes": "Official domain festivaloftheartsokc.com has no DNS resolution / unreachable from research environment. No same-domain fees or prospectus verified; fee fields left blank.",
+    "captureConfidence": "low"
   },
   "fiesta-arts-fair-san-antonio": {
     "captureConfidence": "medium",
@@ -525,14 +528,15 @@
     "applicationDeadline": "2026-09-07",
     "captureConfidence": "medium",
     "endDate": "2027-03-07",
-    "fullAddress": "Julian B. Lane Riverfront Park, Tampa, FL; mail PO Box 10591, Tampa, FL 33679",
+    "fullAddress": "Julian B. Lane Riverfront Park, Downtown Tampa, FL",
     "juryProcess": "panel",
     "sourceUrl": "https://gasparillaarts.com/overview-for-artists/",
     "startDate": "2027-03-06",
     "venueName": "Julian B. Lane Riverfront Park",
-    "attendance": 25000,
+    "attendance": 30000,
     "directorEmail": "info@gasparillaarts.com",
-    "notes": "Prefer 2027: Sat Mar 6 9am-6pm, Sun Mar 7 10am-5pm. Apply until Sept 7, 2026. 2026 show was Feb 28-Mar 1. 250+ artists; $92k awards in 2026. Standard booth fee dollar amount not published on gasparillaarts.com. Emerging artists free booth + $425 stipend (apps open Oct 2026). Phone 813-876-1747."
+    "notes": "2027 show Sat Mar 6 9am–6pm / Sun Mar 7 10am–5pm; apply via ZAPP until Sept 7, 2026. Site mentions application/booth fees but publishes no dollar amounts. Estimated attendance 30,000; contact PO Box 10591 Tampa FL 33679.",
+    "directorPhone": "813-876-1747"
   },
   "geneva-fine-arts-fair": {
     "sourceUrl": "https://genevachamber.com/events/arts-fair",
@@ -601,16 +605,16 @@
     "notes": "60th annual; Sun Oct 4, 2026 10am-5pm; 200+ juried artists. Official site lists event but not booth/application dollar fees. Application historically via ZAPP."
   },
   "jazz-fest-crafts-nola": {
-    "captureConfidence": "low",
-    "fullAddress": "Fair Grounds Race Course, New Orleans, LA",
+    "captureConfidence": "medium",
+    "fullAddress": "Fair Grounds Race Course, 1751 Gentilly Blvd, New Orleans, LA",
     "sourceUrl": "https://www.nojazzfest.com/faq/",
     "venueName": "Fair Grounds Race Course",
     "startDate": "2027-04-22",
     "endDate": "2027-05-02",
-    "juryProcess": "panel",
+    "juryProcess": "unknown",
     "attendance": 400000,
     "directorEmail": "craftsadmin@nojazzfest.com",
-    "notes": "2027 Jazz Fest: Apr 22-25 and Apr 29–May 2. Contemporary Crafts + Louisiana Marketplace. Crafts booth applications for 2027 go live October 2026 at nojazzfest.com/crafts/. Booth fee amounts not published on FAQ. 2026 crafts weekends were Apr 23-26 and Apr 30–May 3."
+    "notes": "2027 Jazz Fest / Heritage Fair: Thu Apr 22–Sun Apr 25 and Thu Apr 29–Sun May 2 at Fair Grounds. Crafts booth applications for 2027 go live beginning Oct 2026 (nojazzfest.com/crafts); no booth/application fee amounts published. FAQ cites ~400,000 visitors yearly."
   },
   "kentuck-festival-of-the-arts": {
     "captureConfidence": "medium",
@@ -632,13 +636,15 @@
   "kimball-arts-festival-park-city": {
     "captureConfidence": "medium",
     "endDate": "2027-08-08",
-    "fullAddress": "Main Street, Park City, UT",
+    "fullAddress": "Historic Main Street, Park City, UT",
     "juryProcess": "blind",
-    "sourceUrl": "https://kimballartsfestival.org/",
+    "sourceUrl": "https://kimballartsfestival.org/artist-application/",
     "startDate": "2027-08-06",
     "venueName": "Historic Main Street, Park City",
-    "directorEmail": "info@kimballartcenter.org",
-    "notes": "57th festival was Aug 7–9, 2026 (kimballartcenter.org exhibition page). Next: Aug 6–8, 2027 per kimballartsfestival.org. Organized by Kimball Art Center; blind jury historically. Booth fees not published on public pages."
+    "directorEmail": "artsfest@kimballartcenter.org",
+    "notes": "Official festival site (linked from kimballartcenter.org) says see you Aug 6–8, 2027; 2026 was Aug 7–9. Blind jury. Application fee required but no dollar amount published; booth fees vary by size/location and are only in seasonal application materials (not listed publicly). >27,000 visitors stated; ~190 spaces.",
+    "attendance": 27000,
+    "directorPhone": "435-649-8882"
   },
   "krasl-art-fair": {
     "captureConfidence": "low",
@@ -664,14 +670,15 @@
     "notes": "18th annual Oct 10-11, 2026. Apps opened Jan 22; deadline May 20; notify May 28. Non-refundable $42 app fee. Booth fee paid after acceptance (amount not listed on site); 10x10 or 10x20. Jurors: local gallery reps, artists, LJAWF reps."
   },
   "la-quinta-arts-festival": {
-    "sourceUrl": "https://www.laquintaartcelebration.org/",
+    "sourceUrl": "https://www.lqaf.com",
     "startDate": "2027-03-04",
     "endDate": "2027-03-07",
     "juryProcess": "panel",
     "venueName": "La Quinta Civic Center Campus",
     "fullAddress": "78495 Calle Tampico, La Quinta, CA 92253",
     "directorEmail": "info@scopeevents.org",
-    "notes": "lqaf.com unreachable; event continues as La Quinta Art Celebration (SCOPE Events) at laquintaartcelebration.org. Spring 2027 Mar 4–7. Also ENCORE 2026 Nov 12–15 (artist apps deadline was July 17, 2026 per artist-applications page). Jury-selected."
+    "notes": "lqaf.com unreachable (connection failed). laquintaartcelebration.com is a parked/lander page with no festival prospectus. No official-domain fees verified.",
+    "captureConfidence": "low"
   },
   "lake-oswego-festival-of-the-arts": {
     "sourceUrl": "https://www.lakeoswegoart.org",
@@ -813,20 +820,25 @@
     "endDate": "2027-03-14",
     "applicationDeadline": "2026-10-31",
     "juryProcess": "panel",
-    "venueName": "Coastal Arts Center of Orange Beach / festival grounds",
+    "venueName": "Coastal Arts Center of Orange Beach",
     "fullAddress": "26389 Canal Road, Orange Beach, AL 36561",
-    "notes": "53rd Annual; free admission; apps open Aug 1–Oct 31 via ZAPP (same-domain FAQ); ~95 artists average; always second full weekend of March, one week before Fairhope. orangebeachartcenter.com redirects to city site."
+    "notes": "Listed orangebeachartcenter.com returns 404/redirects to city site. Current official pages on orangebeachal.gov: 53rd Annual Mar 13–14, 2027; ZAPP apps Aug 1–Oct 31, 2026. FAQ says booth fees due mid-January after acceptance but publishes no dollar amounts. Avg ~95 artists; free admission.",
+    "directorName": "Desiree Hodge",
+    "directorPhone": "251-981-2787",
+    "captureConfidence": "medium"
   },
   "palo-alto-festival-of-the-arts": {
-    "captureConfidence": "low",
+    "captureConfidence": "medium",
     "directorEmail": "info@paloaltochamber.com",
-    "fullAddress": "University Avenue (High to Webster streets), Palo Alto, CA",
-    "sourceUrl": "https://www.paloaltochamber.com/festival-of-the-arts/",
+    "fullAddress": "University Avenue, downtown Palo Alto, CA; Chamber office 355 Alma St, Palo Alto, CA 94301",
+    "sourceUrl": "https://www.paloaltochamber.com/festival-of-the-arts-about/",
     "venueName": "University Avenue, downtown Palo Alto",
     "startDate": "2026-08-22",
     "endDate": "2026-08-23",
     "attendance": 100000,
-    "notes": "10am–6pm Sat–Sun; free admission; ~250 artist booths. Hosted by Palo Alto Chamber; artist production via Pacific Fine Arts (pfa@pacificfinearts.com). paloaltofestival.com points to chamber site. Attendance up to 100,000 per sponsorship page."
+    "notes": "paloaltofestival.com resolves to Palo Alto Chamber festival pages. Aug 22–23, 2026, 10am–6pm; free admission; ~250 artist booths. Artist production via Pacific Fine Arts (pfa@pacificfinearts.com / 209-267-4394); booth/application fee dollars not published on chamber/festival pages. Sponsorship page cites attendance up to 100,000.",
+    "directorPhone": "650-324-3121",
+    "juryProcess": "unknown"
   },
   "paradise-city-arts-festival": {
     "captureConfidence": "medium",
@@ -934,16 +946,17 @@
     "captureConfidence": "low"
   },
   "saint-louis-art-fair": {
-    "captureConfidence": "medium",
+    "captureConfidence": "high",
     "directorEmail": "info@saintlouisartfair.com",
     "endDate": "2026-09-20",
-    "fullAddress": "Downtown Clayton, MO; office 8235 Forsyth Blvd #205, Clayton, MO 63105",
+    "fullAddress": "8235 Forsyth Blvd #205, Clayton, MO 63105",
     "juryProcess": "panel",
-    "sourceUrl": "https://www.saintlouisartfair.com",
+    "sourceUrl": "https://www.saintlouisartfair.com/",
     "startDate": "2026-09-18",
     "venueName": "Downtown Clayton",
     "attendance": 130000,
-    "notes": "33rd annual presented by Emerson, Sept 18-20, 2026. Phone 314-863-0278. Site confirms dates/artists; dollar booth/application fees were published via the 2026 ZAPP call (not restated on main site HTML)."
+    "notes": "2026 fair Sept 18–20. Booth fees not on public pages at capture; contact info@saintlouisartfair.com / 314-863-0278.",
+    "directorPhone": "314-863-0278"
   },
   "santa-fe-folk-art-market": {
     "captureConfidence": "medium",
@@ -991,13 +1004,16 @@
     "captureConfidence": "low"
   },
   "sedona-arts-festival": {
-    "captureConfidence": "low",
-    "fullAddress": "995 Upper Red Rock Loop Road, Sedona, AZ",
+    "captureConfidence": "medium",
+    "fullAddress": "995 Upper Red Rock Loop Road, West Sedona, AZ; mailing P.O. Box 4163, Sedona, AZ 86340",
     "sourceUrl": "https://sedonaartsfestival.org/festival-details-glance/",
     "venueName": "Sedona Red Rock High School",
     "startDate": "2026-10-10",
     "endDate": "2026-10-11",
-    "notes": "Sat 9am–5pm, Sun 10am–4pm. Weekend admission $15. Oldest/largest Sedona premiere arts festival; ~100 artists historically. Artist booth fees not published on sedonaartsfestival.org public pages."
+    "notes": "Oct 10–11, 2026 (Sat 9–5, Sun 10–4); weekend admission $15. Current artist booth fee / application fee not published; only outdated 2018 Fine Art Gallery piece fee ($20) remains on site. Contact title email director@sedonaartsfestival.org.",
+    "directorEmail": "director@sedonaartsfestival.org",
+    "directorPhone": "928-204-9456",
+    "juryProcess": "unknown"
   },
   "smithsonian-craft-show": {
     "captureConfidence": "medium",
@@ -1116,14 +1132,16 @@
     "notes": "Centennial year (founded 1926); Sat–Sun 8am–5pm. Now operated via Traditional Spanish Market / Atrisco Heritage Foundation (traditionalspanishmarket.org); listed spanishcolonial.org no longer hosts market pages. New-artist screening due Jan 26, 2026; jury registration Mar 16, 2026; artist booth registration due May 15, 2026. Booth fee amount not stated on public pages."
   },
   "tubac-festival-of-the-arts": {
-    "captureConfidence": "low",
-    "fullAddress": "Tubac, AZ 85646",
+    "captureConfidence": "medium",
+    "fullAddress": "Historic Village of Tubac, Tubac, AZ; Tubac Chamber Visitors Center, 8 Burruel Street, Tubac, AZ 85646 (mailing PO Box 1866, Tubac, AZ 85646-1866)",
     "sourceUrl": "https://www.tubacaz.com/event-details/68th-annual-tubac-festival-of-the-arts",
     "venueName": "Historic Village of Tubac",
     "startDate": "2027-02-10",
     "endDate": "2027-02-14",
     "directorEmail": "info@tubacaz.com",
-    "notes": "68th Annual; hosted by Tubac Chamber of Commerce. Artist/exhibitor apps via ZAPP (fees not published on tubacaz.com). Wed–Sun village-wide outdoor show."
+    "notes": "68th Annual Feb 10–14, 2027, 10am–5pm (Sun to 4pm). Artist/exhibitor apps via Zapplication; booth/application fee dollars not published on tubacaz.com. Hosted by Tubac Chamber of Commerce.",
+    "directorPhone": "520-398-2704",
+    "juryProcess": "unknown"
   },
   "uptown-art-fair": {
     "sourceUrl": "https://www.uptownartfair.com/",
@@ -1168,11 +1186,17 @@
     "applicationFee": 45,
     "attendance": 250000,
     "endDate": "2027-03-21",
-    "fullAddress": "Winter Park, FL 32789",
+    "fullAddress": "Central Park and along Park Avenue, Downtown Winter Park, FL; mailing P.O. Box 597, Winter Park, FL 32790-0597",
     "juryProcess": "blind",
     "sourceUrl": "https://www.wpsaf.org/info-for-artists/artist-application/",
     "startDate": "2027-03-19",
-    "venueName": "Central Park & Park Avenue"
+    "venueName": "Central Park and Park Avenue",
+    "boothFeeMin": 575,
+    "boothFeeMax": 575,
+    "directorEmail": "artistinfo@wpsaf.org",
+    "directorPhone": "407-644-7207",
+    "captureConfidence": "high",
+    "notes": "68th festival Mar 19–21, 2027. Non-refundable $45 ZAPP application fee; $575 exhibitor/booth fee (includes FL sales tax) due Dec 7, 2026. Images with no identifying markers; three-judge panel. Apps open Aug 1, 2026. Expected attendance over 250,000; ~218 artists."
   },
   "woodlands-waterway-arts-festival": {
     "captureConfidence": "low",

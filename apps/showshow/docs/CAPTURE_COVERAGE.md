@@ -35,18 +35,18 @@ Generated: 2026-08-27
 | The Guild Ann Arbor Summer Art Fair | MI | 2026-07-16→2026-07-18 | 2026-02-16 | 700–2500 | 50 | yes | medium |
 | State Street Area Art Fair | MI | 2026-07-16→2026-07-18 | 2026-03-02 |  |  | yes |  |
 | St. James Court Art Show | KY | 2026-10-02→2026-10-04 | 2026-05-01 | 550–625 | 35 |  | high |
-| Old Town Art Fair | IL | 2027-06-12→2027-06-13 | 2027-01-15 |  | 25 | yes | low |
+| Old Town Art Fair | IL | 2027-06-12→2027-06-13 | 2027-01-15 |  | 25 | yes | high |
 | Art Fair on the Square | WI | 2026-07-11→2026-07-12 | 2026-03-03 | 710 | 40 | yes |  |
 | Uptown Art Fair | MN | 2026-08-07→2026-08-09 |  |  |  |  |  |
 | Lakefront Festival of Arts | WI | 2026-06-12→2026-06-14 |  |  |  | yes | low |
 | Broad Ripple Art Fair | IN | 2026-05-16→2026-05-17 |  |  |  |  |  |
-| Columbus Arts Festival | OH | 2026-06-12→2026-06-14 | 2025-12-12 |  |  |  |  |
+| Columbus Arts Festival | OH | 2026-06-12→2026-06-14 | 2026-12-11 |  |  |  | medium |
 | Cain Park Arts Festival | OH | 2026-07-10→2026-07-12 |  |  |  |  | low |
 | Three Rivers Arts Festival | PA | 2026-06-05→2026-06-14 |  |  |  | yes | low |
 | Rittenhouse Square Fine Art Show | PA | 2026-09-18→2026-09-20 |  |  |  | yes |  |
-| Central Pennsylvania Festival of the Arts | PA | 2026-07-09→2026-07-12 | 2026-01-23 |  |  | yes | medium |
+| Central Pennsylvania Festival of the Arts | PA | 2027-07-07→2027-07-11 | 2026-01-23 |  |  | yes | medium |
 | Mount Gretna Outdoor Art Show | PA | 2027-08-21→2027-08-22 |  |  |  | yes | medium |
-| Armonk Outdoor Art Show | NY | 2026-09-26→2026-09-27 |  |  |  | yes | medium |
+| Armonk Outdoor Art Show | NY | 2026-09-26→2026-09-27 |  |  |  | yes | high |
 | Washington Square Outdoor Art Exhibit | NY | INACTIVE |  |  |  |  | low |
 | Boston Arts Festival | MA | 2026-09-12→2026-09-13 |  | 250 |  | yes | medium |
 | Smithsonian Craft Show | DC | 2027-04-07→2027-04-11 |  | 1605–2300 | 50 |  | medium |
@@ -60,8 +60,8 @@ Generated: 2026-08-27
 | Des Moines Arts Festival | IA | 2027-06-25→2027-06-27 |  | 615–1230 |  | yes | medium |
 | Summerfair | OH | 2026-02-06→2026-02-06 | 2025-12-01 | 525–1050 | 35 | yes | high |
 | Hyde Park Square Art Show | OH | 2026-10-04→2026-10-04 |  |  |  |  | low |
-| Plaza Art Fair | MO | 2026-09-25→2026-09-27 | 2026-04-12 |  |  |  |  |
-| Saint Louis Art Fair | MO | 2026-09-18→2026-09-20 |  |  |  | yes | medium |
+| Plaza Art Fair | MO | 2026-09-25→2026-09-27 | 2026-04-12 |  |  |  | high |
+| Saint Louis Art Fair | MO | 2026-09-18→2026-09-20 |  |  |  | yes | high |
 | Art & Apples Festival | MI | 2026-09-11→2026-09-13 | 2026-03-31 |  |  | yes |  |
 | Krasl Art Fair on the Bluff | MI | 2026-07-11→2026-07-12 |  |  |  |  | low |
 | Long's Park Art Festival | PA | 2026-09-04→2026-09-06 | 2026-03-01 |  | 20 | yes | low |
@@ -71,7 +71,7 @@ Generated: 2026-08-27
 | Chastain Park Arts Festival | GA | 2026-11-07→2026-11-08 |  |  |  | yes | medium |
 | Art Birmingham | MI | 2026-05-09→2026-05-10 |  |  |  |  |  |
 | Coconut Grove Arts Festival | FL | 2027-02-13→2027-02-15 | 2026-07-10 | 875 |  | yes | high |
-| Gasparilla Festival of the Arts | FL | 2027-03-06→2027-03-07 | 2026-09-07 |  |  | yes | medium |
+| Gasparilla Festival of the Arts | FL | 2027-03-06→2027-03-07 | 2026-09-07 |  |  | yes | high |
 | Winter Park Sidewalk Art Festival | FL | 2027-03-19→2027-03-21 | 2026-09-23 |  | 45 |  |  |
 | Cherry Creek Arts Festival | CO | 2026-07-03→2026-07-05 | 2026-12-01 | 350–900 | 45 | yes | high |
 | Sausalito Art Festival | CA | INACTIVE |  |  |  |  | low |
