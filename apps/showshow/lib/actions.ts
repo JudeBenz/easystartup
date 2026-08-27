@@ -160,3 +160,91 @@ export async function createBoothRequestAction(formData: FormData) {
   });
   revalidatePath("/booth-sit");
 }
+
+export async function checkoutProductAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { isPostgresEnabled } = await import("@/lib/db/client");
+  const { isStripeConfigured } = await import("@/lib/payments/stripe");
+  const { createProductCheckout } = await import("@/lib/payments/ledger");
+  const { getSessionUser } = await import("@/lib/session-data");
+  const { eq } = await import("drizzle-orm");
+  const { requirePostgres } = await import("@/lib/db/client");
+  const { products, artists, orders } = await import("@/lib/db/schema");
+  const { nanoid } = await import("nanoid");
+
+  if (!isPostgresEnabled() || !isStripeConfigured()) {
+    throw new Error(
+      "Checkout requires DATABASE_URL and Stripe keys. See docs/ARCHITECTURE.md.",
+    );
+  }
+
+  const productId = String(formData.get("productId"));
+  const quantity = Math.max(1, Number(formData.get("quantity") || 1));
+  const user = await getSessionUser();
+  const db = requirePostgres();
+  const product = await db
+    .select()
+    .from(products)
+    .where(eq(products.id, productId))
+    .limit(1)
+    .then((r) => r[0]);
+  if (!product || !product.active) throw new Error("Product not found");
+  const artist = await db
+    .select()
+    .from(artists)
+    .where(eq(artists.id, product.artistId))
+    .limit(1)
+    .then((r) => r[0]);
+  if (!artist?.stripeConnectAccountId || !artist.stripeConnectReady) {
+    throw new Error("Artist Connect account is not ready");
+  }
+
+  const orderId = `ord_${nanoid(10)}`;
+  const totalCents = product.priceCents * quantity;
+  await db.insert(orders).values({
+    id: orderId,
+    productId: product.id,
+    buyerUserId: user.id,
+    artistId: artist.id,
+    quantity,
+    totalCents,
+    status: "pending",
+  });
+
+  const origin = process.env.AUTH_URL ?? "http://localhost:3000";
+  const session = await createProductCheckout({
+    orderId,
+    productTitle: product.title,
+    quantity,
+    unitAmountCents: product.priceCents,
+    buyerEmail: user.email,
+    artistConnectAccountId: artist.stripeConnectAccountId,
+    successUrl: `${origin}/artists/${artist.slug}/store?paid=1`,
+    cancelUrl: `${origin}/artists/${artist.slug}/store?cancelled=1`,
+    buyerUserId: user.id,
+    artistId: artist.id,
+  });
+
+  if (!session.url) throw new Error("Stripe did not return a checkout URL");
+  redirect(session.url);
+}
+
+export async function startArtistConnectAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { isPostgresEnabled } = await import("@/lib/db/client");
+  const { isStripeConfigured } = await import("@/lib/payments/stripe");
+  const { createArtistConnectOnboarding } = await import("@/lib/payments/ledger");
+
+  if (!isPostgresEnabled() || !isStripeConfigured()) {
+    throw new Error("Connect onboarding requires DATABASE_URL and Stripe keys.");
+  }
+  const artistId = String(formData.get("artistId"));
+  const origin = process.env.AUTH_URL ?? "http://localhost:3000";
+  const slug = String(formData.get("artistSlug"));
+  const { url } = await createArtistConnectOnboarding(
+    artistId,
+    `${origin}/artists/${slug}/store?connect=return`,
+    `${origin}/artists/${slug}/store?connect=refresh`,
+  );
+  redirect(url);
+}

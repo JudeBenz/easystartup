@@ -8,6 +8,10 @@ import {
   getThemePreset,
   resolveThemeId,
 } from "@/lib/themes";
+import { isPostgresEnabled } from "@/lib/db/client";
+import { isStripeConfigured } from "@/lib/payments/stripe";
+import { auth, signIn, signOut } from "@/lib/auth";
+import { getSessionUser } from "@/lib/session-data";
 
 export const metadata = { title: "Settings" };
 
@@ -15,13 +19,98 @@ export default async function SettingsPage() {
   const jar = await cookies();
   const current = resolveThemeId(jar.get(THEME_COOKIE)?.value ?? DEFAULT_THEME);
   const active = getThemePreset(current);
+  const session = await auth();
+  const user = await getSessionUser();
+  const pg = isPostgresEnabled();
+  const stripeOk = isStripeConfigured();
 
   return (
     <div>
       <PageHeader
         title="Settings"
-        description="Pick a color scheme that is easy on your eyes. Your choice is saved on this device."
+        description="Account, theme, and system readiness for production hosting."
       />
+
+      <Panel className="mb-6">
+        <h2 className="font-display text-[1.4rem]">Account</h2>
+        <p className="mt-2 text-[1.05rem] text-[var(--muted)]">
+          Signed in as <strong>{user.name}</strong> ({user.email}) · roles{" "}
+          {user.roles.join(", ")}
+          {session?.user ? " · Auth.js session" : " · demo persona cookie"}
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <form
+            action={async (fd) => {
+              "use server";
+              await signIn("credentials", {
+                email: String(fd.get("email")),
+                password: String(fd.get("password")),
+                redirectTo: "/settings",
+              });
+            }}
+            className="grid gap-3"
+          >
+            <p className="text-base font-bold">Email sign-in</p>
+            <input
+              name="email"
+              type="email"
+              required
+              placeholder="you@example.com"
+              className="ss-input"
+              defaultValue={user.email}
+            />
+            <input
+              name="password"
+              type="password"
+              required
+              placeholder="Password"
+              className="ss-input"
+            />
+            <button type="submit" className="ss-btn ss-btn-primary min-h-[var(--tap)]">
+              Sign in
+            </button>
+            <p className="text-sm text-[var(--muted)]">
+              Seeded demo password when DB is seeded: <code>showshow</code>
+            </p>
+          </form>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/settings" });
+            }}
+            className="flex flex-col justify-end"
+          >
+            <button type="submit" className="ss-btn ss-btn-secondary min-h-[var(--tap)]">
+              Sign out Auth.js session
+            </button>
+          </form>
+        </div>
+      </Panel>
+
+      <Panel className="mb-6">
+        <h2 className="font-display text-[1.4rem]">Production readiness</h2>
+        <ul className="mt-3 space-y-2 text-[1.05rem]">
+          <li className="flex items-center justify-between gap-3">
+            <span>Postgres (`DATABASE_URL`)</span>
+            <Badge tone={pg ? "field" : "warn"}>{pg ? "connected path" : "demo JSON fallback"}</Badge>
+          </li>
+          <li className="flex items-center justify-between gap-3">
+            <span>Stripe keys</span>
+            <Badge tone={stripeOk ? "field" : "warn"}>
+              {stripeOk ? "configured" : "not set — store stays placeholder"}
+            </Badge>
+          </li>
+          <li className="flex items-center justify-between gap-3">
+            <span>Auth secret</span>
+            <Badge tone={process.env.AUTH_SECRET ? "field" : "warn"}>
+              {process.env.AUTH_SECRET ? "set" : "missing AUTH_SECRET"}
+            </Badge>
+          </li>
+        </ul>
+        <p className="mt-3 text-base text-[var(--muted)]">
+          See <code>docs/ARCHITECTURE.md</code> and <code>.env.example</code> for the money-safe stack.
+        </p>
+      </Panel>
 
       <Panel className="mb-6">
         <p className="text-[1.125rem]">
@@ -78,24 +167,6 @@ export default async function SettingsPage() {
           </button>
         </div>
       </form>
-
-      <Panel className="mt-8">
-        <h2 className="font-display text-[1.4rem]">Preview</h2>
-        <p className="mt-2 text-[1.05rem] text-[var(--muted)]">
-          Buttons and status chips update with your theme.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button type="button" className="ss-btn ss-btn-primary">
-            Primary
-          </button>
-          <button type="button" className="ss-btn ss-btn-secondary">
-            Secondary
-          </button>
-          <Badge tone="field">Accepted</Badge>
-          <Badge tone="signal">Promoted</Badge>
-          <Badge tone="warn">Waitlist</Badge>
-        </div>
-      </Panel>
     </div>
   );
 }

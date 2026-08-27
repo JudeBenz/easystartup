@@ -4,24 +4,24 @@ import type { NormalizedEditionFact } from "@/lib/ingestion/schema";
 
 type PriorityShow = (typeof priority100)[number];
 type Capture = {
-  startDate?: string;
-  endDate?: string;
-  applicationDeadline?: string;
-  boothFeeMin?: number;
-  boothFeeMax?: number;
-  applicationFee?: number;
-  juryProcess?: NormalizedEditionFact["juryProcess"];
-  venueName?: string;
-  fullAddress?: string;
-  attendance?: number;
-  directorName?: string;
-  directorEmail?: string;
-  directorPhone?: string;
-  sourceUrl?: string;
-  captureConfidence?: "high" | "medium" | "low" | "none";
-  notes?: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  applicationDeadline?: string | null;
+  boothFeeMin?: number | null;
+  boothFeeMax?: number | null;
+  applicationFee?: number | null;
+  juryProcess?: NormalizedEditionFact["juryProcess"] | null;
+  venueName?: string | null;
+  fullAddress?: string | null;
+  attendance?: number | null;
+  directorName?: string | null;
+  directorEmail?: string | null;
+  directorPhone?: string | null;
+  sourceUrl?: string | null;
+  captureConfidence?: "high" | "medium" | "low" | "none" | null;
+  notes?: string | null;
   /** When true, show is ceased/unreachable — keep directory row but do not invent fees/dates. */
-  inactive?: boolean;
+  inactive?: boolean | null;
 };
 
 const SEASON_MONTH: Record<string, number> = {
@@ -99,16 +99,16 @@ function factFromPriority(
     applicationDeadline,
     venueName: capture?.venueName ?? `${show.city} festival grounds`,
     fullAddress: capture?.fullAddress ?? `${show.city}, ${show.region}`,
-    boothFeeMin: inactive ? undefined : capture?.boothFeeMin,
-    boothFeeMax: inactive ? undefined : capture?.boothFeeMax,
-    applicationFee: inactive ? undefined : capture?.applicationFee,
+    boothFeeMin: inactive ? undefined : (capture?.boothFeeMin ?? undefined),
+    boothFeeMax: inactive ? undefined : (capture?.boothFeeMax ?? undefined),
+    applicationFee: inactive ? undefined : (capture?.applicationFee ?? undefined),
     currency: "USD",
     juryProcess: capture?.juryProcess ?? "unknown",
-    attendance: inactive ? undefined : capture?.attendance,
+    attendance: inactive ? undefined : (capture?.attendance ?? undefined),
     attendanceSourceUrl: !inactive && capture?.attendance ? sourceUrl : undefined,
-    directorName: capture?.directorName,
-    directorEmail: capture?.directorEmail,
-    directorPhone: capture?.directorPhone,
+    directorName: capture?.directorName ?? undefined,
+    directorEmail: capture?.directorEmail ?? undefined,
+    directorPhone: capture?.directorPhone ?? undefined,
     socialLinks: [],
     externalRefs: [],
     sourceUrl,

@@ -379,16 +379,25 @@ export async function getWeekendMode(showSlug: string, showgoerUserId: string) {
 }
 
 export async function listUsers() {
+  const { pgListUsers } = await import("./pg-users");
+  const fromPg = await pgListUsers();
+  if (fromPg) return fromPg;
   const db = await getDb();
   return db.users;
 }
 
 export async function getUser(id: string) {
+  const { pgGetUser } = await import("./pg-users");
+  const fromPg = await pgGetUser(id);
+  if (fromPg !== undefined) return fromPg;
   const db = await getDb();
   return db.users.find((u) => u.id === id) ?? null;
 }
 
 export async function getArtistIdForUser(userId: string) {
+  const { pgGetArtistIdForUser } = await import("./pg-users");
+  const fromPg = await pgGetArtistIdForUser(userId);
+  if (fromPg !== undefined) return fromPg;
   const db = await getDb();
   return db.artists.find((a) => a.userId === userId)?.id ?? null;
 }

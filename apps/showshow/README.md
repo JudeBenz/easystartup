@@ -47,4 +47,15 @@ Use the header Switch control:
 
 ## Stack
 
-Next.js 15 · React 19 · Tailwind 4 · Zod · durable demo store (atomic write-through `.data/showshow-demo.json`)
+Next.js 15 · React 19 · Tailwind 4 · Zod · **Postgres + Drizzle** (when `DATABASE_URL` is set) · Auth.js · Stripe Connect · durable demo JSON fallback
+
+Production architecture (money, auth, hosting): [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+
+```bash
+# optional local Postgres
+pnpm --filter showshow db:up
+# set DATABASE_URL in apps/showshow/.env.local (see .env.example)
+pnpm --filter showshow db:push
+pnpm --filter showshow db:seed
+```
+
