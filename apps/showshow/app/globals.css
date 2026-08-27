@@ -1,6 +1,25 @@
 @import "tailwindcss";
 
-:root {
+/*
+  Theme tokens. Default = rust & turquoise.
+  Switch with html[data-theme="…"] from Settings (cookie ss_theme).
+*/
+:root,
+[data-theme="rust-turquoise"] {
+  --paper: #f2f6f5;
+  --surface: #ffffff;
+  --ink: #1a1f1e;
+  --muted: #3f4a48;
+  --line: #c5d0cd;
+  --accent: #b54a2a;
+  --accent-deep: #8f3a20;
+  --good: #0f7f7b;
+  --warn: #8a5a00;
+  --focus: #0f7f7b;
+  --paper-2: #e4ecea;
+}
+
+[data-theme="fair-crimson"] {
   --paper: #f0f2f4;
   --surface: #ffffff;
   --ink: #0e1116;
@@ -11,6 +30,52 @@
   --good: #0f5c45;
   --warn: #8a5a00;
   --focus: #0b57d0;
+  --paper-2: #e4e8ec;
+}
+
+[data-theme="spruce-copper"] {
+  --paper: #eef3f0;
+  --surface: #ffffff;
+  --ink: #14201a;
+  --muted: #3d5248;
+  --line: #c4d2c9;
+  --accent: #c46b3a;
+  --accent-deep: #9a522c;
+  --good: #1f5c45;
+  --warn: #8a5a00;
+  --focus: #1f5c45;
+  --paper-2: #dfe8e2;
+}
+
+[data-theme="indigo-sand"] {
+  --paper: #f3f0e8;
+  --surface: #fffcf7;
+  --ink: #1a1a18;
+  --muted: #4a463c;
+  --line: #d4cfc2;
+  --accent: #2f3a8f;
+  --accent-deep: #232b6c;
+  --good: #3f6b5a;
+  --warn: #8a5a00;
+  --focus: #2f3a8f;
+  --paper-2: #e8e3d6;
+}
+
+[data-theme="midnight-sea"] {
+  --paper: #0f1716;
+  --surface: #182422;
+  --ink: #e8efed;
+  --muted: #a9b8b4;
+  --line: #2c3b38;
+  --accent: #e07a4b;
+  --accent-deep: #c45f33;
+  --good: #3dbdb5;
+  --warn: #e0b14a;
+  --focus: #3dbdb5;
+  --paper-2: #141d1c;
+}
+
+:root {
   --radius-panel: 10px;
   --radius-control: 6px;
   --tap: 48px;
@@ -24,7 +89,6 @@
   --field-bright: var(--good);
   --signal: var(--accent);
   --signal-deep: var(--accent-deep);
-  --paper-2: #e4e8ec;
 }
 
 @theme inline {

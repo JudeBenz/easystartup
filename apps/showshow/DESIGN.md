@@ -4,17 +4,19 @@
 Printed fair catalog meets park-service signage: cool paper, near-black ink, one crimson ribbon accent, condensed display type, hyperlegible body type. No glow, no glass, no nested cards.
 
 ## Palette
-| Token | Value | Use |
+Default theme: **Rust & turquoise**. Users can switch in Settings (`ss_theme` cookie).
+
+| Token | Rust & turquoise | Use |
 |---|---|---|
-| paper | `#F0F2F4` | Page background |
+| paper | `#F2F6F5` | Page background |
 | surface | `#FFFFFF` | Panels, inputs |
-| ink | `#0E1116` | Primary text |
-| muted | `#3D4654` | Secondary text (still ≥4.5:1 on paper) |
-| line | `#C5CCD6` | Borders |
-| accent | `#B91C1C` | Primary actions, brand mark |
-| accent-deep | `#8F1515` | Pressed/hover |
-| good | `#0F5C45` | Accepted / positive |
-| warn | `#8A5A00` | Caution |
+| ink | `#1A1F1E` | Primary text |
+| muted | `#3F4A48` | Secondary text |
+| line | `#C5D0CD` | Borders |
+| accent | `#B54A2A` | Primary actions (rust) |
+| good | `#0F7F7B` | Success / secondary brand (turquoise) |
+
+Other presets: Fair catalog, Spruce & copper, Indigo & sand, Midnight sea.
 
 ## Type
 - Display: **Big Shoulders Text** — brand, page titles

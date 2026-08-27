@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { SESSION_COOKIE } from "@/lib/session-cookie";
+import { THEME_COOKIE, resolveThemeId } from "@/lib/themes";
 import {
   addComment,
   createAnnouncement,
@@ -21,6 +22,13 @@ export async function switchUserAction(formData: FormData) {
   const userId = String(formData.get("userId") || "user_aria");
   const jar = await cookies();
   jar.set(SESSION_COOKIE, userId, { path: "/" });
+  revalidatePath("/", "layout");
+}
+
+export async function setThemeAction(formData: FormData) {
+  const theme = resolveThemeId(String(formData.get("theme") || ""));
+  const jar = await cookies();
+  jar.set(THEME_COOKIE, theme, { path: "/", maxAge: 60 * 60 * 24 * 365 });
   revalidatePath("/", "layout");
 }
 

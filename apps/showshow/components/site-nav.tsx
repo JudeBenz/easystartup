@@ -25,6 +25,7 @@ const MORE: NavItem[] = [
   { href: "/alerts", label: "Alerts" },
   { href: "/artists", label: "Artists" },
   { href: "/director", label: "Director desk" },
+  { href: "/settings", label: "Settings" },
 ];
 
 function isActive(pathname: string, href: string) {

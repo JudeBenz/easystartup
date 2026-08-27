@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Atkinson_Hyperlegible, Bebas_Neue } from "next/font/google";
+import { cookies } from "next/headers";
+import { Atkinson_Hyperlegible, Big_Shoulders } from "next/font/google";
+import { DEFAULT_THEME, THEME_COOKIE, resolveThemeId } from "@/lib/themes";
 import "./globals.css";
 
-const display = Bebas_Neue({
+const display = Big_Shoulders({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["500", "600"],
 });
 
 const body = Atkinson_Hyperlegible({
@@ -26,12 +28,15 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#F0F2F4",
+  themeColor: "#F2F6F5",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const jar = await cookies();
+  const theme = resolveThemeId(jar.get(THEME_COOKIE)?.value ?? DEFAULT_THEME);
+
   return (
-    <html lang="en">
+    <html lang="en" data-theme={theme} suppressHydrationWarning>
       <body className={`${display.variable} ${body.variable}`}>{children}</body>
     </html>
   );
