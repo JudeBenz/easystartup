@@ -10,7 +10,9 @@ export const metadata = { title: "Jury feedback" };
 export default async function JuryPage() {
   const artistId = await getSessionArtistId();
   const rows = await listJuryFeedback();
-  const editions = (await getEditionOptions()).filter((e) => e.edition.year === 2026);
+  const editions = (await getEditionOptions()).filter(
+    (e) => e.edition.status === "upcoming" || e.edition.status === "active",
+  );
 
   return (
     <div>
@@ -25,11 +27,11 @@ export default async function JuryPage() {
           {!artistId ? (
             <p className="mt-3 text-[1.05rem] text-[var(--muted)]">Switch to an artist persona to post.</p>
           ) : (
-            <form action={createJuryFeedbackAction} className="mt-4 grid gap-4 text-[1.125rem]">
+            <form action={createJuryFeedbackAction} className="mt-4 grid gap-3 text-sm">
               <input type="hidden" name="artistId" value={artistId} />
               <label className="ss-label">
                 <span>Show</span>
-                <select name="editionId" required className="ss-select">
+                <select name="editionId" required className="ss-input">
                   {editions.map(({ edition, showName }) => (
                     <option key={edition.id} value={edition.id}>
                       {showName}
@@ -39,7 +41,7 @@ export default async function JuryPage() {
               </label>
               <label className="ss-label">
                 <span>Outcome</span>
-                <select name="outcome" className="ss-select">
+                <select name="outcome" className="ss-input">
                   <option value="accepted">accepted</option>
                   <option value="waitlisted">waitlisted</option>
                   <option value="declined">declined</option>
@@ -85,7 +87,7 @@ export default async function JuryPage() {
                   {row.outcome}
                 </Badge>
               </div>
-              {row.notes ? <p className="mt-3 text-[1.05rem]">{row.notes}</p> : null}
+              {row.notes ? <p className="mt-3 text-sm">{row.notes}</p> : null}
               <p className="mt-2 text-base text-[var(--muted)]">{formatDate(row.createdAt)}</p>
             </Panel>
           ))}

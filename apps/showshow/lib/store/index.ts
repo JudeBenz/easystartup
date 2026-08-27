@@ -21,7 +21,8 @@ export async function listShows() {
       const editions = db.editions
         .filter((e) => e.showId === show.id)
         .sort((a, b) => b.year - a.year);
-      const current = editions.find((e) => e.year === 2026) ?? editions[0];
+      const current =
+        editions.find((e) => e.status === "upcoming" || e.status === "active") ?? editions[0];
       const agg = db.aggregates
         .filter((a) => a.showId === show.id && a.minNMet)
         .sort((a, b) => (b.medianNet ?? 0) - (a.medianNet ?? 0))[0];
@@ -40,7 +41,8 @@ export async function getShowBySlug(slug: string) {
   const editions = db.editions
     .filter((e) => e.showId === show.id)
     .sort((a, b) => b.year - a.year);
-  const current = editions.find((e) => e.year === 2026) ?? editions[0];
+  const current =
+    editions.find((e) => e.status === "upcoming" || e.status === "active") ?? editions[0];
   const socialLinks = db.socialLinks.filter((l) => editions.some((e) => e.id === l.editionId));
   const externalRefs = db.externalRefs.filter((r) => r.showId === show.id);
   const provenance = db.provenance.filter((p) => editions.some((e) => e.id === p.entityId));
@@ -79,7 +81,7 @@ export async function getShowBySlug(slug: string) {
 export async function listEditionsForCalendar() {
   const db = await getDb();
   return db.editions
-    .filter((e) => e.year === 2026)
+    .filter((e) => e.status === "upcoming" || e.status === "active")
     .map((edition) => ({
       edition,
       show: db.shows.find((s) => s.id === edition.showId)!,
@@ -335,7 +337,11 @@ export async function getDirectorDashboard(userId: string) {
   const director = db.directors.find((d) => d.userId === userId);
   if (!director) return null;
   const shows = db.shows.filter((s) => director.showIds.includes(s.id));
-  const editions = db.editions.filter((e) => shows.some((s) => s.id === e.showId) && e.year === 2026);
+  const editions = db.editions.filter(
+    (e) =>
+      shows.some((s) => s.id === e.showId) &&
+      (e.status === "upcoming" || e.status === "active"),
+  );
   const announcements = db.announcements.filter((a) =>
     editions.some((e) => e.id === a.editionId),
   );
@@ -379,7 +385,7 @@ export async function openWaitlistBooth(editionId: string, boothLabel?: string) 
 export async function getEditionOptions(): Promise<{ edition: ShowEdition; showName: string }[]> {
   const db = await getDb();
   return db.editions
-    .filter((e) => e.year === 2026 || e.year === 2025)
+    .filter((e) => e.year >= 2025)
     .map((edition) => ({
       edition,
       showName: db.shows.find((s) => s.id === edition.showId)!.name,

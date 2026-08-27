@@ -69,7 +69,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
         <div className="space-y-6">
           <Panel>
             <h2 className="font-display text-lg font-bold">Facts</h2>
-            <dl className="mt-4 grid gap-4 text-[1.125rem] sm:grid-cols-2">
+            <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
               <Fact label="Address" value={current?.fullAddress} />
               <Fact
                 label="Booth fee"
@@ -128,7 +128,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                     Median gross {formatMoney(agg.medianGrossSales ?? 0)} · expenses{" "}
                     {formatMoney(agg.medianTotalExpenses ?? 0)}
                   </p>
-                  <ul className="mt-3 space-y-1 text-[1.05rem]">
+                  <ul className="mt-3 space-y-1 text-sm">
                     {agg.topMediums.map((m) => (
                       <li key={m.medium}>
                         {MEDIUM_LABELS[m.medium]} · {Math.round(m.share * 100)}% of reported sales
@@ -149,7 +149,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
 
           <Panel>
             <h2 className="font-display text-lg font-bold">Year over year</h2>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
+            <ul className="mt-3 space-y-2 text-sm">
               {editions.map((e) => (
                 <li key={e.id} className="flex justify-between gap-3 border-b border-[var(--line)] py-2 last:border-0">
                   <span>
@@ -198,7 +198,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
         <div className="space-y-6">
           <Panel>
             <h2 className="font-display text-lg font-bold">Coverage links</h2>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
+            <ul className="mt-3 space-y-2 text-sm">
               {socialLinks.map((l) => (
                 <li key={l.id}>
                   <a className="text-[var(--field-bright)] underline-offset-2 hover:underline" href={l.url} target="_blank" rel="noreferrer">
@@ -215,7 +215,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
             <p className="mt-1 text-base text-[var(--muted)]">
               Link-outs only — we never store rankings, scores, or editorial copy.
             </p>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
+            <ul className="mt-3 space-y-2 text-sm">
               {externalRefs.map((r) => (
                 <li key={r.id}>
                   <a className="text-[var(--field-bright)] underline-offset-2 hover:underline" href={r.url} target="_blank" rel="noreferrer">
@@ -245,7 +245,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           {alerts.length ? (
             <Panel>
               <h2 className="font-display text-lg font-bold">Alerts</h2>
-              <ul className="mt-3 space-y-2 text-[1.05rem]">
+              <ul className="mt-3 space-y-2 text-sm">
                 {alerts.map((a) => (
                   <li key={a.id}>
                     <Badge tone="warn">{a.kind}</Badge>
@@ -260,7 +260,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           {weather.length ? (
             <Panel>
               <h2 className="font-display text-lg font-bold">Historical weather</h2>
-              <ul className="mt-3 space-y-2 text-[1.05rem]">
+              <ul className="mt-3 space-y-2 text-sm">
                 {weather.map((w) => (
                   <li key={w.id} className="flex justify-between gap-2">
                     <span>{formatDate(w.date)}</span>
@@ -275,7 +275,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
 
           <Panel>
             <h2 className="font-display text-lg font-bold">Waitlist & booth-sit</h2>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
+            <ul className="mt-3 space-y-2 text-sm">
               {waitlist.map((w) => (
                 <li key={w.id}>
                   Waitlist booth {w.boothLabel ?? "open"} · <Badge>{w.status}</Badge>

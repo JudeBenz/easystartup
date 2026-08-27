@@ -104,9 +104,9 @@ a:hover {
 }
 
 .font-display {
-  font-family: var(--font-display), "Big Shoulders", Impact, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  font-family: var(--font-display), "Bebas Neue", Impact, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .ss-panel {

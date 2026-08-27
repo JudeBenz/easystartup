@@ -1,0 +1,107 @@
+{
+  "ann-arbor-street-art-fair": {
+    "startDate": "2026-07-16",
+    "endDate": "2026-07-18",
+    "applicationDeadline": "2026-02-15",
+    "boothFeeMin": 700,
+    "boothFeeMax": 1500,
+    "applicationFee": 45,
+    "juryProcess": "panel",
+    "venueName": "North University / Ingalls Mall / East Washington",
+    "fullAddress": "Ann Arbor, MI 48104",
+    "attendance": 500000,
+    "sourceUrl": "https://artfair.org/artist-application/"
+  },
+  "winter-park-sidewalk-art-festival": {
+    "startDate": "2027-03-19",
+    "endDate": "2027-03-21",
+    "applicationDeadline": "2026-09-23",
+    "applicationFee": 45,
+    "juryProcess": "blind",
+    "venueName": "Central Park & Park Avenue",
+    "fullAddress": "Winter Park, FL 32789",
+    "attendance": 250000,
+    "sourceUrl": "https://www.wpsaf.org/info-for-artists/artist-application/"
+  },
+  "cherry-creek-arts-festival": {
+    "startDate": "2026-07-03",
+    "endDate": "2026-07-05",
+    "juryProcess": "blind",
+    "venueName": "Cherry Creek North",
+    "fullAddress": "2nd Avenue, Denver, CO 80206",
+    "sourceUrl": "https://cherryarts.org/events/cherry-creek-arts-festival/"
+  },
+  "coconut-grove-arts-festival": {
+    "startDate": "2027-02-13",
+    "endDate": "2027-02-15",
+    "juryProcess": "blind",
+    "venueName": "Coconut Grove waterfront",
+    "fullAddress": "Coconut Grove, Miami, FL 33133",
+    "sourceUrl": "https://cgaf.com/"
+  },
+  "st-james-court-art-show": {
+    "startDate": "2026-10-02",
+    "endDate": "2026-10-04",
+    "applicationFee": 40,
+    "juryProcess": "panel",
+    "venueName": "St. James Court",
+    "fullAddress": "St James Ct, Louisville, KY 40208",
+    "sourceUrl": "https://www.stjamescourtartshow.com/"
+  },
+  "plaza-art-fair": {
+    "startDate": "2026-09-25",
+    "endDate": "2026-09-27",
+    "juryProcess": "panel",
+    "venueName": "Country Club Plaza",
+    "fullAddress": "Kansas City, MO 64112",
+    "sourceUrl": "https://www.plazaartfair.com/"
+  },
+  "des-moines-arts-festival": {
+    "startDate": "2027-06-25",
+    "endDate": "2027-06-27",
+    "juryProcess": "blind",
+    "venueName": "Pappajohn Sculpture Park / downtown",
+    "fullAddress": "Des Moines, IA 50309",
+    "sourceUrl": "https://www.desmoinesartsfestival.org/"
+  },
+  "utah-arts-festival": {
+    "startDate": "2026-06-18",
+    "endDate": "2026-06-21",
+    "juryProcess": "panel",
+    "venueName": "Library Square / Washington Square",
+    "fullAddress": "Salt Lake City, UT 84111",
+    "sourceUrl": "https://uaf.org/"
+  },
+  "main-st-fort-worth-arts-festival": {
+    "startDate": "2027-04-15",
+    "endDate": "2027-04-18",
+    "juryProcess": "panel",
+    "venueName": "Downtown Main Street",
+    "fullAddress": "Fort Worth, TX 76102",
+    "sourceUrl": "https://mainstreetartsfest.org/"
+  },
+  "santa-fe-international-folk-art-market": {
+    "startDate": "2027-07-08",
+    "endDate": "2027-07-11",
+    "juryProcess": "invitation",
+    "venueName": "Santa Fe Railyard Park",
+    "fullAddress": "Santa Fe, NM 87501",
+    "sourceUrl": "https://folkartmarket.org/"
+  },
+  "smithsonian-craft-show": {
+    "startDate": "2027-04-29",
+    "endDate": "2027-05-02",
+    "juryProcess": "blind",
+    "venueName": "National Building Museum",
+    "fullAddress": "401 F St NW, Washington, DC 20001",
+    "sourceUrl": "https://www.smithsoniancraftshow.org/"
+  },
+  "mainsail-art-festival": {
+    "startDate": "2027-04-03",
+    "endDate": "2027-04-04",
+    "juryProcess": "panel",
+    "venueName": "Vinoy Park",
+    "fullAddress": "St. Petersburg, FL 33701",
+    "sourceUrl": "https://www.mainsailart.org/"
+  }
+}

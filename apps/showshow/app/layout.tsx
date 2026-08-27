@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Atkinson_Hyperlegible, Big_Shoulders } from "next/font/google";
+import { Atkinson_Hyperlegible, Bebas_Neue } from "next/font/google";
 import "./globals.css";
 
-const display = Big_Shoulders({
+const display = Bebas_Neue({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: "400",
 });
 
 const body = Atkinson_Hyperlegible({

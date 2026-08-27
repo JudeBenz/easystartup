@@ -22,7 +22,7 @@ export default async function AlertsPage() {
                 <Badge tone="warn">{alert.kind}</Badge>
                 <h2 className="mt-2 font-display text-lg font-bold">{alert.title}</h2>
                 <p className="mt-1 text-[1.05rem] text-[var(--muted)]">{alert.body}</p>
-                <p className="mt-2 text-[1.05rem]">
+                <p className="mt-2 text-sm">
                   <Link href={`/shows/${show.slug}`} className="font-medium hover:text-[var(--field)]">
                     {show.name}
                   </Link>{" "}

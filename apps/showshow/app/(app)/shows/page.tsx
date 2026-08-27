@@ -7,7 +7,9 @@ export const metadata = { title: "Shows" };
 
 export default async function ShowsPage() {
   const rows = await listShows();
-  const current = rows.filter((r) => r.current?.year === 2026);
+  const current = rows.filter(
+    (r) => r.current && (r.current.status === "upcoming" || r.current.status === "active"),
+  );
 
   return (
     <div>

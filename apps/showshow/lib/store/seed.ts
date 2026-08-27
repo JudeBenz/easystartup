@@ -7,7 +7,7 @@ import type {
   User,
 } from "@/types/domain";
 import { ManualFactAdapter } from "@/lib/ingestion/manual";
-import { SEED_OFFICIAL_FACTS } from "@/lib/ingestion/seed-facts";
+import { ALL_SEED_FACTS } from "@/lib/ingestion/seed-facts";
 
 const MEDIUMS: Medium[] = [
   "ceramics",
@@ -26,7 +26,7 @@ const MEDIUMS: Medium[] = [
 
 export async function buildSeed(): Promise<DemoData> {
   const adapter = new ManualFactAdapter(
-    SEED_OFFICIAL_FACTS.map((f) => ({
+    ALL_SEED_FACTS.map((f) => ({
       ...f,
       adapterId: "manual-v1",
       sourceKind: "manual" as const,
@@ -207,7 +207,7 @@ export async function buildSeed(): Promise<DemoData> {
     {
       id: "sg_lee",
       userId: "user_lee",
-      favoriteShowIds: ["show_sausalito-art-festival", "show_acc-show-sf"],
+      favoriteShowIds: ["show_sausalito-art-festival", "show_cherry-creek-arts-festival"],
       followedArtistIds: ["artist_aria", "artist_sam"],
     },
   ];
@@ -223,22 +223,22 @@ export async function buildSeed(): Promise<DemoData> {
     },
   ];
 
-  const editions2026 = editions.filter((e) => e.year === 2026);
+  const upcoming = editions.filter((e) => e.status === "upcoming" || e.status === "active");
   const pick = (...slugs: string[]) =>
-    editions2026.filter((e) => slugs.some((s) => e.id.includes(s)));
+    upcoming.filter((e) => slugs.some((s) => e.id.includes(s)));
 
   const ariaEditions = pick(
     "old-town-art-fair",
     "art-fair-on-the-square",
     "uptown-art-fair",
-    "lakefront-festival-arts",
+    "lakefront-festival-of-arts",
     "ann-arbor-street-art-fair",
   );
   const samEditions = pick(
     "cherry-creek-arts-festival",
-    "boulder-creek-festival-arts",
+    "boulder-creek-festival",
     "santa-fe-folk-art-market",
-    "scottsdale-arts-festival",
+    "celebration-of-fine-art-scottsdale",
     "plaza-art-fair",
   );
 
@@ -363,27 +363,56 @@ export async function buildSeed(): Promise<DemoData> {
   ];
 
   const routeStops: DemoData["routeStops"] = [
-    ...pick("old-town-art-fair", "art-fair-on-the-square", "lakefront-festival-arts", "ann-arbor-street-art-fair").map(
-      (e, order) => ({
-        id: `rs_mw_${order}`,
-        routeId: "route_midwest",
-        editionId: e.id,
-        order,
-        travelMilesFromPrev: order === 0 ? 0 : 140 + order * 30,
-        travelHoursFromPrev: order === 0 ? 0 : 2.5 + order * 0.4,
-      }),
-    ),
-    ...pick("scottsdale-arts-festival", "boulder-creek-festival-arts", "cherry-creek-arts-festival", "santa-fe-folk-art-market").map(
-      (e, order) => ({
-        id: `rs_mt_${order}`,
-        routeId: "route_mountain",
-        editionId: e.id,
-        order,
-        travelMilesFromPrev: order === 0 ? 0 : 300 + order * 80,
-        travelHoursFromPrev: order === 0 ? 0 : 5 + order,
-      }),
-    ),
+    ...pick(
+      "old-town-art-fair",
+      "art-fair-on-the-square",
+      "lakefront-festival-of-arts",
+      "ann-arbor-street-art-fair",
+    ).map((e, order) => ({
+      id: `rs_mw_${order}`,
+      routeId: "route_midwest",
+      editionId: e.id,
+      order,
+      travelMilesFromPrev: order === 0 ? 0 : 140 + order * 30,
+      travelHoursFromPrev: order === 0 ? 0 : 2.5 + order * 0.4,
+    })),
+    ...pick(
+      "celebration-of-fine-art-scottsdale",
+      "boulder-creek-festival",
+      "cherry-creek-arts-festival",
+      "santa-fe-folk-art-market",
+    ).map((e, order) => ({
+      id: `rs_mt_${order}`,
+      routeId: "route_mountain",
+      editionId: e.id,
+      order,
+      travelMilesFromPrev: order === 0 ? 0 : 300 + order * 80,
+      travelHoursFromPrev: order === 0 ? 0 : 5 + order,
+    })),
+    ...pick(
+      "coconut-grove-arts-festival",
+      "gasparilla-festival-of-the-arts",
+      "winter-park-sidewalk-art-festival",
+      "mainsail-art-festival",
+    ).map((e, order) => ({
+      id: `rs_fl_${order}`,
+      routeId: "route_florida",
+      editionId: e.id,
+      order,
+      travelMilesFromPrev: order === 0 ? 0 : 180 + order * 40,
+      travelHoursFromPrev: order === 0 ? 0 : 3 + order * 0.5,
+    })),
   ];
+
+  // Add Florida winter circuit
+  routes.push({
+    id: "route_florida",
+    slug: "florida-winter-circuit",
+    name: "Florida Winter Circuit",
+    region: "Southeast",
+    seasonLabel: "Winter 2026–27",
+    description: "Coconut Grove → Gasparilla → Winter Park → Mainsail — classic FL winter run.",
+  });
 
   const bookings: DemoData["bookings"] = applications
     .filter((a) => a.status === "accepted" || a.status === "applied")
@@ -424,7 +453,7 @@ export async function buildSeed(): Promise<DemoData> {
   const comments: DemoData["comments"] = [
     {
       id: "c1",
-      editionId: editions2026.find((e) => e.id.includes("cherry-creek"))!.id,
+      editionId: upcoming.find((e) => e.id.includes("cherry-creek"))!.id,
       authorUserId: "user_lee",
       body: "Coming Saturday afternoon — any shade on the south blocks?",
       createdAt: now,
@@ -434,7 +463,7 @@ export async function buildSeed(): Promise<DemoData> {
   const announcements: DemoData["announcements"] = [
     {
       id: "ann_1",
-      editionId: editions2026.find((e) => e.id.includes("cherry-creek"))!.id,
+      editionId: upcoming.find((e) => e.id.includes("cherry-creek"))!.id,
       directorUserId: "user_jordan",
       title: "Application deadline extended",
       body: "Official deadline moved to January 22. Apply on the show website.",
@@ -446,7 +475,7 @@ export async function buildSeed(): Promise<DemoData> {
   const waitlist: DemoData["waitlist"] = [
     {
       id: "wl_1",
-      editionId: ariaEditions[0]?.id ?? editions2026[0].id,
+      editionId: ariaEditions[0]?.id ?? upcoming[0].id,
       boothLabel: "Block B-12",
       status: "open",
       createdAt: now,
@@ -456,7 +485,7 @@ export async function buildSeed(): Promise<DemoData> {
   const boothOffers: DemoData["boothOffers"] = [
     {
       id: "bo_1",
-      editionId: ariaEditions[0]?.id ?? editions2026[0].id,
+      editionId: ariaEditions[0]?.id ?? upcoming[0].id,
       artistId: "artist_aria",
       availableWindows: "Sat 12–2pm",
       notes: "Happy to cover a neighbor for lunch.",
@@ -466,7 +495,7 @@ export async function buildSeed(): Promise<DemoData> {
   const boothRequests: DemoData["boothRequests"] = [
     {
       id: "br_1",
-      editionId: ariaEditions[0]?.id ?? editions2026[0].id,
+      editionId: ariaEditions[0]?.id ?? upcoming[0].id,
       artistId: "artist_sam",
       neededWindow: "Sat 1–2pm",
       status: "open",
@@ -477,7 +506,7 @@ export async function buildSeed(): Promise<DemoData> {
     {
       id: "jf_1",
       artistId: "artist_aria",
-      editionId: ariaEditions[0]?.id ?? editions2026[0].id,
+      editionId: ariaEditions[0]?.id ?? upcoming[0].id,
       imageUrls: [],
       outcome: "accepted",
       notes: "Submitted three tableware sets + one sculptural vessel.",
@@ -488,7 +517,7 @@ export async function buildSeed(): Promise<DemoData> {
   const alerts: DemoData["alerts"] = [
     {
       id: "al_1",
-      editionId: editions2026.find((e) => e.id.includes("sausalito"))!.id,
+      editionId: upcoming.find((e) => e.id.includes("sausalito"))!.id,
       kind: "weather",
       title: "Wind advisory weekend of show",
       body: "Historical pattern: afternoon gusts on the waterfront. Stake tents early.",
@@ -496,7 +525,7 @@ export async function buildSeed(): Promise<DemoData> {
     },
   ];
 
-  const weather: DemoData["weather"] = editions2026.slice(0, 15).flatMap((e) => {
+  const weather: DemoData["weather"] = upcoming.slice(0, 15).flatMap((e) => {
     const days = [e.startDate, e.endDate];
     return days.map((date, i) => ({
       id: nanoid(8),

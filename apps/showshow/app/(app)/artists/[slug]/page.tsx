@@ -29,7 +29,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     <div>
       <PageHeader
         title={artist.displayName}
-        description={`${artist.city}, ${artist.region}. ${artist.tagline}`}
+        description={`${artist.city}, ${artist.region} · ${artist.tagline}`}
         actions={
           <>
             <Link href={`/artists/${artist.slug}/store`} className="ss-btn ss-btn-secondary">
@@ -45,7 +45,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
           <Panel>
-            <p className="text-[1.05rem] leading-relaxed">{artist.bio}</p>
+            <p className="text-sm leading-relaxed">{artist.bio}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {artist.mediums.map((m) => (
                 <Badge key={m} tone="field">
@@ -61,7 +61,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
 
           <Panel>
             <h2 className="font-display text-lg font-bold">Upcoming schedule</h2>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
+            <ul className="mt-3 space-y-2 text-sm">
               {upcoming.map(({ a, edition, show }) => (
                 <li key={a.id} className="flex justify-between gap-3">
                   <Link href={`/shows/${show.slug}`} className="font-medium hover:text-[var(--field)]">
@@ -94,7 +94,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
             <h2 className="font-display text-lg font-bold">Shop preview</h2>
             <ul className="mt-3 space-y-3">
               {products.map((p) => (
-                <li key={p.id} className="flex justify-between gap-3 text-[1.05rem]">
+                <li key={p.id} className="flex justify-between gap-3 text-sm">
                   <span>{p.title}</span>
                   <span className="font-medium">{formatCents(p.priceCents)}</span>
                 </li>

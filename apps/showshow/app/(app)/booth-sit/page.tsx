@@ -10,7 +10,9 @@ export const metadata = { title: "Booth-sit network" };
 export default async function BoothSitPage() {
   const artistId = await getSessionArtistId();
   const { offers, requests } = await listBoothSit();
-  const editions = (await getEditionOptions()).filter((e) => e.edition.year === 2026);
+  const editions = (await getEditionOptions()).filter(
+    (e) => e.edition.status === "upcoming" || e.edition.status === "active",
+  );
 
   return (
     <div>
@@ -25,11 +27,11 @@ export default async function BoothSitPage() {
           {!artistId ? (
             <p className="mt-3 text-[1.05rem] text-[var(--muted)]">Switch to an artist persona.</p>
           ) : (
-            <form action={createBoothOfferAction} className="mt-4 grid gap-4 text-[1.125rem]">
+            <form action={createBoothOfferAction} className="mt-4 grid gap-3 text-sm">
               <input type="hidden" name="artistId" value={artistId} />
               <label className="ss-label">
                 <span>Show</span>
-                <select name="editionId" required className="ss-select">
+                <select name="editionId" required className="ss-input">
                   {editions.map(({ edition, showName }) => (
                     <option key={edition.id} value={edition.id}>
                       {showName}
@@ -76,11 +78,11 @@ export default async function BoothSitPage() {
           {!artistId ? (
             <p className="mt-3 text-[1.05rem] text-[var(--muted)]">Switch to an artist persona.</p>
           ) : (
-            <form action={createBoothRequestAction} className="mt-4 grid gap-4 text-[1.125rem]">
+            <form action={createBoothRequestAction} className="mt-4 grid gap-3 text-sm">
               <input type="hidden" name="artistId" value={artistId} />
               <label className="ss-label">
                 <span>Show</span>
-                <select name="editionId" required className="ss-select">
+                <select name="editionId" required className="ss-input">
                   {editions.map(({ edition, showName }) => (
                     <option key={edition.id} value={edition.id}>
                       {showName}
@@ -101,7 +103,7 @@ export default async function BoothSitPage() {
           )}
           <ul className="mt-5 space-y-3 border-t border-[var(--line)] pt-4">
             {requests.map(({ request, artist, show }) => (
-              <li key={request.id} className="flex flex-wrap items-center justify-between gap-2 text-[1.05rem]">
+              <li key={request.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
                 <div>
                   <p className="font-medium">
                     {artist.displayName} · {show.name}

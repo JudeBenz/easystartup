@@ -56,7 +56,7 @@ export default async function WeekendModePage({ params }: { params: Promise<{ sl
         <div className="space-y-6">
           <Panel>
             <h2 className="font-display text-lg font-bold">Artists you follow here</h2>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
+            <ul className="mt-3 space-y-2 text-sm">
               {artistsYouFollow.map((a) => (
                 <li key={a.id}>
                   <Link href={`/artists/${a.slug}`} className="font-medium hover:text-[var(--field)]">
@@ -75,7 +75,7 @@ export default async function WeekendModePage({ params }: { params: Promise<{ sl
 
           <Panel>
             <h2 className="font-display text-lg font-bold">Booth-sit nearby</h2>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
+            <ul className="mt-3 space-y-2 text-sm">
               {boothOffers.map((o) => (
                 <li key={o.id}>{o.availableWindows}{o.notes ? ` — ${o.notes}` : ""}</li>
               ))}

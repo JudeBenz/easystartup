@@ -35,7 +35,9 @@ export default async function ApplicationsPage() {
   const apps = await getApplicationsForArtist(artistId);
   const editions = await getEditionOptions();
   const tracked = new Set(apps.map((a) => a.app.editionId));
-  const addable = editions.filter((e) => e.edition.year === 2026 && !tracked.has(e.edition.id)).slice(0, 20);
+  const addable = editions
+    .filter((e) => e.edition.status !== "completed" && !tracked.has(e.edition.id))
+    .slice(0, 30);
 
   return (
     <div>
@@ -106,12 +108,12 @@ export default async function ApplicationsPage() {
 
         <Panel>
           <h2 className="font-display text-lg font-bold">Track another show</h2>
-          <form action={updateApplicationAction} className="mt-4 grid gap-4 text-[1.125rem]">
+          <form action={updateApplicationAction} className="mt-4 grid gap-3 text-sm">
             <input type="hidden" name="artistId" value={artistId} />
             <input type="hidden" name="status" value="interested" />
             <label className="ss-label">
               <span>Edition</span>
-              <select name="editionId" required className="ss-select">
+              <select name="editionId" required className="ss-input">
                 {addable.map(({ edition, showName }) => (
                   <option key={edition.id} value={edition.id}>
                     {showName}

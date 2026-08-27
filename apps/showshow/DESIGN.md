@@ -17,7 +17,7 @@ Printed fair catalog meets park-service signage: cool paper, near-black ink, one
 | warn | `#8A5A00` | Caution |
 
 ## Type
-- Display: **Big Shoulders** — brand, page titles
+- Display: **Big Shoulders Text** — brand, page titles
 - Body/UI: **Atkinson Hyperlegible** — everything interactive and readable
 - Body size: 18px / line-height 1.6
 - Minimum functional text: 16px

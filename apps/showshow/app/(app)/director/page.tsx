@@ -33,15 +33,15 @@ export default async function DirectorPage() {
         title="Director desk"
         description={
           director.verified
-            ? `Verified for ${director.verifiedDomain}. Post announcements, open waitlist booths, and manage promoted listings.`
-            : "Post announcements, open waitlist booths, and manage promoted listings."
+            ? `Verified for ${director.verifiedDomain}. Announcements, waitlist booths, and promoted listings.`
+            : "Announcements, waitlist marketplace, and promoted listings."
         }
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
           <h2 className="font-display text-lg font-bold">Your shows</h2>
-          <ul className="mt-3 space-y-2 text-[1.05rem]">
+          <ul className="mt-3 space-y-2 text-sm">
             {shows.map((s) => (
               <li key={s.id} className="flex items-center justify-between gap-2">
                 <span className="font-medium">{s.name}</span>
@@ -53,7 +53,7 @@ export default async function DirectorPage() {
 
         <Panel>
           <h2 className="font-display text-lg font-bold">Promoted listings</h2>
-          <ul className="mt-3 space-y-2 text-[1.05rem]">
+          <ul className="mt-3 space-y-2 text-sm">
             {promotions.map((p) => (
               <li key={p.id}>
                 Budget {formatCents(p.budgetCents)} · {p.status} · ends {formatDate(p.endsAt)}
@@ -69,12 +69,12 @@ export default async function DirectorPage() {
         <Panel>
           <h2 className="font-display text-lg font-bold">Post announcement</h2>
           {edition ? (
-            <form action={createAnnouncementAction} className="mt-4 grid gap-4 text-[1.125rem]">
+            <form action={createAnnouncementAction} className="mt-4 grid gap-3 text-sm">
               <input type="hidden" name="editionId" value={edition.id} />
               <input type="hidden" name="directorUserId" value={user.id} />
               <label className="ss-label">
                 <span>Kind</span>
-                <select name="kind" className="ss-select">
+                <select name="kind" className="ss-input">
                   <option value="general">general</option>
                   <option value="opening">opening</option>
                   <option value="deadline_extension">deadline extension</option>
@@ -99,7 +99,7 @@ export default async function DirectorPage() {
               </button>
             </form>
           ) : null}
-          <ul className="mt-4 space-y-2 border-t border-[var(--line)] pt-4 text-[1.05rem]">
+          <ul className="mt-4 space-y-2 border-t border-[var(--line)] pt-4 text-sm">
             {announcements.map((a) => (
               <li key={a.id}>
                 <Badge>{a.kind}</Badge> {a.title}
@@ -126,7 +126,7 @@ export default async function DirectorPage() {
               </button>
             </form>
           ) : null}
-          <ul className="mt-4 space-y-2 text-[1.05rem]">
+          <ul className="mt-4 space-y-2 text-sm">
             {waitlist.map((w) => (
               <li key={w.id}>
                 {w.boothLabel ?? "Booth"} · <Badge tone="warn">{w.status}</Badge>
