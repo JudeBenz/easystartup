@@ -875,7 +875,8 @@
     "venueName": "Country Club Plaza",
     "applicationDeadline": "2026-04-12",
     "attendance": 250000,
-    "notes": "95th year; Fri 5-9pm, Sat 10am-9pm, Sun 11am-5pm. ~240 artists over nine city blocks. 2026 applications via ZAPP through April 12, 2026 11:59pm CT. Booth fee amounts not published on plazaartfair.com (details were on ZAPP listing)."
+    "notes": "2026 Plaza Art Fair Fri–Sun Sept 25–27. Site also cites historical 250k+ crowds. Booth fees not published on plazaartfair.com public pages at capture (apply via third-party portal — fees not ingested from aggregator hosts).",
+    "captureConfidence": "high"
   },
   "port-clinton-art-festival": {
     "captureConfidence": "medium",
