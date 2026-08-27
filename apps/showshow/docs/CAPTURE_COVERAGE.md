@@ -11,21 +11,8 @@ Generated: 2026-08-27
 | Application deadlines | 52 |
 | Booth fees | 44 |
 | Application/jury fees | 36 |
-| Director emails | 67 |
-| Marked inactive / unreachable | 10 |
-
-## Inactive / unreachable
-
-- **Washington Square Outdoor Art Exhibit** (`washington-square-outdoor-art-exhibit`): Historic Greenwich Village exhibit reportedly suspended since ~2024; official sites unreachable / no 2026–2027 edition facts found. Omit dates/fees until revival announced.
-- **Sausalito Art Festival** (`sausalito-art-festival`): No live Labor Day festival currently scheduled for 2026/2027. Foundation seeking alternative location after Marinship Park loss; accepting interest form for future applications. Juried panel historically 8-10 judges; ~220 artists when active.
-- **Boulder Creek Festival** (`boulder-creek-festival`): Official bceproductions.com still shows outdated 2022 Hometown Festival dates (Aug 19-21, 2022). Current 2026/2027 dates and booth fees not published; contact Meg at meg@bce.events or 303.449.3137 for exhibitor application.
-- **Lake Oswego Festival of the Arts** (`lake-oswego-festival-of-the-arts`): Official site lakeoswegoart.org unreachable from research environment (DNS/connection failure). Could not verify 2026/2027 dates or fees on official domain.
-- **Festival of the Arts Grand Rapids** (`festival-of-the-arts-grand-rapids`): Festival of the Arts (Grand Rapids) ceased operations in February 2025 after 55 years; no 2026/2027 festival. Official site festivalgr.org was unreachable from this environment; cessation widely reported including organizer statements. Omit date/fee/deadline as event discontinued.
-- **Art Detroit Fair** (`art-detroit-fair`): Listed officialWebsiteUrl artdetroitfair.com does not resolve (DNS failure). No verifiable 2026/2027 artist prospectus found under that brand. Possible confusion with other Detroit fairs (e.g. Midtown Art Fair / Michigan Arts Access, Belle Isle Art Fair). Facts omitted pending a live official domain.
-- **Riverfest** (`riverfest-little-rock`): Official site still reflects 2018 RiverFest (May 25–27, 2018) produced by Universal Fairs; no 2026/2027 dates, fees, or artist applications published. Treat as inactive/legacy listing.
-- **Brown County Fine Arts Festival** (`brown-county-fine-arts-festival`): No booth-based 'Brown County Fine Arts Festival' found for 2026/2027. Brown County Art Guild (browncountyartguild.org; listed .com may differ) hosts Art Colony Weekend (gallery hop/auction, e.g. Sept 11–13 2026) and juried Guild membership—not an open outdoor booth fair. Fees/dates for a multi-artist street festival omitted as event type mismatch.
-- **Scottsdale Arts Festival** (`scottsdale-arts-festival`): Classic Scottsdale Arts Festival (Civic Center Mall juried outdoor fair) not listed as returning for 2026/2027 on scottsdalearts.org. Scottsdale Arts currently promotes Merchantile Market vendor weekends and Scottsdale Family ArtsFest (student-focused, Mar 6–7 2026)—not equivalent to the historic arts festival. Booth fees/deadlines for a 2026/2027 Scottsdale Arts Festival omitted as not published.
-- **Saint Augustine Art & Craft Festival** (`saint-augustine-art-craft-festival`): St. Augustine Art Association discontinued the Annual Art & Craft Festival (last presented Nov 2019; 2020 cancelled). Listed staugustineartfestival.com timed out/unreachable. No 2026/2027 STAAA Art & Craft Festival dates or fees. Separate Francis Field events (e.g. Old Town Art Show, St. ARTistine) are different promoters.
+| Director emails | 66 |
+| Marked inactive / unreachable | 0 |
 
 ## Full table
 
@@ -47,7 +34,7 @@ Generated: 2026-08-27
 | Central Pennsylvania Festival of the Arts | PA | 2026-07-09→2026-07-12 | 2026-01-23 |  |  | yes | medium |
 | Mount Gretna Outdoor Art Show | PA | 2027-08-21→2027-08-22 |  |  |  | yes | medium |
 | Armonk Outdoor Art Show | NY | 2026-09-26→2026-09-27 |  |  |  | yes | medium |
-| Washington Square Outdoor Art Exhibit | NY | INACTIVE |  |  |  |  | low |
+| Crafts at Rhinebeck | NY |  |  |  |  |  | medium |
 | Boston Arts Festival | MA | 2026-09-12→2026-09-13 |  | 250 |  | yes | medium |
 | Smithsonian Craft Show | DC | 2027-04-07→2027-04-11 |  | 1605–2300 | 50 |  | medium |
 | Artscape | MD | 2026-05-23→2026-05-24 |  |  |  | yes | medium |
@@ -74,7 +61,7 @@ Generated: 2026-08-27
 | Gasparilla Festival of the Arts | FL | 2027-03-06→2027-03-07 | 2026-09-07 |  |  | yes | medium |
 | Winter Park Sidewalk Art Festival | FL | 2027-03-19→2027-03-21 | 2026-09-23 | 575 | 45 | yes | high |
 | Cherry Creek Arts Festival | CO | 2026-07-03→2026-07-05 | 2026-12-01 | 350–900 | 45 | yes | high |
-| Sausalito Art Festival | CA | INACTIVE |  |  |  |  | low |
+| Carmel Art Festival | CA |  |  |  |  |  | medium |
 | Santa Fe International Folk Art Market | NM | 2027-07-08→2027-07-11 | 2026-09-11 | 700 | 0 | yes | medium |
 | Celebration of Fine Art | AZ | 2027-01-16→2027-03-28 | 2026-06-15 | 2800–2950 | 0 | yes | medium |
 | Bayou City Art Festival | TX | 2026-10-09→2026-10-11 |  |  |  | yes | medium |
@@ -83,7 +70,7 @@ Generated: 2026-08-27
 | Beverly Hills Art Show | CA | 2026-10-17→2026-10-18 | 2026-07-14 | 415 | 35 | yes | low |
 | Art in the Pearl | OR | 2026-09-05→2026-09-07 | 2026-02-15 | 750–1395 |  |  | low |
 | Utah Arts Festival | UT | 2026-06-18→2026-06-21 | 2026-02-26 | 650–750 | 45 |  | medium |
-| Boulder Creek Festival | CO | INACTIVE |  |  |  | yes | low |
+| ArtFest Fort Collins | CO |  |  |  |  |  | low |
 | Festival of the Arts OKC | OK | 2027-04-22→2027-04-25 | 2026-09-27 |  |  |  | low |
 | New Orleans Jazz & Heritage Festival Crafts | LA | 2027-04-22→2027-05-02 |  |  |  | yes | medium |
 | Orange Beach Festival of Art | AL | 2027-03-13→2027-03-14 | 2026-10-31 |  |  |  | medium |
@@ -101,7 +88,7 @@ Generated: 2026-08-27
 | Sedona Arts Festival | AZ | 2026-10-10→2026-10-11 |  |  |  | yes | medium |
 | Rio Grande Arts & Crafts Festival | NM | 2026-10-02→2026-10-11 | 2026-04-01 | 795 | 35 |  | low |
 | Mount Dora Arts Festival | FL | 2027-02-06→2027-02-07 |  |  |  | yes | medium |
-| Lake Oswego Festival of the Arts | OR | INACTIVE |  |  |  |  | low |
+| Salem Art Fair & Festival | OR |  |  |  |  |  | medium |
 | Bellevue Arts Fair / Pacific Northwest Arts Fair | WA | 2026-07-24→2026-07-26 | 2026-02-12 |  |  | yes | high |
 | Capitola Art & Wine Festival | CA | 2026-09-12→2026-09-13 |  |  |  | yes | medium |
 | Delray Affair | FL | 2027-04-09→2027-04-11 |  |  |  | yes | medium |
@@ -113,21 +100,21 @@ Generated: 2026-08-27
 | Coral Springs Festival of the Arts | FL | 2026-08-10→2026-08-10 |  |  |  |  | low |
 | Armadillo Christmas Bazaar | TX | 2026-12-12→2026-12-21 |  | 1500–5000 | 25 | yes | high |
 | Kentuck Festival of the Arts | AL | 2026-10-17→2026-10-18 | 2026-06-01 | 300–700 | 35 | yes | medium |
-| Festival of the Arts Grand Rapids | MI | INACTIVE |  |  |  |  | low |
-| Art Detroit Fair | MI | INACTIVE |  |  |  |  | low |
+| East Lansing Art Festival | MI |  |  |  |  |  | medium |
+| Belle Isle Art Fair | MI |  |  |  |  |  | medium |
 | Cooper-Young Festival | TN | 2026-09-19→2026-09-19 | 2026-06-15 | 300 |  | yes | medium |
-| Riverfest | AR | INACTIVE |  |  |  |  | low |
+| Eureka Springs May Festival of the Arts | AR |  |  |  |  |  | low |
 | Anacortes Arts Festival | WA | 2026-07-31→2026-08-02 | 2026-03-05 | 400 | 35 |  |  |
 | Art in the Park Boise | ID | 2026-09-11→2026-09-13 | 2026-03-20 | 100–250 | 50 | yes |  |
 | Stockley Gardens Arts Festival | VA | 2026-10-17→2026-10-18 | 2026-07-15 |  |  | yes | medium |
 | Clothesline Art Festival | NY | 2026-08-29→2026-08-30 | 2026-08-16 | 330–1165 | 35 | yes | medium |
 | Mayfair Festival of the Arts | PA | 2026-05-22→2026-05-24 |  | 300–800 | 35 |  | high |
 | Berea Craft Festival | KY | 2026-07-10→2026-07-12 |  | 300–600 | 25 |  |  |
-| Brown County Fine Arts Festival | IN | INACTIVE |  |  |  |  | low |
+| Penrod Arts Fair | IN |  |  |  |  |  | medium |
 | Geneva Fine Arts Fair | IL | 2027-07-24→2027-07-25 |  | 400–800 |  | yes |  |
-| Scottsdale Arts Festival | AZ | INACTIVE |  |  |  |  | low |
+| Fountain Hills Fine Art Festival | AZ |  |  |  |  |  | medium |
 | Hot Springs Arts & Crafts Fair | AR | 2026-10-02→2026-10-04 | 2026-03-31 | 150–300 |  | yes |  |
 | Countryside Village Art Fair | NE | 2026-05-30→2026-05-31 | 2026-03-31 | 325–650 |  |  | high |
 | Sun Valley Center Arts & Crafts Festival | ID | 2026-08-14→2026-08-16 | 2026-03-20 | 450–1000 | 35 |  |  |
 | Lewiston Art Festival | NY | 2026-08-08→2026-08-09 | 2026-03-31 |  | 30 | yes | medium |
-| Saint Augustine Art & Craft Festival | FL | INACTIVE |  |  |  |  | low |
+| Las Olas Art Fair | FL |  |  |  |  |  | medium |

@@ -4,7 +4,9 @@ import type { DemoData } from "@/types/domain";
 import { buildSeed } from "./seed";
 
 const globalKey = "__showshow_demo_data__";
-const persistPath = path.join(process.cwd(), ".demo-data.json");
+/** Durable demo store — survives restarts when the filesystem is writable. */
+const persistPath = path.join(process.cwd(), ".data", "showshow-demo.json");
+const legacyPersistPath = path.join(process.cwd(), ".demo-data.json");
 
 type GlobalStore = typeof globalThis & {
   [globalKey]?: DemoData;
@@ -15,18 +17,36 @@ function g() {
   return globalThis as GlobalStore;
 }
 
-async function load(): Promise<DemoData> {
+async function ensureDir(filePath: string) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+}
+
+async function readJson(filePath: string): Promise<DemoData | null> {
   try {
-    const raw = await fs.readFile(persistPath, "utf8");
+    const raw = await fs.readFile(filePath, "utf8");
     return JSON.parse(raw) as DemoData;
   } catch {
-    return buildSeed();
+    return null;
   }
+}
+
+async function load(): Promise<DemoData> {
+  const primary = await readJson(persistPath);
+  if (primary?.shows?.length) return primary;
+  const legacy = await readJson(legacyPersistPath);
+  if (legacy?.shows?.length) {
+    await persist(legacy);
+    return legacy;
+  }
+  return buildSeed();
 }
 
 async function persist(data: DemoData) {
   try {
-    await fs.writeFile(persistPath, JSON.stringify(data, null, 2), "utf8");
+    await ensureDir(persistPath);
+    const tmp = `${persistPath}.${process.pid}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(data, null, 2), "utf8");
+    await fs.rename(tmp, persistPath);
   } catch {
     // Demo persistence is best-effort (read-only FS still works in-memory).
   }
@@ -56,4 +76,8 @@ export async function resetDb(): Promise<DemoData> {
   g()[globalKey] = data;
   await persist(data);
   return data;
+}
+
+export function getPersistPath() {
+  return persistPath;
 }

@@ -6,6 +6,7 @@ import { SESSION_COOKIE } from "@/lib/session-cookie";
 import { THEME_COOKIE, resolveThemeId } from "@/lib/themes";
 import {
   addComment,
+  claimShow,
   createAnnouncement,
   createBoothOffer,
   createBoothRequest,
@@ -45,10 +46,23 @@ export async function saveRoiAction(formData: FormData) {
   const lodging = Number(formData.get("lodging") || 0);
   const otherExpenses = Number(formData.get("otherExpenses") || 0);
   const grossSales = Number(formData.get("grossSales") || 0);
+  const hoursWorked = Number(formData.get("hoursWorked") || 0) || undefined;
   const optInAggregate = formData.get("optInAggregate") === "on";
   const notes = String(formData.get("notes") || "") || undefined;
   const medium = String(formData.get("medium") || "other") as Medium;
   const unitsSold = Number(formData.get("unitsSold") || 0);
+  const medium2 = String(formData.get("medium2") || "") as Medium | "";
+  const sales2 = Number(formData.get("sales2") || 0);
+  const units2 = Number(formData.get("units2") || 0);
+
+  const breakdowns: { medium: Medium; sales: number; unitsSold: number }[] = [];
+  if (grossSales) {
+    const primarySales = medium2 && sales2 > 0 ? Math.max(grossSales - sales2, 0) : grossSales;
+    breakdowns.push({ medium, sales: primarySales, unitsSold: unitsSold || 1 });
+    if (medium2 && sales2 > 0) {
+      breakdowns.push({ medium: medium2 as Medium, sales: sales2, unitsSold: units2 || 1 });
+    }
+  }
 
   await createRoiReport({
     artistId,
@@ -58,11 +72,10 @@ export async function saveRoiAction(formData: FormData) {
     lodging,
     otherExpenses,
     grossSales,
+    hoursWorked,
     optInAggregate,
     notes,
-    breakdowns: grossSales
-      ? [{ medium, sales: grossSales, unitsSold: unitsSold || 1 }]
-      : [],
+    breakdowns,
   });
   revalidatePath("/roi");
   revalidatePath("/shows/ranked");
@@ -73,11 +86,22 @@ export async function updateApplicationAction(formData: FormData) {
     artistId: String(formData.get("artistId")),
     editionId: String(formData.get("editionId")),
     status: String(formData.get("status")) as ApplicationStatus,
-    officialApplyUrl: String(formData.get("officialApplyUrl")),
+    officialApplyUrl: String(formData.get("officialApplyUrl") || ""),
     notes: String(formData.get("notes") || "") || undefined,
   });
   revalidatePath("/applications");
   revalidatePath("/calendar");
+  revalidatePath("/alerts");
+}
+
+export async function claimShowAction(formData: FormData) {
+  await claimShow({
+    userId: String(formData.get("userId")),
+    showId: String(formData.get("showId")),
+    contactEmail: String(formData.get("contactEmail")),
+  });
+  revalidatePath("/director");
+  revalidatePath("/", "layout");
 }
 
 export async function addCommentAction(formData: FormData) {

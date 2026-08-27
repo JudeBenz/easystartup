@@ -49,3 +49,9 @@ zapplication.org, artfairsourcebook.com, sunshineartist.com, entrythingy.com
 - **Routes:** regional circuits built from same set
 - **Directory:** facts + provenance
 - **Rankings:** still only from opted-in ROI — separate from this list
+
+## Inactive slot replacements (2026-08)
+
+Ten unreachable/ceased listings were swapped for live fairs (same Priority-100 size):
+
+Belle Isle Art Fair, ArtFest Fort Collins, Penrod Arts Fair, East Lansing Art Festival, Salem Art Fair & Festival, Eureka Springs May Festival of the Arts, Las Olas Art Fair, Carmel Art Festival, Fountain Hills Fine Art Festival, Crafts at Rhinebeck.

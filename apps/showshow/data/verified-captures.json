@@ -112,12 +112,6 @@
     "directorEmail": "info@a3austin.org",
     "notes": "Rebranded as Art City Austin's Fiesta / A3 Fiesta 2026. Organizer A3 Art Alliance Austin (artallianceaustin.org DNS failed during capture; a3austin.org used). Suggested $1 admission. Artist market 40+ local makers. Phone 512-588-0369. Booth fee details not published on event page."
   },
-  "art-detroit-fair": {
-    "sourceUrl": "https://www.artdetroitfair.com",
-    "notes": "Listed officialWebsiteUrl artdetroitfair.com does not resolve (DNS failure). No verifiable 2026/2027 artist prospectus found under that brand. Possible confusion with other Detroit fairs (e.g. Midtown Art Fair / Michigan Arts Access, Belle Isle Art Fair). Facts omitted pending a live official domain.",
-    "inactive": true,
-    "captureConfidence": "low"
-  },
   "art-fair-on-the-square": {
     "sourceUrl": "https://www.mmoca.org/event/art-fair-on-the-square/artfair-faq/",
     "startDate": "2026-07-11",
@@ -161,6 +155,23 @@
     "boothFeeMax": 1395,
     "notes": "30th annual Labor Day weekend. Booth: 10x10 $750; 15x10 $1155; 20x10 $1395; emerging $350. Blind jury (5 jurors). 2027 apps Nov 15, 2026–Feb 15, 2027. Hours Sat-Sun 10-5, Mon 10-4."
   },
+  "artfest-fort-collins": {
+    "sourceUrl": "https://www.artfestfortcollins.org",
+    "venueName": "Old Town Fort Collins",
+    "fullAddress": "Fort Collins, CO",
+    "captureConfidence": "low",
+    "notes": "Priority replacement; confirm current dates on official site."
+  },
+  "artfest-fort-myers": {
+    "sourceUrl": "https://artfestfortmyers.com/",
+    "startDate": "2027-02-05",
+    "endDate": "2027-02-07",
+    "juryProcess": "Juried fine art festival with 200+ artists.",
+    "venueName": "Downtown Fort Myers River District",
+    "fullAddress": "Edwards Drive / Downtown River District, Fort Myers, FL 33901",
+    "captureConfidence": "medium",
+    "notes": "Official site and org channels promote 2027 Feb 5–7 riverfront festival; detailed booth/app fees left blank (not confirmed on primary public pages during capture)."
+  },
   "artisphere-greenville": {
     "applicationDeadline": "2026-10-09",
     "captureConfidence": "medium",
@@ -200,6 +211,18 @@
     "notes": "Memorial Park 2026 Oct 9–11 (apps closed). Downtown 2027 applications open Sept 1, 2026 via ZAPP. Blind jury then independent panel scores; ~300 artists invited. Booth/application fee dollars not published on official site. Artist Relations: wendi@bayoucityartfestival.com.",
     "directorName": "Kelly Batterson",
     "directorPhone": "713-521-0133"
+  },
+  "belle-isle-art-fair": {
+    "sourceUrl": "https://www.belleisleartfair.com/faqs",
+    "venueName": "Belle Isle Park (adjacent to James Scott Memorial Fountain)",
+    "fullAddress": "Belle Isle Park, Detroit, MI 48207",
+    "captureConfidence": "high",
+    "notes": "Dates/hours and juried description from official FAQ and Integrity Shows 2026 schedule; 2026 edition held Aug 1–2; annual early-August pattern.",
+    "startDate": "2026-08-01",
+    "endDate": "2026-08-02",
+    "applicationDeadline": "2026-04-26",
+    "juryProcess": "Juried fine art fair (~100 professional artists plus emerging Mint Artists Guild).",
+    "directorEmail": "Mark@integrityshows.com"
   },
   "bellevue-arts-fair": {
     "captureConfidence": "high",
@@ -271,15 +294,6 @@
     "juryProcess": "panel",
     "notes": "Sept 12–13, 2026, 11am–6pm. Greater Boston fine artists only; booth fee $250 after acceptance (bostonartsfestival.org/artist-application-1). Listed boston.gov URL is not the festival home."
   },
-  "boulder-creek-festival": {
-    "captureConfidence": "low",
-    "directorEmail": "meg@bce.events",
-    "fullAddress": "Boulder, CO; Boulder Creek Events PO Box 108, Boulder, CO 80306",
-    "sourceUrl": "https://www.bceproductions.com/boulder-creek-hometown-festival",
-    "venueName": "Downtown Boulder / Boulder Creek Path area",
-    "notes": "Official bceproductions.com still shows outdated 2022 Hometown Festival dates (Aug 19-21, 2022). Current 2026/2027 dates and booth fees not published; contact Meg at meg@bce.events or 303.449.3137 for exhibitor application.",
-    "inactive": true
-  },
   "broad-ripple-art-fair": {
     "sourceUrl": "https://indyartcenter.org/braf/",
     "startDate": "2026-05-16",
@@ -293,14 +307,6 @@
     "directorEmail": "SBennett@IndyArtCenter.org",
     "directorPhone": "317-255-2464",
     "captureConfidence": "medium"
-  },
-  "brown-county-fine-arts-festival": {
-    "sourceUrl": "https://browncountyartguild.org/",
-    "venueName": "Brown County Art Guild / Minor House",
-    "fullAddress": "48 South Van Buren Street, Nashville, IN 47448",
-    "notes": "No booth-based 'Brown County Fine Arts Festival' found for 2026/2027. Brown County Art Guild (browncountyartguild.org; listed .com may differ) hosts Art Colony Weekend (gallery hop/auction, e.g. Sept 11–13 2026) and juried Guild membership—not an open outdoor booth fair. Fees/dates for a multi-artist street festival omitted as event type mismatch.",
-    "inactive": true,
-    "captureConfidence": "low"
   },
   "cain-park-arts-festival": {
     "captureConfidence": "medium",
@@ -327,6 +333,19 @@
     "directorPhone": "831-475-6522",
     "directorName": "Jeanne Pifferini",
     "captureConfidence": "medium"
+  },
+  "carmel-art-festival": {
+    "sourceUrl": "https://www.carmelartfestivalcalifornia.art/2027application",
+    "venueName": "Devendorf Park",
+    "fullAddress": "Devendorf Park, Carmel-by-the-Sea, CA",
+    "captureConfidence": "high",
+    "notes": "Official 2027 application page: festival May 14–16, 2027; $95 application fee; deadline Sept 30, 2026.",
+    "startDate": "2027-05-14",
+    "endDate": "2027-05-16",
+    "applicationDeadline": "2026-09-30",
+    "applicationFee": 95,
+    "juryProcess": "60 juried plein air artist spots; applications with images/CV; finalists notified Oct 30, 2026.",
+    "directorEmail": "carmelartfest@gmail.com"
   },
   "celebration-of-fine-art-scottsdale": {
     "captureConfidence": "medium",
@@ -477,6 +496,16 @@
     "directorPhone": "402-391-2200",
     "captureConfidence": "high"
   },
+  "crafts-at-rhinebeck": {
+    "sourceUrl": "https://www.artrider.com/rhinebeck-crafts-festival-2026",
+    "venueName": "Dutchess County Fairgrounds",
+    "fullAddress": "6636 Spring Brook Ave, Rhinebeck, NY 12572",
+    "captureConfidence": "high",
+    "notes": "Official Artrider 2026 page lists June 6–7 at Dutchess County Fairgrounds with indoor+outdoor booths; 2027 dates not yet posted—annual early-June pattern.",
+    "startDate": "2026-06-06",
+    "endDate": "2026-06-07",
+    "juryProcess": "Curated Artrider crafts festival with 165+ makers (ceramics, glass, metal, wood, fine art, etc.)."
+  },
   "crested-butte-arts-festival": {
     "captureConfidence": "medium",
     "directorEmail": "director@crestedbutteartsfestival.com",
@@ -501,6 +530,16 @@
     "directorEmail": "Jennifer@FestivalManagementGroup.com",
     "directorPhone": "561-279-0907",
     "directorName": "Jennifer Costello"
+  },
+  "denver-arts-festival": {
+    "sourceUrl": "https://denverartsfestival.com/",
+    "startDate": "2027-05-29",
+    "endDate": "2027-05-30",
+    "juryProcess": "Juried fine arts and fine crafts festival (Colorado + select national artists).",
+    "venueName": "Conservatory Green, Central Park",
+    "fullAddress": "8304 East 49th Place, Denver, CO 80238",
+    "captureConfidence": "high",
+    "notes": "Official site lists Memorial Weekend 2027 dates May 29–30 and Conservatory Green address; 2026 applications closed; 2027 app details not yet posted on site."
   },
   "des-moines-arts-festival": {
     "captureConfidence": "medium",
@@ -527,6 +566,25 @@
     "startDate": "2026-09-19",
     "venueName": "Durango Arts Center / downtown Durango",
     "notes": "32nd Annual; 10am–5pm. Presented by Durango Arts Center. Artist registration closed (deadline May 1, 2026). Booth fees not listed on public pages. Phone (970) 259-2606."
+  },
+  "east-lansing-art-festival": {
+    "sourceUrl": "https://www.cityofeastlansing.com/bids.aspx?bidID=125",
+    "venueName": "Downtown East Lansing",
+    "fullAddress": "Downtown East Lansing, East Lansing, MI",
+    "captureConfidence": "high",
+    "notes": "City of East Lansing RFQ confirms 64th annual May 15–16, 2027, ~200 juried artists, ~60,000 attendance; elartfest.com is live official festival site accepting 2027 graphics applications.",
+    "startDate": "2027-05-15",
+    "endDate": "2027-05-16",
+    "juryProcess": "Peer jury selects ~200 artists across ~17 mediums.",
+    "attendance": 60000,
+    "directorEmail": "hmajano@cityofeastlansing.com"
+  },
+  "eureka-springs-may-festival": {
+    "sourceUrl": "https://www.eurekasprings.org",
+    "venueName": "Eureka Springs",
+    "fullAddress": "Eureka Springs, AR",
+    "captureConfidence": "low",
+    "notes": "City tourism site; refine artist prospectus URL when confirmed."
   },
   "fairhope-arts-and-crafts-festival": {
     "sourceUrl": "https://www.fairhopeartsandcraftsfestival.com/artists/artist-application",
@@ -555,12 +613,6 @@
     "captureConfidence": "medium",
     "slug": "fall-crafts-at-lyndhurst"
   },
-  "festival-of-the-arts-grand-rapids": {
-    "sourceUrl": "https://festivalgr.org/",
-    "notes": "Festival of the Arts (Grand Rapids) ceased operations in February 2025 after 55 years; no 2026/2027 festival. Official site festivalgr.org was unreachable from this environment; cessation widely reported including organizer statements. Omit date/fee/deadline as event discontinued.",
-    "inactive": true,
-    "captureConfidence": "low"
-  },
   "festival-of-the-arts-okc": {
     "sourceUrl": "https://www.festivaloftheartsokc.com",
     "startDate": "2027-04-22",
@@ -587,6 +639,17 @@
     "directorEmail": "Alumni@UTSA.edu",
     "directorPhone": "210-458-4133",
     "attendance": 12000
+  },
+  "fountain-hills-fine-art-festival": {
+    "sourceUrl": "https://fhchamber.com/artfairs/",
+    "venueName": "Avenue of the Fountains & Saguaro Blvd",
+    "fullAddress": "Ave. of the Fountains & Saguaro Blvd, Fountain Hills, AZ 85268",
+    "captureConfidence": "high",
+    "notes": "Chamber official art-fairs page: Fall Nov 13–15, 2026; Spring Feb 26–28, 2027; Fall applications May 15–Aug 31; tens of thousands of visitors.",
+    "startDate": "2026-11-13",
+    "endDate": "2026-11-15",
+    "applicationDeadline": "2026-08-31",
+    "juryProcess": "Juried festival; 400+ artists from across the country."
   },
   "gasparilla-festival-of-the-arts": {
     "applicationDeadline": "2026-09-07",
@@ -748,14 +811,6 @@
     "notes": "lqaf.com unreachable (connection failed). laquintaartcelebration.com is a parked/lander page with no festival prospectus. No official-domain fees verified.",
     "captureConfidence": "low"
   },
-  "lake-oswego-festival-of-the-arts": {
-    "sourceUrl": "https://www.lakeoswegoart.org",
-    "venueName": "George Rogers Park / downtown Lake Oswego",
-    "fullAddress": "Lake Oswego, OR",
-    "notes": "Official site lakeoswegoart.org unreachable from research environment (DNS/connection failure). Could not verify 2026/2027 dates or fees on official domain.",
-    "inactive": true,
-    "captureConfidence": "low"
-  },
   "lakefront-festival-of-arts": {
     "captureConfidence": "low",
     "directorEmail": "lfoa@mam.org",
@@ -766,6 +821,16 @@
     "endDate": "2026-06-14",
     "juryProcess": "panel",
     "notes": "2026 LFOA June 12–14 on MAM campus; 145 juried artists. Public jury panel Jan 9, 2026. Artist packet at mam.org/pdfs/events/lfoa/artist_information_packet.pdf. Booth/app dollar amounts not listed on mam.org pages captured."
+  },
+  "las-olas-art-fair": {
+    "sourceUrl": "https://www.artfestival.com/festivals/las-olas-art-fair-fort-lauderdale-florida",
+    "venueName": "Las Olas Boulevard",
+    "fullAddress": "740 E Las Olas Blvd, Fort Lauderdale, FL 33301",
+    "captureConfidence": "high",
+    "notes": "Producer calendar lists 39th Annual Las Olas Art Fair Oct 17–18, 2026 plus Jan 9–10 and Mar 6–7, 2027 editions; boulevard site also promotes the fair series.",
+    "startDate": "2026-10-17",
+    "endDate": "2026-10-18",
+    "juryProcess": "Juried selection of fine art for outdoor boulevard exhibition."
   },
   "lewiston-art-festival": {
     "captureConfidence": "medium",
@@ -933,6 +998,16 @@
     "juryProcess": "panel",
     "notes": "Northampton Fall 2026 Oct 9-11 (Fri 10-5, Sat 10-6, Sun 10-4); 200+ artists. Spring 2027 Northampton May 29-31: booths 6' table $550 / 10x10 $1090 / 10x15 $1530 / 10x20 $1795 (+$295 corners). App $30 first show, $20 each additional (apply4paradise.com). Also Marlborough March 19-21, 2027. Phone 413.587.0772. Also info@paradisecityarts.com."
   },
+  "penrod-arts-fair": {
+    "sourceUrl": "https://www.penrod.org/arts-fair/",
+    "venueName": "Newfields",
+    "fullAddress": "4000 N Michigan Rd, Indianapolis, IN 46208",
+    "captureConfidence": "high",
+    "notes": "Official FAQ lists Fair date as September 12, open 9:00 AM–5:00 PM; venue Newfields confirmed. Booth/app fees not published on visitor page.",
+    "startDate": "2026-09-12",
+    "endDate": "2026-09-12",
+    "juryProcess": "Large outdoor arts fair featuring 350+ artists on the Newfields campus."
+  },
   "piccolo-spoleto-outdoor-art": {
     "captureConfidence": "medium",
     "endDate": "2026-06-06",
@@ -1016,22 +1091,6 @@
     "directorName": "Parris Berry-Oliphant",
     "captureConfidence": "medium"
   },
-  "riverfest-little-rock": {
-    "captureConfidence": "low",
-    "fullAddress": "400 President Clinton Avenue, Little Rock, AR 72201",
-    "sourceUrl": "https://riverfestarkansas.com/",
-    "venueName": "Julius Breckling Riverfront Park",
-    "notes": "Official site still reflects 2018 RiverFest (May 25–27, 2018) produced by Universal Fairs; no 2026/2027 dates, fees, or artist applications published. Treat as inactive/legacy listing.",
-    "inactive": true
-  },
-  "saint-augustine-art-craft-festival": {
-    "sourceUrl": "https://www.visitstaugustine.com/event/st-augustine-art-craft-festival",
-    "venueName": "Francis Field",
-    "fullAddress": "25–29 W. Castillo Drive, St. Augustine, FL 32084",
-    "notes": "St. Augustine Art Association discontinued the Annual Art & Craft Festival (last presented Nov 2019; 2020 cancelled). Listed staugustineartfestival.com timed out/unreachable. No 2026/2027 STAAA Art & Craft Festival dates or fees. Separate Francis Field events (e.g. Old Town Art Show, St. ARTistine) are different promoters.",
-    "inactive": true,
-    "captureConfidence": "low"
-  },
   "saint-louis-art-fair": {
     "captureConfidence": "high",
     "directorEmail": "sarah@saintlouisartfair.com",
@@ -1046,6 +1105,17 @@
     "directorPhone": "314-249-1819",
     "slug": "saint-louis-art-fair",
     "directorName": "Sarah Umlauf"
+  },
+  "salem-art-fair": {
+    "sourceUrl": "https://salemartfair.org/",
+    "venueName": "Bush's Pasture Park",
+    "fullAddress": "Bush's Pasture Park, Salem, OR",
+    "captureConfidence": "high",
+    "notes": "Official site headlines September 11–13, 2026; selection-process page confirms blind jury and April 26, 2026 application deadline.",
+    "startDate": "2026-09-11",
+    "endDate": "2026-09-13",
+    "applicationDeadline": "2026-04-26",
+    "juryProcess": "Blind jury based on artist images (no names/location); five professional jurors for 2026."
   },
   "santa-fe-folk-art-market": {
     "captureConfidence": "medium",
@@ -1074,23 +1144,6 @@
     "boothFeeMin": 600,
     "boothFeeMax": 1400,
     "notes": "104th Santa Fe Indian Market Aug 15–16, 2026; upcoming Aug 21–22, 2027. Small 5x10: $600 (1 artist) to $950 (3); Large 10x10: $900 (1) to $1400 (4). Collaborator $25; youth $15. Payments due May 15, 2026. 2026 artist apps closed; 2027 cycle info Dec 2026. artistservices@swaia.org / communications@swaia.org."
-  },
-  "sausalito-art-festival": {
-    "captureConfidence": "low",
-    "fullAddress": "Sausalito, CA",
-    "juryProcess": "panel",
-    "sourceUrl": "https://www.sausalitoartfestival.org/exhibit",
-    "venueName": "Marinship Park (historic; venue uncertain)",
-    "notes": "No live Labor Day festival currently scheduled for 2026/2027. Foundation seeking alternative location after Marinship Park loss; accepting interest form for future applications. Juried panel historically 8-10 judges; ~220 artists when active.",
-    "inactive": true
-  },
-  "scottsdale-arts-festival": {
-    "sourceUrl": "https://scottsdalearts.org/",
-    "venueName": "Scottsdale Civic Center",
-    "fullAddress": "Scottsdale Civic Center, Scottsdale, AZ",
-    "notes": "Classic Scottsdale Arts Festival (Civic Center Mall juried outdoor fair) not listed as returning for 2026/2027 on scottsdalearts.org. Scottsdale Arts currently promotes Merchantile Market vendor weekends and Scottsdale Family ArtsFest (student-focused, Mar 6–7 2026)—not equivalent to the historic arts festival. Booth fees/deadlines for a 2026/2027 Scottsdale Arts Festival omitted as not published.",
-    "inactive": true,
-    "captureConfidence": "low"
   },
   "sedona-arts-festival": {
     "captureConfidence": "medium",
@@ -1269,12 +1322,6 @@
     "applicationFee": 45,
     "attendance": 35000,
     "notes": "50th annual June 18-21, 2026 (passed as of Aug 2026). $45 app; $650 standard / $750 corner booth. Jury Feb 28–Mar 1; notify Mar 13; booth fee due Apr 3. Check uaf.org Nov 2026 for 2027 cycle."
-  },
-  "washington-square-outdoor-art-exhibit": {
-    "sourceUrl": "http://wsoae.org/",
-    "notes": "Historic Greenwich Village exhibit reportedly suspended since ~2024; official sites unreachable / no 2026–2027 edition facts found. Omit dates/fees until revival announced.",
-    "inactive": true,
-    "captureConfidence": "low"
   },
   "wells-street-art-festival": {
     "sourceUrl": "https://www.wellsstreetartfest.us/",

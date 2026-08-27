@@ -38,12 +38,12 @@ function pinIcon(kind: "near" | "far" | "home" | "promoted") {
         : kind === "promoted"
           ? "#0F7F7B"
           : "#6B7280";
-  const size = kind === "home" ? 18 : 14;
+  const size = kind === "home" ? 22 : 18;
   return L.divIcon({
     className: "ss-map-pin",
     html: `<span style="display:block;width:${size}px;height:${size}px;border-radius:999px;background:${resolved};border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)"></span>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
+    iconSize: [size + 12, size + 12],
+    iconAnchor: [(size + 12) / 2, (size + 12) / 2],
   });
 }
 
@@ -98,7 +98,7 @@ export function ShowMap({
   return (
     <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
       <div className="overflow-hidden rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface)]">
-        <div className="ss-leaflet h-[min(62vh,520px)] w-full min-h-[320px]">
+        <div className="ss-leaflet h-[min(70vh,640px)] w-full min-h-[360px]">
           <MapContainer
             center={center}
             zoom={5}

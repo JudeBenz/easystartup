@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, SelfReportedNote } from "@/components/ui";
 import { formatDate, formatMoney, MEDIUM_LABELS } from "@/lib/format";
-import { getShowBySlug } from "@/lib/store";
+import { getShowBySlug, getShowRoiSignal } from "@/lib/store";
 import { getSessionUser } from "@/lib/session-data";
 import { addCommentAction } from "@/lib/actions";
 
@@ -34,6 +34,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
     boothRequests,
   } = data;
 
+  const roiSignal = await getShowRoiSignal(show.id);
   const agg = aggregates.find((a) => a.editionId === current?.id) ?? aggregates[0];
   const feeLabel =
     current?.boothFeeMin != null
@@ -132,6 +133,36 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           </aside>
         </div>
       </section>
+
+      {roiSignal ? (
+        <section aria-label="Peer ROI signal" className="rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface)] p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-base font-bold text-[var(--muted)]">Peer ROI (opted-in artists only)</p>
+              <p className="mt-1 text-[1.15rem]">
+                Median net {formatMoney(roiSignal.medianNet)} · n={roiSignal.sampleSize} ·{" "}
+                {Math.round(roiSignal.positiveShare * 100)}% net positive
+              </p>
+              {roiSignal.yoy.length > 1 ? (
+                <p className="mt-1 text-base text-[var(--muted)]">
+                  YoY{" "}
+                  {roiSignal.yoy
+                    .map((y) => `${y.year}: ${formatMoney(y.medianNet)}`)
+                    .join(" → ")}
+                </p>
+              ) : null}
+            </div>
+            {roiSignal.worthApplying == null ? (
+              <Badge>need more reports</Badge>
+            ) : roiSignal.worthApplying ? (
+              <Badge tone="field">peers lean worth applying</Badge>
+            ) : (
+              <Badge tone="warn">peers lean cautious</Badge>
+            )}
+          </div>
+          <SelfReportedNote sampleSize={roiSignal.sampleSize} />
+        </section>
+      ) : null}
 
       {/* Ticket stub fact strip */}
       <section aria-label="Key facts" className="ss-ticket-strip relative">

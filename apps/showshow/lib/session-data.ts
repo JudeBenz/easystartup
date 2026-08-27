@@ -1,6 +1,11 @@
 import { cookies } from "next/headers";
-import { getUser, listUsers as storeListUsers } from "@/lib/store";
+import {
+  getArtistIdForUser,
+  getUser,
+  listUsers as storeListUsers,
+} from "@/lib/store";
 import { SESSION_COOKIE } from "@/lib/session-cookie";
+import type { UserRole } from "@/types/domain";
 
 export async function getSessionUser() {
   const jar = await cookies();
@@ -18,7 +23,10 @@ export async function listUsers() {
 export async function getSessionArtistId() {
   const user = await getSessionUser();
   if (!user.roles.includes("artist")) return null;
-  if (user.id === "user_aria") return "artist_aria";
-  if (user.id === "user_sam") return "artist_sam";
-  return null;
+  return getArtistIdForUser(user.id);
+}
+
+export async function sessionHasRole(role: UserRole) {
+  const user = await getSessionUser();
+  return user.roles.includes(role);
 }

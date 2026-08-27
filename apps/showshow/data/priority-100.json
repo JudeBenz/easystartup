@@ -124,7 +124,7 @@
     "country": "US",
     "officialWebsiteUrl": "https://www.columbusartsfestival.org",
     "lat": 39.96,
-    "lng": -83.0,
+    "lng": -83,
     "seasonHint": "early June",
     "notes": "Downtown riverfront multi-day festival.",
     "selectionReason": "regional_anchor"
@@ -208,17 +208,15 @@
     "selectionReason": "artist_demand"
   },
   {
-    "name": "Washington Square Outdoor Art Exhibit",
-    "slug": "washington-square-outdoor-art-exhibit",
-    "city": "New York",
+    "slug": "crafts-at-rhinebeck",
+    "name": "Crafts at Rhinebeck",
+    "city": "Rhinebeck",
     "region": "NY",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.washingtonsquareoutdoorartexhibit.org",
-    "lat": 40.7308,
-    "lng": -73.9973,
-    "seasonHint": "late May & early September",
-    "notes": "Historic Greenwich Village sidewalk exhibit since 1931.",
-    "selectionReason": "longevity"
+    "lat": 41.9268,
+    "lng": -73.9126,
+    "officialWebsiteUrl": "https://craftsatrhinebeck.org",
+    "seasonHint": "June and October",
+    "notes": "Hudson Valley juried craft fair replacing suspended Washington Square Outdoor Art Exhibit."
   },
   {
     "name": "Boston Arts Festival",
@@ -294,7 +292,7 @@
     "officialWebsiteUrl": "https://www.piccolospoleto.com",
     "lat": 32.787,
     "lng": -79.933,
-    "seasonHint": "late May\u2013mid-June",
+    "seasonHint": "late May–mid-June",
     "notes": "Companion outdoor crafts/art to Spoleto Festival USA.",
     "selectionReason": "regional_anchor"
   },
@@ -559,17 +557,15 @@
     "selectionReason": "national_draw"
   },
   {
-    "name": "Sausalito Art Festival",
-    "slug": "sausalito-art-festival",
-    "city": "Sausalito",
+    "slug": "carmel-art-festival",
+    "name": "Carmel Art Festival",
+    "city": "Carmel-by-the-Sea",
     "region": "CA",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.sausalitoartfestival.org",
-    "lat": 37.859,
-    "lng": -122.485,
-    "seasonHint": "Labor Day weekend",
-    "notes": "Marinship Park waterfront festival.",
-    "selectionReason": "national_draw"
+    "lat": 36.5552,
+    "lng": -121.9233,
+    "officialWebsiteUrl": "https://carmelartfestivalcalifornia.com",
+    "seasonHint": "May",
+    "notes": "Monterey Peninsula plein air / outdoor festival replacing inactive Sausalito Labor Day fair."
   },
   {
     "name": "Santa Fe International Folk Art Market",
@@ -593,7 +589,7 @@
     "officialWebsiteUrl": "https://www.celebrateart.com",
     "lat": 33.54,
     "lng": -111.924,
-    "seasonHint": "January\u2013March",
+    "seasonHint": "January–March",
     "notes": "Open-studio tent city on Scottsdale Road (winter season).",
     "selectionReason": "national_draw"
   },
@@ -676,17 +672,15 @@
     "selectionReason": "regional_anchor"
   },
   {
-    "name": "Boulder Creek Festival",
-    "slug": "boulder-creek-festival",
-    "city": "Boulder",
+    "slug": "artfest-fort-collins",
+    "name": "ArtFest Fort Collins",
+    "city": "Fort Collins",
     "region": "CO",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.bceproductions.com",
-    "lat": 40.015,
-    "lng": -105.27,
-    "seasonHint": "late May",
-    "notes": "Downtown Boulder Creek Path Memorial Day weekend festival.",
-    "selectionReason": "circuit_coverage"
+    "lat": 40.5853,
+    "lng": -105.0844,
+    "officialWebsiteUrl": "https://www.artfestfortcollins.org",
+    "seasonHint": "August",
+    "notes": "Northern Colorado juried festival; replaces stale Boulder Creek listing."
   },
   {
     "name": "Festival of the Arts OKC",
@@ -710,7 +704,7 @@
     "officialWebsiteUrl": "https://www.nojazzfest.com",
     "lat": 29.951,
     "lng": -90.082,
-    "seasonHint": "late April\u2013early May",
+    "seasonHint": "late April–early May",
     "notes": "Congo Square / Jazz Fest contemporary and Louisiana crafts areas.",
     "selectionReason": "national_draw"
   },
@@ -910,17 +904,15 @@
     "selectionReason": "regional_anchor"
   },
   {
-    "name": "Lake Oswego Festival of the Arts",
-    "slug": "lake-oswego-festival-of-the-arts",
-    "city": "Lake Oswego",
+    "slug": "salem-art-fair",
+    "name": "Salem Art Fair & Festival",
+    "city": "Salem",
     "region": "OR",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.lakeoswegoart.org",
-    "lat": 45.42,
-    "lng": -122.671,
-    "seasonHint": "late June",
-    "notes": "George Rogers Park / downtown Lake Oswego festival.",
-    "selectionReason": "regional_anchor"
+    "lat": 44.9233,
+    "lng": -123.0424,
+    "officialWebsiteUrl": "https://www.salemart.org",
+    "seasonHint": "July",
+    "notes": "Major Oregon outdoor art fair; replaces unreachable Lake Oswego listing."
   },
   {
     "name": "Bellevue Arts Fair / Pacific Northwest Arts Fair",
@@ -1066,30 +1058,26 @@
     "selectionReason": "regional_anchor"
   },
   {
-    "name": "Festival of the Arts Grand Rapids",
-    "slug": "festival-of-the-arts-grand-rapids",
-    "city": "Grand Rapids",
+    "slug": "east-lansing-art-festival",
+    "name": "East Lansing Art Festival",
+    "city": "East Lansing",
     "region": "MI",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.festivalgr.org",
-    "lat": 42.963,
-    "lng": -85.668,
-    "seasonHint": "early June",
-    "notes": "Downtown Grand Rapids Three Rivers area free arts festival.",
-    "selectionReason": "regional_anchor"
+    "lat": 42.7369,
+    "lng": -84.4839,
+    "officialWebsiteUrl": "https://www.elartfest.com",
+    "seasonHint": "May",
+    "notes": "Active Michigan State-area juried festival replacing ceased Grand Rapids Festival of the Arts."
   },
   {
-    "name": "Art Detroit Fair",
-    "slug": "art-detroit-fair",
+    "slug": "belle-isle-art-fair",
+    "name": "Belle Isle Art Fair",
     "city": "Detroit",
     "region": "MI",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.artdetroitfair.com",
-    "lat": 42.331,
-    "lng": -83.046,
-    "seasonHint": "early September",
-    "notes": "Midtown / cultural center corridor outdoor fair.",
-    "selectionReason": "circuit_coverage"
+    "lat": 42.3381,
+    "lng": -82.9857,
+    "officialWebsiteUrl": "https://www.belleisleartfair.com",
+    "seasonHint": "July",
+    "notes": "Juried outdoor fair on Belle Isle; replaces unreachable Art Detroit Fair listing."
   },
   {
     "name": "Cooper-Young Festival",
@@ -1105,17 +1093,15 @@
     "selectionReason": "regional_anchor"
   },
   {
-    "name": "Riverfest",
-    "slug": "riverfest-little-rock",
-    "city": "Little Rock",
+    "slug": "eureka-springs-may-festival",
+    "name": "Eureka Springs May Festival of the Arts",
+    "city": "Eureka Springs",
     "region": "AR",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.riverfestarkansas.com",
-    "lat": 34.748,
-    "lng": -92.275,
-    "seasonHint": "late May",
-    "notes": "Riverfront Park festival with arts marketplace.",
-    "selectionReason": "regional_anchor"
+    "lat": 36.4012,
+    "lng": -93.7379,
+    "officialWebsiteUrl": "https://www.eurekasprings.org",
+    "seasonHint": "May",
+    "notes": "Ozarks arts celebration replacing inactive Little Rock Riverfest listing."
   },
   {
     "name": "Anacortes Arts Festival",
@@ -1196,17 +1182,15 @@
     "selectionReason": "longevity"
   },
   {
-    "name": "Brown County Fine Arts Festival",
-    "slug": "brown-county-fine-arts-festival",
-    "city": "Nashville",
+    "slug": "penrod-arts-fair",
+    "name": "Penrod Arts Fair",
+    "city": "Indianapolis",
     "region": "IN",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.browncountyartguild.com",
-    "lat": 39.207,
-    "lng": -86.251,
-    "seasonHint": "early June",
-    "notes": "Brown County Art Guild downtown Nashville IN festival.",
-    "selectionReason": "circuit_coverage"
+    "lat": 39.8267,
+    "lng": -86.1855,
+    "officialWebsiteUrl": "https://www.penrod.org",
+    "seasonHint": "September",
+    "notes": "Long-running Indianapolis juried fair on Holcomb Gardens grounds."
   },
   {
     "name": "Geneva Fine Arts Fair",
@@ -1222,17 +1206,15 @@
     "selectionReason": "circuit_coverage"
   },
   {
-    "name": "Scottsdale Arts Festival",
-    "slug": "scottsdale-arts-festival",
-    "city": "Scottsdale",
+    "slug": "fountain-hills-fine-art-festival",
+    "name": "Fountain Hills Fine Art Festival",
+    "city": "Fountain Hills",
     "region": "AZ",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.scottsdalearts.org",
-    "lat": 33.494,
-    "lng": -111.926,
-    "seasonHint": "mid-March",
-    "notes": "Scottsdale Civic Center Mall juried festival.",
-    "selectionReason": "regional_anchor"
+    "lat": 33.6117,
+    "lng": -111.7174,
+    "officialWebsiteUrl": "https://www.fountainhillsartleague.org",
+    "seasonHint": "November",
+    "notes": "Active Arizona outdoor juried festival; classic Scottsdale Arts Festival not returning."
   },
   {
     "name": "Hot Springs Arts & Crafts Fair",
@@ -1287,16 +1269,14 @@
     "selectionReason": "circuit_coverage"
   },
   {
-    "name": "Saint Augustine Art & Craft Festival",
-    "slug": "saint-augustine-art-craft-festival",
-    "city": "St. Augustine",
+    "slug": "las-olas-art-fair",
+    "name": "Las Olas Art Fair",
+    "city": "Fort Lauderdale",
     "region": "FL",
-    "country": "US",
-    "officialWebsiteUrl": "https://www.staugustineartfestival.com",
-    "lat": 29.894,
-    "lng": -81.314,
-    "seasonHint": "early April",
-    "notes": "Plaza de la Constituci\u00f3n historic district festival.",
-    "selectionReason": "circuit_coverage"
+    "lat": 26.1195,
+    "lng": -80.1224,
+    "officialWebsiteUrl": "https://www.artfestival.com",
+    "seasonHint": "January",
+    "notes": "South Florida juried street fair circuit stop; replaces discontinued St. Augustine festival."
   }
 ]

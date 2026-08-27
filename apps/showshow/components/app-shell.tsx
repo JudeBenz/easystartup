@@ -42,12 +42,13 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <SiteNav
         userLabel={`${user.name.split(" ")[0]} · ${role}`}
+        roles={user.roles}
         personaForm={personaForm}
         resetForm={resetForm}
       />
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-4 py-6 pb-28 md:px-6 md:py-8 lg:pb-10"
+        className="mx-auto max-w-6xl px-4 py-6 pb-32 md:px-6 md:py-8 lg:pb-10"
       >
         {children}
       </main>

@@ -47,4 +47,4 @@ Use the header Switch control:
 
 ## Stack
 
-Next.js 15 · React 19 · Tailwind 4 · Zod · in-memory demo store (write-through `.demo-data.json`)
+Next.js 15 · React 19 · Tailwind 4 · Zod · durable demo store (atomic write-through `.data/showshow-demo.json`)

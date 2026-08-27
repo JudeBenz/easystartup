@@ -142,6 +142,14 @@ export async function getApplicationsForArtist(artistId: string) {
     .sort((a, b) => (a.edition.applicationDeadline ?? "").localeCompare(b.edition.applicationDeadline ?? ""));
 }
 
+function reminderFromDeadline(deadline?: string) {
+  if (!deadline) return undefined;
+  const d = new Date(`${deadline}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return undefined;
+  d.setUTCDate(d.getUTCDate() - 14);
+  return d.toISOString();
+}
+
 export async function upsertApplication(input: {
   artistId: string;
   editionId: string;
@@ -153,22 +161,30 @@ export async function upsertApplication(input: {
     const existing = db.applications.find(
       (a) => a.artistId === input.artistId && a.editionId === input.editionId,
     );
+    const edition = db.editions.find((e) => e.id === input.editionId);
     const now = new Date().toISOString();
+    const reminderAt = reminderFromDeadline(edition?.applicationDeadline);
     if (existing) {
       existing.status = input.status;
       existing.notes = input.notes;
+      existing.officialApplyUrl = input.officialApplyUrl || existing.officialApplyUrl;
       existing.updatedAt = now;
+      if (!existing.reminderAt && reminderAt) existing.reminderAt = reminderAt;
       if (input.status === "applied" && !existing.appliedAt) existing.appliedAt = now;
       return existing;
     }
+    const show = edition ? db.shows.find((s) => s.id === edition.showId) : undefined;
     const app: Application = {
       id: `app_${nanoid(8)}`,
       artistId: input.artistId,
       editionId: input.editionId,
       status: input.status,
-      officialApplyUrl: input.officialApplyUrl,
+      officialApplyUrl:
+        input.officialApplyUrl ||
+        (show ? `${show.officialWebsiteUrl.replace(/\/$/, "")}/apply` : ""),
       appliedAt: input.status === "applied" ? now : undefined,
       updatedAt: now,
+      reminderAt,
       notes: input.notes,
     };
     db.applications.push(app);
@@ -207,6 +223,7 @@ export async function createRoiReport(input: {
   otherExpenses: number;
   grossSales: number;
   optInAggregate: boolean;
+  hoursWorked?: number;
   notes?: string;
   breakdowns?: { medium: RoiMediumBreakdown["medium"]; sales: number; unitsSold: number }[];
 }) {
@@ -222,6 +239,7 @@ export async function createRoiReport(input: {
       otherExpenses: input.otherExpenses,
       grossSales: input.grossSales,
       currency: "USD",
+      hoursWorked: input.hoursWorked,
       optInAggregate: input.optInAggregate,
       notes: input.notes,
       createdAt: now,
@@ -238,6 +256,44 @@ export async function createRoiReport(input: {
     db.aggregates = computeAggregates(db.roiReports, db.roiBreakdowns, db.editions, db.shows);
     return report;
   });
+}
+
+/** Peer signal for a show: opted-in self-reported nets only (no aggregator data). */
+export async function getShowRoiSignal(showId: string) {
+  const db = await getDb();
+  const editionIds = new Set(db.editions.filter((e) => e.showId === showId).map((e) => e.id));
+  const opted = db.roiReports.filter((r) => r.optInAggregate && editionIds.has(r.editionId));
+  if (!opted.length) return null;
+  const nets = opted.map((r) => {
+    const expenses = r.boothFee + r.travel + r.lodging + r.otherExpenses;
+    return r.grossSales - expenses;
+  });
+  nets.sort((a, b) => a - b);
+  const mid = nets[Math.floor(nets.length / 2)] ?? 0;
+  const positiveShare = nets.filter((n) => n > 0).length / nets.length;
+  const byYear = new Map<number, number[]>();
+  for (const r of opted) {
+    const ed = db.editions.find((e) => e.id === r.editionId);
+    if (!ed) continue;
+    const expenses = r.boothFee + r.travel + r.lodging + r.otherExpenses;
+    const list = byYear.get(ed.year) ?? [];
+    list.push(r.grossSales - expenses);
+    byYear.set(ed.year, list);
+  }
+  const yoy = [...byYear.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([year, vals]) => {
+      vals.sort((a, b) => a - b);
+      return { year, medianNet: vals[Math.floor(vals.length / 2)] ?? 0, n: vals.length };
+    });
+  return {
+    sampleSize: opted.length,
+    medianNet: mid,
+    positiveShare,
+    worthApplying: opted.length >= 3 ? positiveShare >= 0.5 && mid > 0 : null,
+    yoy,
+    label: "self_reported" as const,
+  };
 }
 
 export async function listRoutes() {
@@ -330,6 +386,58 @@ export async function listUsers() {
 export async function getUser(id: string) {
   const db = await getDb();
   return db.users.find((u) => u.id === id) ?? null;
+}
+
+export async function getArtistIdForUser(userId: string) {
+  const db = await getDb();
+  return db.artists.find((a) => a.userId === userId)?.id ?? null;
+}
+
+export async function claimShow(input: {
+  userId: string;
+  showId: string;
+  contactEmail: string;
+}) {
+  return mutateDb((db) => {
+    const show = db.shows.find((s) => s.id === input.showId);
+    if (!show) throw new Error("Show not found");
+    let director = db.directors.find((d) => d.userId === input.userId);
+    const domain = (() => {
+      try {
+        return new URL(show.officialWebsiteUrl).hostname.replace(/^www\./, "");
+      } catch {
+        return undefined;
+      }
+    })();
+    const emailDomain = input.contactEmail.split("@")[1]?.toLowerCase();
+    const autoVerify = Boolean(domain && emailDomain && emailDomain === domain);
+    if (!director) {
+      director = {
+        id: `dir_${nanoid(8)}`,
+        userId: input.userId,
+        showIds: [input.showId],
+        verified: autoVerify,
+        verifiedDomain: autoVerify ? domain : undefined,
+        verifiedAt: autoVerify ? new Date().toISOString() : undefined,
+      };
+      db.directors.push(director);
+    } else if (!director.showIds.includes(input.showId)) {
+      director.showIds.push(input.showId);
+      if (autoVerify && !director.verified) {
+        director.verified = true;
+        director.verifiedDomain = domain;
+        director.verifiedAt = new Date().toISOString();
+      }
+    }
+    const user = db.users.find((u) => u.id === input.userId);
+    if (user && !user.roles.includes("director")) user.roles.push("director");
+    return { director, autoVerify, domain };
+  });
+}
+
+export async function listClaimableShows() {
+  const db = await getDb();
+  return db.shows.slice().sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getDirectorDashboard(userId: string) {
@@ -471,16 +579,79 @@ export async function createBoothRequest(input: {
   });
 }
 
-export async function listAlerts() {
+export async function listAlerts(artistId?: string | null) {
   const db = await getDb();
-  return db.alerts
+  type AlertRow = {
+    kind: "operational" | "deadline";
+    id: string;
+    alertKind: string;
+    title: string;
+    body: string;
+    createdAt: string;
+    edition: (typeof db.editions)[number];
+    show: (typeof db.shows)[number];
+    dueAt?: string;
+    href: string;
+  };
+
+  const operational: AlertRow[] = db.alerts
     .slice()
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((alert) => {
       const edition = db.editions.find((e) => e.id === alert.editionId)!;
       const show = db.shows.find((s) => s.id === edition.showId)!;
-      return { alert, edition, show };
+      return {
+        kind: "operational" as const,
+        id: alert.id,
+        alertKind: alert.kind,
+        title: alert.title,
+        body: alert.body,
+        createdAt: alert.createdAt,
+        edition,
+        show,
+        dueAt: undefined,
+        href: `/shows/${show.slug}`,
+      };
     });
+
+  const deadlineRows: AlertRow[] = [];
+  if (artistId) {
+    const now = Date.now();
+    const horizonMs = 1000 * 60 * 60 * 24 * 60; // 60 days
+    for (const app of db.applications.filter((a) => a.artistId === artistId)) {
+      if (["declined", "withdrawn", "accepted"].includes(app.status)) continue;
+      const edition = db.editions.find((e) => e.id === app.editionId);
+      const show = edition ? db.shows.find((s) => s.id === edition.showId) : undefined;
+      if (!edition || !show || !edition.applicationDeadline) continue;
+      const due = new Date(`${edition.applicationDeadline}T23:59:59Z`).getTime();
+      if (Number.isNaN(due)) continue;
+      const delta = due - now;
+      if (delta < -1000 * 60 * 60 * 24 || delta > horizonMs) continue;
+      const days = Math.ceil(delta / (1000 * 60 * 60 * 24));
+      deadlineRows.push({
+        kind: "deadline",
+        id: `deadline_${app.id}`,
+        alertKind: "deadline",
+        title:
+          days < 0
+            ? `Deadline passed · ${show.name}`
+            : days === 0
+              ? `Apply today · ${show.name}`
+              : `Deadline in ${days} day${days === 1 ? "" : "s"} · ${show.name}`,
+        body: `Your tracker is “${app.status}”. Official deadline ${edition.applicationDeadline}.${
+          app.reminderAt ? ` Reminder set for ${app.reminderAt.slice(0, 10)}.` : ""
+        }`,
+        createdAt: app.reminderAt ?? app.updatedAt,
+        edition,
+        show,
+        dueAt: edition.applicationDeadline,
+        href: `/applications`,
+      });
+    }
+    deadlineRows.sort((a, b) => (a.dueAt ?? "").localeCompare(b.dueAt ?? ""));
+  }
+
+  return [...deadlineRows, ...operational];
 }
 
 export async function stats() {
