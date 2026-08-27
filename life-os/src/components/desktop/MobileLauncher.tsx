@@ -7,6 +7,8 @@ import { useLifeStore } from "@/lib/store";
 import { isErrandDue } from "@/lib/store/errands";
 import { PHONE_THEMES } from "@/lib/store/phone-prefs";
 import { haptic } from "@/lib/phone/haptics";
+import { QuickAssistSheet } from "@/components/phone/QuickAssistSheet";
+import { Mic } from "lucide-react";
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", {
@@ -25,18 +27,10 @@ export function MobileLauncher() {
   const accounts = useLifeStore((s) => s.accounts);
   const events = useLifeStore((s) => s.events);
   const errands = useLifeStore((s) => s.errands);
-  const addTransaction = useLifeStore((s) => s.addTransaction);
-  const addAccount = useLifeStore((s) => s.addAccount);
-  const addEvent = useLifeStore((s) => s.addEvent);
-  const addErrand = useLifeStore((s) => s.addErrand);
 
   const [time, setTime] = useState("");
   const [entering, setEntering] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
-  const [quickTab, setQuickTab] = useState<"money" | "event" | "errand">("money");
-  const [qAmount, setQAmount] = useState("");
-  const [qNote, setQNote] = useState("");
-  const [qTitle, setQTitle] = useState("");
 
   const theme = PHONE_THEMES[themeId];
 
@@ -52,6 +46,10 @@ export function MobileLauncher() {
     const id = setInterval(tick, 15_000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (mobileOpenModule) setQuickOpen(false);
+  }, [mobileOpenModule]);
 
   useEffect(() => {
     if (mobileOpenModule) {
@@ -213,178 +211,28 @@ export function MobileLauncher() {
           </div>
         </div>
 
-        {/* Quick-add FAB */}
+        {/* Assist FAB — talk / type to control the phone */}
         <button
           type="button"
           onClick={() => {
             haptic("medium");
             setQuickOpen(true);
           }}
-          className="absolute bottom-[max(3.5rem,calc(env(safe-area-inset-bottom)+2.75rem))] right-5 z-20 flex h-14 w-14 items-center justify-center rounded-full text-2xl font-light text-white shadow-xl active:scale-90"
+          className="absolute bottom-[max(3.5rem,calc(env(safe-area-inset-bottom)+2.75rem))] right-5 z-20 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-xl active:scale-90"
           style={{ backgroundColor: theme.accent }}
-          aria-label="Quick add"
+          aria-label="Ask LifeInvader"
         >
-          +
+          <Mic className="h-6 w-6" strokeWidth={2} />
         </button>
 
         <PhoneHomeBar onHome={goHome} />
       </div>
 
-      {quickOpen && (
-        <div className="absolute inset-0 z-30 flex items-end bg-black/60 backdrop-blur-sm">
-          <div className="phone-sheet w-full rounded-t-3xl bg-[#121820] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-bold">Quick add</p>
-              <button
-                type="button"
-                onClick={() => setQuickOpen(false)}
-                className="text-white/50"
-              >
-                Close
-              </button>
-            </div>
-            <div className="mb-3 flex gap-1 rounded-xl bg-white/5 p-1">
-              {(
-                [
-                  ["money", "Money"],
-                  ["event", "Event"],
-                  ["errand", "Errand"],
-                ] as const
-              ).map(([id, label]) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setQuickTab(id)}
-                  className={`flex-1 rounded-lg py-2 text-xs font-semibold ${
-                    quickTab === id ? "bg-white/15 text-white" : "text-white/45"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {quickTab === "money" && (
-              <form
-                className="space-y-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const amount = parseFloat(qAmount);
-                  if (!amount) return;
-                  let accountId = accounts[0]?.id;
-                  if (!accountId) {
-                    addAccount({
-                      name: "Checking",
-                      type: "checking",
-                      balance: 0,
-                      color: "#2ecc71",
-                    });
-                    accountId = useLifeStore.getState().accounts[0]?.id;
-                  }
-                  if (!accountId) return;
-                  addTransaction({
-                    accountId,
-                    amount,
-                    category: qNote.trim() || "General",
-                    note: qNote.trim() || "Quick add",
-                    date: new Date().toISOString().slice(0, 10),
-                    type: "expense",
-                  });
-                  haptic("success");
-                  setQAmount("");
-                  setQNote("");
-                  setQuickOpen(false);
-                  openApp("maze-bank");
-                }}
-              >
-                <input
-                  value={qAmount}
-                  onChange={(e) => setQAmount(e.target.value)}
-                  type="number"
-                  step="0.01"
-                  placeholder="Amount"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm"
-                />
-                <input
-                  value={qNote}
-                  onChange={(e) => setQNote(e.target.value)}
-                  placeholder="What for?"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm"
-                />
-                <button
-                  type="submit"
-                  className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold"
-                >
-                  Log expense
-                </button>
-              </form>
-            )}
-
-            {quickTab === "event" && (
-              <form
-                className="space-y-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!qTitle.trim()) return;
-                  const d = new Date().toISOString().slice(0, 10);
-                  addEvent({
-                    title: qTitle.trim(),
-                    start: `${d}T09:00:00`,
-                    end: `${d}T10:00:00`,
-                    allDay: false,
-                    color: "#3498db",
-                  });
-                  haptic("success");
-                  setQTitle("");
-                  setQuickOpen(false);
-                  openApp("calendar");
-                }}
-              >
-                <input
-                  value={qTitle}
-                  onChange={(e) => setQTitle(e.target.value)}
-                  placeholder="Event title"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm"
-                />
-                <button
-                  type="submit"
-                  className="w-full rounded-xl bg-sky-600 py-3 text-sm font-bold"
-                >
-                  Add to today
-                </button>
-              </form>
-            )}
-
-            {quickTab === "errand" && (
-              <form
-                className="space-y-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!qTitle.trim()) return;
-                  addErrand({ title: qTitle.trim(), frequency: "daily" });
-                  haptic("success");
-                  setQTitle("");
-                  setQuickOpen(false);
-                  openApp("errands");
-                }}
-              >
-                <input
-                  value={qTitle}
-                  onChange={(e) => setQTitle(e.target.value)}
-                  placeholder="Habit / errand"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm"
-                />
-                <button
-                  type="submit"
-                  className="w-full rounded-xl bg-cyan-600 py-3 text-sm font-bold"
-                >
-                  Add to checklist
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+      <QuickAssistSheet
+        open={quickOpen}
+        onClose={() => setQuickOpen(false)}
+        accent={theme.accent}
+      />
     </div>
   );
 }

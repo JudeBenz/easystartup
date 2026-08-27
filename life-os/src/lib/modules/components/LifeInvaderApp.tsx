@@ -4,26 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { createChatMessage, runLifeAgent } from "@/lib/ai/agent-client";
 import { useLifeStore } from "@/lib/store";
 import type { AIProvider } from "@/types/ai";
-
-type SpeechRecognitionLike = {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start: () => void;
-  stop: () => void;
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
-};
-
-function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as {
-    SpeechRecognition?: new () => SpeechRecognitionLike;
-    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
-}
+import {
+  getSpeechRecognition,
+  type SpeechRecognitionLike,
+} from "@/lib/phone/speech";
 
 export function LifeInvaderApp() {
   const messages = useLifeStore((s) => s.chatMessages);

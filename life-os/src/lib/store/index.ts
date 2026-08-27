@@ -61,6 +61,9 @@ export const useLifeStore = create<LifeStore>()(
       nextZ: 10,
 
       openModule: (moduleId) => {
+        // Phone shell uses mobileOpenModule; always set so AI / tools work on mobile
+        set({ mobileOpenModule: moduleId });
+
         const existing = get().windows.find((w) => w.moduleId === moduleId);
         if (existing) {
           if (existing.minimized) {

@@ -8,6 +8,17 @@ import type { ChatApiRequest, ChatApiResponse, ToolCall } from "@/types/ai";
 export async function callMock(
   request: ChatApiRequest,
 ): Promise<ChatApiResponse> {
+  const lastMsg = request.messages[request.messages.length - 1];
+  // After tools already ran, finish the turn — don't re-fire the same rules
+  if (lastMsg?.role === "tool" || lastMsg?.role === "assistant") {
+    return {
+      content: "Done.",
+      toolCalls: [],
+      provider: "mock",
+      model: "rule-based",
+    };
+  }
+
   const lastUser = [...request.messages]
     .reverse()
     .find((m) => m.role === "user")?.content;
@@ -103,6 +114,59 @@ export async function callMock(
     }
   }
 
+  // Errands: "add errand gym" / "add habit water plants every 2 days"
+  const errandMatch =
+    text.match(
+      /(?:add|create)\s+(?:an?\s+)?(?:errand|habit|checklist(?:\s+item)?)\s*:?\s*(.+)/i,
+    ) ??
+    text.match(
+      /(?:remind me to|every day|daily)\s+(.+)/i,
+    );
+  if (errandMatch && !toolCalls.length) {
+    let title = errandMatch[1].replace(/\.$/, "").trim();
+    let frequency: "daily" | "every_2_days" | "every_3_days" | "weekly" =
+      "daily";
+    if (/every\s*2\s*days|every other day/i.test(title)) {
+      frequency = "every_2_days";
+      title = title.replace(/every\s*2\s*days|every other day/gi, "").trim();
+    } else if (/every\s*3\s*days/i.test(title)) {
+      frequency = "every_3_days";
+      title = title.replace(/every\s*3\s*days/gi, "").trim();
+    } else if (/weekly|every week/i.test(title)) {
+      frequency = "weekly";
+      title = title.replace(/weekly|every week/gi, "").trim();
+    } else if (/every\s*day|daily/i.test(title)) {
+      frequency = "daily";
+      title = title.replace(/every\s*day|daily/gi, "").trim();
+    }
+    title = title.replace(/^(?:to\s+)/i, "").replace(/[:\-–]+$/, "").trim();
+    title = title.replace(/\s{2,}/g, " ").trim();
+    if (title) {
+      toolCalls.push({
+        id: uuid(),
+        name: "add_errand",
+        arguments: { title, frequency },
+      });
+    }
+  }
+
+  if (
+    !toolCalls.length &&
+    (lower.includes("complete errand") ||
+      lower.match(/mark\s+.+?\s+(?:done|complete)/))
+  ) {
+    const m =
+      text.match(/complete(?:\s+errand)?\s+(.+)/i) ??
+      text.match(/mark\s+(.+?)\s+(?:done|complete)/i);
+    if (m) {
+      toolCalls.push({
+        id: uuid(),
+        name: "complete_errand",
+        arguments: { title: m[1].replace(/\.$/, "").trim() },
+      });
+    }
+  }
+
   // Balance query
   if (
     lower.includes("balance") ||
@@ -121,6 +185,8 @@ export async function callMock(
     toolCalls.push({ id: uuid(), name: "open_app", arguments: { appId: "maze-bank" } });
   } else if (lower.includes("open calendar")) {
     toolCalls.push({ id: uuid(), name: "open_app", arguments: { appId: "calendar" } });
+  } else if (lower.includes("open errand") || lower.includes("open checklist")) {
+    toolCalls.push({ id: uuid(), name: "open_app", arguments: { appId: "errands" } });
   } else if (lower.includes("open project")) {
     toolCalls.push({
       id: uuid(),
@@ -140,12 +206,12 @@ export async function callMock(
 
   return {
     content:
-      "I'm running in offline rule-based mode (no Grok/Ollama key). Try:\n" +
+      "I'm running in offline rule-based mode (no Gemini key). Try:\n" +
       "• \"Add dentist to calendar tomorrow at 2pm\"\n" +
       "• \"Log $50 for groceries\"\n" +
-      "• \"Add task buy groceries\"\n" +
+      "• \"Add errand: water plants every 2 days\"\n" +
       "• \"What's my balance?\"\n\n" +
-      "For full natural language, set XAI_API_KEY (Grok) or run Ollama locally.",
+      "For fuller chat, set GEMINI_API_KEY on the server.",
     toolCalls: [],
     provider: "mock",
     model: "rule-based",
