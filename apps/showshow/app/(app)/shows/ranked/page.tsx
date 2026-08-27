@@ -11,13 +11,12 @@ export default async function RankedPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Sales intelligence"
         title="First-party rankings"
         description={`Built only from opted-in artist ROI logs. Minimum n=${MIN_N}. Never from aggregator scores.`}
       />
       {!rows.length ? (
         <Panel>
-          <p className="text-sm text-[var(--ink-soft)]">
+          <p className="text-[1.05rem] text-[var(--muted)]">
             No shows have met the sample-size threshold yet. Keep logging ROI.
           </p>
         </Panel>
@@ -28,12 +27,12 @@ export default async function RankedPage() {
               <Panel>
                 <Link href={`/shows/${row.show.slug}`} className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex gap-4">
-                    <span className="font-[family-name:var(--font-syne)] text-3xl font-extrabold text-[var(--field)]">
+                    <span className="font-display text-3xl font-extrabold text-[var(--field)]">
                       {index + 1}
                     </span>
                     <div>
-                      <p className="font-[family-name:var(--font-syne)] text-xl font-bold">{row.show.name}</p>
-                      <p className="text-sm text-[var(--ink-soft)]">
+                      <p className="font-display text-xl font-bold">{row.show.name}</p>
+                      <p className="text-[1.05rem] text-[var(--muted)]">
                         {row.show.primaryCity}, {row.show.primaryRegion}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -47,7 +46,7 @@ export default async function RankedPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold">{formatMoney(row.aggregate?.medianNet ?? 0)}</p>
-                    <p className="text-xs text-[var(--ink-soft)]">median net</p>
+                    <p className="text-base text-[var(--muted)]">median net</p>
                     <div className="mt-1">
                       <SelfReportedNote sampleSize={row.aggregate?.sampleSize ?? 0} />
                     </div>

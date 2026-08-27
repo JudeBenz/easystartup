@@ -39,12 +39,11 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
   return (
     <div>
       <PageHeader
-        eyebrow={`${show.primaryCity}, ${show.primaryRegion}`}
         title={show.name}
         description={
           current
-            ? `${formatDate(current.startDate)} – ${formatDate(current.endDate)} · ${current.venueName}`
-            : undefined
+            ? `${show.primaryCity}, ${show.primaryRegion} · ${formatDate(current.startDate)} – ${formatDate(current.endDate)} · ${current.venueName}`
+            : `${show.primaryCity}, ${show.primaryRegion}`
         }
         actions={
           <>
@@ -52,13 +51,13 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
               href={show.officialWebsiteUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full bg-[var(--signal)] px-4 py-2 text-sm font-semibold text-white"
+              className="ss-btn ss-btn-primary"
             >
               Official site
             </a>
             <Link
               href={`/shows/${show.slug}/weekend`}
-              className="rounded-full border border-[var(--line)] bg-white/80 px-4 py-2 text-sm"
+              className="ss-btn ss-btn-ghost"
             >
               Weekend mode
             </Link>
@@ -69,8 +68,8 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
       <div className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
         <div className="space-y-6">
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Facts</h2>
-            <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+            <h2 className="font-display text-lg font-bold">Facts</h2>
+            <dl className="mt-4 grid gap-4 text-[1.125rem] sm:grid-cols-2">
               <Fact label="Address" value={current?.fullAddress} />
               <Fact
                 label="Booth fee"
@@ -104,7 +103,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
               <Fact label="Director" value={current?.directorName} />
               <Fact label="Director contact" value={current?.directorEmail} />
             </dl>
-            <p className="mt-4 text-xs text-[var(--ink-soft)]">
+            <p className="mt-4 text-base text-[var(--muted)]">
               Provenance: {provenance.length} field captures from official sources via ingestion
               adapters.
             </p>
@@ -113,7 +112,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           {agg ? (
             <Panel>
               <div className="flex items-center justify-between gap-2">
-                <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">
+                <h2 className="font-display text-lg font-bold">
                   First-party ROI signal
                 </h2>
                 <Badge tone={agg.minNMet ? "field" : "warn"}>
@@ -125,11 +124,11 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                   <p className="mt-3 text-2xl font-bold">
                     Median net {formatMoney(agg.medianNet ?? 0)}
                   </p>
-                  <p className="text-sm text-[var(--ink-soft)]">
+                  <p className="text-[1.05rem] text-[var(--muted)]">
                     Median gross {formatMoney(agg.medianGrossSales ?? 0)} · expenses{" "}
                     {formatMoney(agg.medianTotalExpenses ?? 0)}
                   </p>
-                  <ul className="mt-3 space-y-1 text-sm">
+                  <ul className="mt-3 space-y-1 text-[1.05rem]">
                     {agg.topMediums.map((m) => (
                       <li key={m.medium}>
                         {MEDIUM_LABELS[m.medium]} · {Math.round(m.share * 100)}% of reported sales
@@ -138,7 +137,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                   </ul>
                 </>
               ) : (
-                <p className="mt-3 text-sm text-[var(--ink-soft)]">
+                <p className="mt-3 text-[1.05rem] text-[var(--muted)]">
                   Need at least 5 opted-in self-reported logs before we publish a ranking number.
                 </p>
               )}
@@ -149,14 +148,14 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           ) : null}
 
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Year over year</h2>
-            <ul className="mt-3 space-y-2 text-sm">
+            <h2 className="font-display text-lg font-bold">Year over year</h2>
+            <ul className="mt-3 space-y-2 text-[1.05rem]">
               {editions.map((e) => (
                 <li key={e.id} className="flex justify-between gap-3 border-b border-[var(--line)] py-2 last:border-0">
                   <span>
                     {e.year} · {formatDate(e.startDate)}–{formatDate(e.endDate)}
                   </span>
-                  <span className="text-[var(--ink-soft)]">
+                  <span className="text-[var(--muted)]">
                     {e.boothFeeMin != null ? formatMoney(e.boothFeeMin) : "—"}
                     {e.attendance ? ` · ${e.attendance.toLocaleString()} att.` : ""}
                   </span>
@@ -166,15 +165,15 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           </Panel>
 
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Comments</h2>
+            <h2 className="font-display text-lg font-bold">Comments</h2>
             <ul className="mt-3 space-y-3">
               {comments.map((c) => (
                 <li key={c.id} className="text-sm">
                   <p>{c.body}</p>
-                  <p className="text-xs text-[var(--ink-soft)]">{formatDate(c.createdAt, "MMM d, yyyy · h:mm a")}</p>
+                  <p className="text-base text-[var(--muted)]">{formatDate(c.createdAt, "MMM d, yyyy · h:mm a")}</p>
                 </li>
               ))}
-              {!comments.length ? <li className="text-sm text-[var(--ink-soft)]">No comments yet.</li> : null}
+              {!comments.length ? <li className="text-[1.05rem] text-[var(--muted)]">No comments yet.</li> : null}
             </ul>
             {current ? (
               <form action={addCommentAction} className="mt-4 flex flex-col gap-2">
@@ -186,9 +185,9 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                   required
                   rows={2}
                   placeholder="Ask about booth layout, shade, load-in…"
-                  className="w-full rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2 text-sm"
+                  className="ss-textarea"
                 />
-                <button type="submit" className="self-start rounded-full bg-[var(--ink)] px-4 py-2 text-sm text-white">
+                <button type="submit" className="ss-btn ss-btn-secondary self-start">
                   Post comment
                 </button>
               </form>
@@ -198,8 +197,8 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
 
         <div className="space-y-6">
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Coverage links</h2>
-            <ul className="mt-3 space-y-2 text-sm">
+            <h2 className="font-display text-lg font-bold">Coverage links</h2>
+            <ul className="mt-3 space-y-2 text-[1.05rem]">
               {socialLinks.map((l) => (
                 <li key={l.id}>
                   <a className="text-[var(--field-bright)] underline-offset-2 hover:underline" href={l.url} target="_blank" rel="noreferrer">
@@ -207,16 +206,16 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                   </a>
                 </li>
               ))}
-              {!socialLinks.length ? <li className="text-[var(--ink-soft)]">None listed</li> : null}
+              {!socialLinks.length ? <li className="text-[var(--muted)]">None listed</li> : null}
             </ul>
           </Panel>
 
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">External references</h2>
-            <p className="mt-1 text-xs text-[var(--ink-soft)]">
+            <h2 className="font-display text-lg font-bold">External references</h2>
+            <p className="mt-1 text-base text-[var(--muted)]">
               Link-outs only — we never store rankings, scores, or editorial copy.
             </p>
-            <ul className="mt-3 space-y-2 text-sm">
+            <ul className="mt-3 space-y-2 text-[1.05rem]">
               {externalRefs.map((r) => (
                 <li key={r.id}>
                   <a className="text-[var(--field-bright)] underline-offset-2 hover:underline" href={r.url} target="_blank" rel="noreferrer">
@@ -224,19 +223,19 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                   </a>
                 </li>
               ))}
-              {!externalRefs.length ? <li className="text-[var(--ink-soft)]">No aggregator links</li> : null}
+              {!externalRefs.length ? <li className="text-[var(--muted)]">No aggregator links</li> : null}
             </ul>
           </Panel>
 
           {announcements.length ? (
             <Panel>
-              <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Director updates</h2>
+              <h2 className="font-display text-lg font-bold">Director updates</h2>
               <ul className="mt-3 space-y-3">
                 {announcements.map((a) => (
                   <li key={a.id}>
                     <Badge tone="field">{a.kind.replace("_", " ")}</Badge>
                     <p className="mt-1 font-medium">{a.title}</p>
-                    <p className="text-sm text-[var(--ink-soft)]">{a.body}</p>
+                    <p className="text-[1.05rem] text-[var(--muted)]">{a.body}</p>
                   </li>
                 ))}
               </ul>
@@ -245,13 +244,13 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
 
           {alerts.length ? (
             <Panel>
-              <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Alerts</h2>
-              <ul className="mt-3 space-y-2 text-sm">
+              <h2 className="font-display text-lg font-bold">Alerts</h2>
+              <ul className="mt-3 space-y-2 text-[1.05rem]">
                 {alerts.map((a) => (
                   <li key={a.id}>
                     <Badge tone="warn">{a.kind}</Badge>
                     <p className="mt-1 font-medium">{a.title}</p>
-                    <p className="text-[var(--ink-soft)]">{a.body}</p>
+                    <p className="text-[var(--muted)]">{a.body}</p>
                   </li>
                 ))}
               </ul>
@@ -260,12 +259,12 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
 
           {weather.length ? (
             <Panel>
-              <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Historical weather</h2>
-              <ul className="mt-3 space-y-2 text-sm">
+              <h2 className="font-display text-lg font-bold">Historical weather</h2>
+              <ul className="mt-3 space-y-2 text-[1.05rem]">
                 {weather.map((w) => (
                   <li key={w.id} className="flex justify-between gap-2">
                     <span>{formatDate(w.date)}</span>
-                    <span className="text-[var(--ink-soft)]">
+                    <span className="text-[var(--muted)]">
                       {w.lowF}–{w.highF}°F · {w.condition} · {w.precipChance}% rain
                     </span>
                   </li>
@@ -275,8 +274,8 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           ) : null}
 
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Waitlist & booth-sit</h2>
-            <ul className="mt-3 space-y-2 text-sm">
+            <h2 className="font-display text-lg font-bold">Waitlist & booth-sit</h2>
+            <ul className="mt-3 space-y-2 text-[1.05rem]">
               {waitlist.map((w) => (
                 <li key={w.id}>
                   Waitlist booth {w.boothLabel ?? "open"} · <Badge>{w.status}</Badge>
@@ -291,7 +290,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                 </li>
               ))}
               {!waitlist.length && !boothOffers.length && !boothRequests.length ? (
-                <li className="text-[var(--ink-soft)]">Nothing posted yet</li>
+                <li className="text-[var(--muted)]">Nothing posted yet</li>
               ) : null}
             </ul>
           </Panel>
@@ -304,7 +303,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
 function Fact({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-[var(--ink-soft)]">{label}</dt>
+      <dt className="text-base font-bold text-[var(--muted)]">{label}</dt>
       <dd className="mt-0.5 font-medium">{value || "—"}</dd>
     </div>
   );

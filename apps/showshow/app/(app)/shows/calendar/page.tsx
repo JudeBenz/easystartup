@@ -27,17 +27,16 @@ export default async function ShowsCalendarPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Discovery"
         title="Calendar"
         description="Show dates and application deadlines as separate layers — never confuse load-in with jury day."
       />
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Show dates</h2>
+          <h2 className="font-display text-lg font-bold">Show dates</h2>
           <div className="mt-4 space-y-5">
             {months.map(([month, list]) => (
               <div key={month}>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--field-bright)]">
+                <p className="text-base font-bold text-[var(--good)]">
                   {formatDate(`${month}-01`, "MMMM yyyy")}
                 </p>
                 <ul className="mt-2 space-y-2">
@@ -47,7 +46,7 @@ export default async function ShowsCalendarPage() {
                       <li key={edition.id}>
                         <Link href={`/shows/${show.slug}`} className="flex justify-between gap-3 text-sm hover:text-[var(--field)]">
                           <span className="font-medium">{show.name}</span>
-                          <span className="shrink-0 text-[var(--ink-soft)]">
+                          <span className="shrink-0 text-[var(--muted)]">
                             {formatDate(edition.startDate, "MMM d")}–{formatDate(edition.endDate, "d")}
                           </span>
                         </Link>
@@ -59,10 +58,10 @@ export default async function ShowsCalendarPage() {
           </div>
         </Panel>
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Application deadlines</h2>
+          <h2 className="font-display text-lg font-bold">Application deadlines</h2>
           <ul className="mt-4 space-y-2">
             {deadlines.map(({ show, edition, deadline }) => (
-              <li key={edition.id} className="flex items-center justify-between gap-3 text-sm">
+              <li key={edition.id} className="flex items-center justify-between gap-3 text-[1.05rem]">
                 <Link href={`/shows/${show.slug}`} className="font-medium hover:text-[var(--field)]">
                   {show.name}
                 </Link>

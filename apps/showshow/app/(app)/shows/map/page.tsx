@@ -28,7 +28,6 @@ export default async function MapPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Discovery"
         title="Map"
         description={`Radius search from ${home.label}. Clustering is visual for the demo — swap in Mapbox later.`}
         actions={
@@ -37,8 +36,8 @@ export default async function MapPage({
               <Link
                 key={r}
                 href={`/shows/map?radius=${r}`}
-                className={`rounded-full px-3 py-1.5 text-sm ${
-                  radius === r ? "bg-[var(--ink)] text-white" : "border border-[var(--line)] bg-white/80"
+                className={`ss-btn text-base ${
+                  radius === r ? "ss-btn-primary" : "ss-btn-ghost"
                 }`}
               >
                 {r} mi
@@ -49,7 +48,7 @@ export default async function MapPage({
       />
 
       <Panel className="overflow-hidden !p-0">
-        <svg viewBox="0 0 100 60" className="h-auto w-full bg-[linear-gradient(180deg,#d9e7ef,#c5d5c8)]">
+        <svg viewBox="0 0 100 60" className="h-auto w-full bg-[#dce5ec]">
           {all.map(({ show, promoted }) => {
             const { x, y } = project(show.geo.lat, show.geo.lng);
             const inRadius = nearby.some((n) => n.show.id === show.id);
@@ -77,22 +76,22 @@ export default async function MapPage({
       </Panel>
 
       <div className="mt-6 grid gap-3">
-        <p className="text-sm text-[var(--ink-soft)]">
+        <p className="text-[1.05rem] text-[var(--muted)]">
           {nearby.length} shows within {radius} miles of {home.label}
         </p>
         {nearby.map(({ show, current, distanceMiles }) => (
           <Panel key={show.id} className="!py-3">
             <Link href={`/shows/${show.slug}`} className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="font-[family-name:var(--font-syne)] font-bold">{show.name}</p>
-                <p className="text-sm text-[var(--ink-soft)]">
+                <p className="font-display font-bold">{show.name}</p>
+                <p className="text-[1.05rem] text-[var(--muted)]">
                   {show.primaryCity}, {show.primaryRegion}
                 </p>
               </div>
-              <div className="text-right text-sm">
+              <div className="text-right text-[1.05rem]">
                 <Badge tone="field">{Math.round(distanceMiles)} mi</Badge>
                 {current?.boothFeeMin != null ? (
-                  <p className="mt-1 text-[var(--ink-soft)]">{formatMoney(current.boothFeeMin)}</p>
+                  <p className="mt-1 text-[var(--muted)]">{formatMoney(current.boothFeeMin)}</p>
                 ) : null}
               </div>
             </Link>

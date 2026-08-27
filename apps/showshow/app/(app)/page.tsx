@@ -5,55 +5,55 @@ export default async function HomePage() {
   const s = await stats();
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[linear-gradient(135deg,#0f4c4c_0%,#123038_48%,#1b2430_100%)] text-white shadow-[var(--shadow)]">
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute -right-10 top-10 h-72 w-72 animate-drift rounded-full bg-[radial-gradient(circle,rgba(255,90,54,0.55),transparent_65%)]" />
-        <div className="absolute bottom-0 left-10 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(22,122,118,0.7),transparent_70%)]" />
-      </div>
-      <div className="relative grid gap-10 px-6 py-14 sm:px-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-14 lg:py-20">
-        <div className="animate-rise">
-          <p className="font-[family-name:var(--font-syne)] text-5xl font-extrabold tracking-tight sm:text-7xl">
-            Show<span className="text-[var(--signal)]">Show</span>
+    <div className="grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-stretch">
+      <section className="ss-panel flex flex-col justify-between gap-8 !p-6 md:!p-10">
+        <div>
+          <p className="font-display text-[3.25rem] leading-none text-[var(--ink)] md:text-[4.5rem]">
+            Show<span className="text-[var(--accent)]">Show</span>
           </p>
-          <div className="mt-3 h-1 w-24 animate-pulse-line rounded-full bg-[var(--signal)]" />
-          <h1 className="mt-6 max-w-xl font-[family-name:var(--font-syne)] text-2xl font-semibold leading-snug sm:text-3xl">
-            The season planner artists actually open twice a week.
+          <h1 className="mt-5 max-w-[18ch] font-display text-[1.75rem] leading-tight md:text-[2.25rem]">
+            Plan your fair season without the guesswork.
           </h1>
-          <p className="mt-4 max-w-lg text-white/75">
-            Official-site facts for every fair. Private ROI logs that become first-party rankings.
-            Applications, routes, and a social layer for the booth aisle.
+          <p className="ss-prose mt-4 text-[1.2rem] text-[var(--muted)]">
+            Look up shows, track applications, and privately log what you spent
+            and sold. Our rankings come only from artists who opt in.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/shows"
-              className="rounded-full bg-[var(--signal)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--signal-deep)]"
-            >
-              Browse shows
-            </Link>
-            <Link
-              href="/roi"
-              className="rounded-full border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold backdrop-blur transition hover:bg-white/20"
-            >
-              Log ROI
-            </Link>
-          </div>
         </div>
-        <div className="animate-rise grid content-end gap-3 self-end text-sm" style={{ animationDelay: "120ms" }}>
-          <Stat label="Shows" value={String(s.shows)} />
-          <Stat label="Editions" value={String(s.editions)} />
-          <Stat label="ROI logs" value={String(s.roiReports)} />
-          <Stat label="Rankings ready" value={String(s.aggregatesReady)} />
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link href="/shows" className="ss-btn ss-btn-primary">
+            Browse shows
+          </Link>
+          <Link href="/roi" className="ss-btn ss-btn-secondary">
+            Log my ROI
+          </Link>
         </div>
-      </div>
-    </div>
-  );
-}
+      </section>
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between rounded-xl border border-white/15 bg-white/5 px-4 py-3 backdrop-blur">
-      <span className="text-white/65">{label}</span>
-      <span className="font-[family-name:var(--font-syne)] text-2xl font-bold">{value}</span>
+      <aside className="ss-panel grid content-start gap-4 !p-6">
+        <h2 className="font-display text-[1.5rem]">In this demo</h2>
+        <ul className="grid gap-3 text-[1.125rem]">
+          <li className="flex justify-between border-b border-[var(--line)] pb-2">
+            <span>Shows</span>
+            <strong>{s.shows}</strong>
+          </li>
+          <li className="flex justify-between border-b border-[var(--line)] pb-2">
+            <span>Show years</span>
+            <strong>{s.editions}</strong>
+          </li>
+          <li className="flex justify-between border-b border-[var(--line)] pb-2">
+            <span>ROI logs</span>
+            <strong>{s.roiReports}</strong>
+          </li>
+          <li className="flex justify-between">
+            <span>Published rankings</span>
+            <strong>{s.aggregatesReady}</strong>
+          </li>
+        </ul>
+        <p className="text-base text-[var(--muted)]">
+          Tip: open Menu, pick a person (Aria, Sam, Jordan, or Lee), then tap
+          Switch person.
+        </p>
+      </aside>
     </div>
   );
 }

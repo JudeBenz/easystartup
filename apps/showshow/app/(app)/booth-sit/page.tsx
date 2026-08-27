@@ -15,22 +15,21 @@ export default async function BoothSitPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Artist tools"
         title="Booth-sit network"
         description="Request or offer short booth coverage from trusted neighbors at the same show."
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Offer coverage</h2>
+          <h2 className="font-display text-lg font-bold">Offer coverage</h2>
           {!artistId ? (
-            <p className="mt-3 text-sm text-[var(--ink-soft)]">Switch to an artist persona.</p>
+            <p className="mt-3 text-[1.05rem] text-[var(--muted)]">Switch to an artist persona.</p>
           ) : (
-            <form action={createBoothOfferAction} className="mt-4 grid gap-3 text-sm">
+            <form action={createBoothOfferAction} className="mt-4 grid gap-4 text-[1.125rem]">
               <input type="hidden" name="artistId" value={artistId} />
-              <label className="grid gap-1">
+              <label className="ss-label">
                 <span>Show</span>
-                <select name="editionId" required className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2">
+                <select name="editionId" required className="ss-select">
                   {editions.map(({ edition, showName }) => (
                     <option key={edition.id} value={edition.id}>
                       {showName}
@@ -42,14 +41,14 @@ export default async function BoothSitPage() {
                 name="availableWindows"
                 required
                 placeholder="Sat 12–2pm"
-                className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2"
+                className="ss-input"
               />
               <input
                 name="notes"
                 placeholder="Notes (optional)"
-                className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2"
+                className="ss-input"
               />
-              <button type="submit" className="rounded-full bg-[var(--ink)] px-4 py-2 text-white">
+              <button type="submit" className="ss-btn ss-btn-secondary">
                 Post offer
               </button>
             </form>
@@ -63,7 +62,7 @@ export default async function BoothSitPage() {
                     {show.name}
                   </Link>
                 </p>
-                <p className="text-[var(--ink-soft)]">
+                <p className="text-[var(--muted)]">
                   {offer.availableWindows}
                   {offer.notes ? ` — ${offer.notes}` : ""} · {formatDate(edition.startDate, "MMM d")}
                 </p>
@@ -73,15 +72,15 @@ export default async function BoothSitPage() {
         </Panel>
 
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Need coverage</h2>
+          <h2 className="font-display text-lg font-bold">Need coverage</h2>
           {!artistId ? (
-            <p className="mt-3 text-sm text-[var(--ink-soft)]">Switch to an artist persona.</p>
+            <p className="mt-3 text-[1.05rem] text-[var(--muted)]">Switch to an artist persona.</p>
           ) : (
-            <form action={createBoothRequestAction} className="mt-4 grid gap-3 text-sm">
+            <form action={createBoothRequestAction} className="mt-4 grid gap-4 text-[1.125rem]">
               <input type="hidden" name="artistId" value={artistId} />
-              <label className="grid gap-1">
+              <label className="ss-label">
                 <span>Show</span>
-                <select name="editionId" required className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2">
+                <select name="editionId" required className="ss-select">
                   {editions.map(({ edition, showName }) => (
                     <option key={edition.id} value={edition.id}>
                       {showName}
@@ -93,21 +92,21 @@ export default async function BoothSitPage() {
                 name="neededWindow"
                 required
                 placeholder="Sat 1–2pm"
-                className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2"
+                className="ss-input"
               />
-              <button type="submit" className="rounded-full bg-[var(--signal)] px-4 py-2 font-semibold text-white">
+              <button type="submit" className="ss-btn ss-btn-primary">
                 Post request
               </button>
             </form>
           )}
           <ul className="mt-5 space-y-3 border-t border-[var(--line)] pt-4">
             {requests.map(({ request, artist, show }) => (
-              <li key={request.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+              <li key={request.id} className="flex flex-wrap items-center justify-between gap-2 text-[1.05rem]">
                 <div>
                   <p className="font-medium">
                     {artist.displayName} · {show.name}
                   </p>
-                  <p className="text-[var(--ink-soft)]">{request.neededWindow}</p>
+                  <p className="text-[var(--muted)]">{request.neededWindow}</p>
                 </div>
                 <Badge tone={request.status === "open" ? "warn" : "field"}>{request.status}</Badge>
               </li>

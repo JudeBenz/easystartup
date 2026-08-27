@@ -11,13 +11,12 @@ export default async function FeedPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Social"
         title="Feed"
         description="Artists post work and show updates. Showgoers follow favorites."
       />
       <div className="mx-auto max-w-2xl space-y-4">
         {posts.map(({ post, author, artist, show }) => (
-          <Panel key={post.id} className="animate-rise">
+          <Panel key={post.id} className="">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -36,7 +35,7 @@ export default async function FeedPage() {
                       author.name
                     )}
                   </p>
-                  <p className="text-xs text-[var(--ink-soft)]">{formatDate(post.createdAt, "MMM d · h:mm a")}</p>
+                  <p className="text-base text-[var(--muted)]">{formatDate(post.createdAt, "MMM d · h:mm a")}</p>
                 </div>
               </div>
               {show ? <Badge tone="field">{show.name}</Badge> : null}

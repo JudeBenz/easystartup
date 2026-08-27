@@ -11,7 +11,6 @@ export default async function AlertsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Artist tools"
         title="Cancellation & weather alerts"
         description="Rain-outs, permit issues, and show changes. Historical weather lives on each show page."
       />
@@ -21,22 +20,22 @@ export default async function AlertsPage() {
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
                 <Badge tone="warn">{alert.kind}</Badge>
-                <h2 className="mt-2 font-[family-name:var(--font-syne)] text-lg font-bold">{alert.title}</h2>
-                <p className="mt-1 text-sm text-[var(--ink-soft)]">{alert.body}</p>
-                <p className="mt-2 text-sm">
+                <h2 className="mt-2 font-display text-lg font-bold">{alert.title}</h2>
+                <p className="mt-1 text-[1.05rem] text-[var(--muted)]">{alert.body}</p>
+                <p className="mt-2 text-[1.05rem]">
                   <Link href={`/shows/${show.slug}`} className="font-medium hover:text-[var(--field)]">
                     {show.name}
                   </Link>{" "}
                   · {formatDate(edition.startDate)}
                 </p>
               </div>
-              <p className="text-xs text-[var(--ink-soft)]">{formatDate(alert.createdAt)}</p>
+              <p className="text-base text-[var(--muted)]">{formatDate(alert.createdAt)}</p>
             </div>
           </Panel>
         ))}
         {!rows.length ? (
           <Panel>
-            <p className="text-sm text-[var(--ink-soft)]">No alerts right now.</p>
+            <p className="text-[1.05rem] text-[var(--muted)]">No alerts right now.</p>
           </Panel>
         ) : null}
       </div>

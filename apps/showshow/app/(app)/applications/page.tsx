@@ -40,7 +40,6 @@ export default async function ApplicationsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Artist tools"
         title="Application tracker"
         description="Deep-link to each show's official apply page. Track status and deadlines — we never host competitor forms."
       />
@@ -51,10 +50,10 @@ export default async function ApplicationsPage() {
             <Panel key={app.id}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <Link href={`/shows/${show.slug}`} className="font-[family-name:var(--font-syne)] text-lg font-bold hover:text-[var(--field)]">
+                  <Link href={`/shows/${show.slug}`} className="font-display text-lg font-bold hover:text-[var(--field)]">
                     {show.name}
                   </Link>
-                  <p className="text-sm text-[var(--ink-soft)]">
+                  <p className="text-[1.05rem] text-[var(--muted)]">
                     Deadline {edition.applicationDeadline ? formatDate(edition.applicationDeadline) : "—"}
                   </p>
                 </div>
@@ -77,7 +76,7 @@ export default async function ApplicationsPage() {
                   href={app.officialApplyUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs text-white"
+                  className="ss-btn ss-btn-secondary"
                 >
                   Official application
                 </a>
@@ -88,7 +87,7 @@ export default async function ApplicationsPage() {
                   <select
                     name="status"
                     defaultValue={app.status}
-                    className="rounded-full border border-[var(--line)] bg-white/80 px-3 py-1.5 text-xs"
+                    className="ss-select"
                   >
                     {STATUSES.map((s) => (
                       <option key={s} value={s}>
@@ -96,7 +95,7 @@ export default async function ApplicationsPage() {
                       </option>
                     ))}
                   </select>
-                  <button type="submit" className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs">
+                  <button type="submit" className="ss-btn ss-btn-ghost">
                     Update
                   </button>
                 </form>
@@ -106,13 +105,13 @@ export default async function ApplicationsPage() {
         </div>
 
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Track another show</h2>
-          <form action={updateApplicationAction} className="mt-4 grid gap-3 text-sm">
+          <h2 className="font-display text-lg font-bold">Track another show</h2>
+          <form action={updateApplicationAction} className="mt-4 grid gap-4 text-[1.125rem]">
             <input type="hidden" name="artistId" value={artistId} />
             <input type="hidden" name="status" value="interested" />
-            <label className="grid gap-1">
+            <label className="ss-label">
               <span>Edition</span>
-              <select name="editionId" required className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2">
+              <select name="editionId" required className="ss-select">
                 {addable.map(({ edition, showName }) => (
                   <option key={edition.id} value={edition.id}>
                     {showName}
@@ -120,16 +119,16 @@ export default async function ApplicationsPage() {
                 ))}
               </select>
             </label>
-            <label className="grid gap-1">
+            <label className="ss-label">
               <span>Official apply URL</span>
               <input
                 name="officialApplyUrl"
                 required
                 placeholder="https://…"
-                className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2"
+                className="ss-input"
               />
             </label>
-            <button type="submit" className="rounded-full bg-[var(--signal)] px-4 py-2 font-semibold text-white">
+            <button type="submit" className="ss-btn ss-btn-primary">
               Add to tracker
             </button>
           </form>

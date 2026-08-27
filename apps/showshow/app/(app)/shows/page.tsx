@@ -12,18 +12,17 @@ export default async function ShowsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Directory"
         title="Art fair directory"
-        description="Raw facts from each show's official site — dates, fees, addresses, directors. No scraped rankings."
+        description="Dates, fees, and addresses from each show's own website. No copied rankings."
         actions={
           <>
-            <Link className="rounded-full bg-[var(--ink)] px-4 py-2 text-sm text-white" href="/shows/calendar">
+            <Link className="ss-btn ss-btn-secondary" href="/shows/calendar">
               Calendar
             </Link>
-            <Link className="rounded-full border border-[var(--line)] bg-white/80 px-4 py-2 text-sm" href="/shows/map">
+            <Link className="ss-btn ss-btn-ghost" href="/shows/map">
               Map
             </Link>
-            <Link className="rounded-full border border-[var(--line)] bg-white/80 px-4 py-2 text-sm" href="/shows/ranked">
+            <Link className="ss-btn ss-btn-ghost" href="/shows/ranked">
               Our rankings
             </Link>
           </>
@@ -31,22 +30,29 @@ export default async function ShowsPage() {
       />
       <div className="grid gap-3">
         {current.map(({ show, current: edition, aggregate, promoted }) => (
-          <Panel key={show.id} className="!p-0 overflow-hidden transition hover:-translate-y-0.5">
-            <Link href={`/shows/${show.slug}`} className="block p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
+          <Panel key={show.id} className="!p-0">
+            <Link
+              href={`/shows/${show.slug}`}
+              className="block p-5 no-underline transition hover:bg-[var(--paper)] md:p-6"
+            >
+              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold">{show.name}</h2>
+                    <h2 className="font-display text-[1.5rem] leading-tight md:text-[1.75rem]">
+                      {show.name}
+                    </h2>
                     {promoted ? <Badge tone="signal">Promoted</Badge> : null}
                   </div>
-                  <p className="mt-1 text-sm text-[var(--ink-soft)]">
+                  <p className="mt-1 text-[1.125rem] text-[var(--muted)]">
                     {show.primaryCity}, {show.primaryRegion}
-                    {edition ? ` · ${formatDate(edition.startDate)} – ${formatDate(edition.endDate)}` : null}
+                    {edition
+                      ? ` · ${formatDate(edition.startDate)} – ${formatDate(edition.endDate)}`
+                      : null}
                   </p>
                 </div>
-                <div className="text-right text-sm">
+                <div className="md:text-right">
                   {edition?.boothFeeMin != null ? (
-                    <p className="font-medium">
+                    <p className="text-[1.25rem] font-bold">
                       Booth {formatMoney(edition.boothFeeMin)}
                       {edition.boothFeeMax && edition.boothFeeMax !== edition.boothFeeMin
                         ? `–${formatMoney(edition.boothFeeMax)}`
@@ -54,17 +60,16 @@ export default async function ShowsPage() {
                     </p>
                   ) : null}
                   {edition?.applicationDeadline ? (
-                    <p className="text-[var(--ink-soft)]">
+                    <p className="text-[1.05rem] text-[var(--muted)]">
                       Apply by {formatDate(edition.applicationDeadline)}
                     </p>
                   ) : null}
                 </div>
               </div>
               {aggregate?.minNMet ? (
-                <div className="mt-3 border-t border-[var(--line)] pt-3">
-                  <p className="text-sm">
-                    Median net {formatMoney(aggregate.medianNet ?? 0)}{" "}
-                    <span className="text-[var(--ink-soft)]">(first-party)</span>
+                <div className="mt-4 border-t border-[var(--line)] pt-3">
+                  <p className="text-[1.125rem] font-bold">
+                    Median net {formatMoney(aggregate.medianNet ?? 0)}
                   </p>
                   <SelfReportedNote sampleSize={aggregate.sampleSize} />
                 </div>

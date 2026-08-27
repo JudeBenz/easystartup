@@ -13,9 +13,14 @@ export default async function RoiPage() {
   if (!artistId) {
     return (
       <div>
-        <PageHeader title="ROI tracker" description="Switch to an artist persona to log private show economics." />
+        <PageHeader
+          title="ROI tracker"
+          description="Switch to an artist (Aria or Sam) in Menu to log private show economics."
+        />
         <Panel>
-          <p className="text-sm">Current user ({user.name}) is not an artist. Use the Switch control in the header.</p>
+          <p className="text-[1.125rem]">
+            {user.name} is not set up as an artist in this demo.
+          </p>
         </Panel>
       </div>
     );
@@ -27,19 +32,18 @@ export default async function RoiPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Private"
         title="Show ROI tracker"
-        description="Your expenses and sales stay private. Opt in to anonymized aggregates that power our rankings."
+        description="Your numbers stay private. Check the box if you want them counted in anonymous rankings."
       />
 
-      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Log a show</h2>
-          <form action={saveRoiAction} className="mt-4 grid gap-3 text-sm">
+          <h2 className="font-display text-[1.5rem]">Log a show</h2>
+          <form action={saveRoiAction} className="mt-5 grid gap-4">
             <input type="hidden" name="artistId" value={artistId} />
-            <label className="grid gap-1">
-              <span>Show edition</span>
-              <select name="editionId" required className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2">
+            <label className="ss-label">
+              Show
+              <select name="editionId" required className="ss-select">
                 {editions.map(({ edition, showName }) => (
                   <option key={edition.id} value={edition.id}>
                     {showName} ({edition.year})
@@ -47,17 +51,17 @@ export default async function RoiPage() {
                 ))}
               </select>
             </label>
-            <div className="grid grid-cols-2 gap-3">
-              <Field name="boothFee" label="Booth fee" />
-              <Field name="travel" label="Travel" />
-              <Field name="lodging" label="Lodging" />
-              <Field name="otherExpenses" label="Other" />
-              <Field name="grossSales" label="Gross sales" />
-              <Field name="unitsSold" label="Units sold" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field name="boothFee" label="Booth fee ($)" />
+              <Field name="travel" label="Travel ($)" />
+              <Field name="lodging" label="Lodging ($)" />
+              <Field name="otherExpenses" label="Other costs ($)" />
+              <Field name="grossSales" label="Gross sales ($)" />
+              <Field name="unitsSold" label="Pieces sold" />
             </div>
-            <label className="grid gap-1">
-              <span>Primary medium</span>
-              <select name="medium" className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2">
+            <label className="ss-label">
+              Main medium sold
+              <select name="medium" className="ss-select">
                 {Object.entries(MEDIUM_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
@@ -65,15 +69,20 @@ export default async function RoiPage() {
                 ))}
               </select>
             </label>
-            <label className="grid gap-1">
-              <span>Notes</span>
-              <textarea name="notes" rows={2} className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2" />
+            <label className="ss-label">
+              Notes
+              <textarea name="notes" rows={3} className="ss-textarea" />
             </label>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" name="optInAggregate" defaultChecked />
-              <span>Include anonymized numbers in first-party rankings</span>
+            <label className="flex min-h-[var(--tap)] items-start gap-3 text-[1.125rem]">
+              <input
+                type="checkbox"
+                name="optInAggregate"
+                defaultChecked
+                className="mt-1 h-6 w-6 shrink-0"
+              />
+              <span>Include my anonymized numbers in first-party rankings</span>
             </label>
-            <button type="submit" className="rounded-full bg-[var(--signal)] px-4 py-2 font-semibold text-white">
+            <button type="submit" className="ss-btn ss-btn-primary">
               Save private log
             </button>
           </form>
@@ -84,33 +93,37 @@ export default async function RoiPage() {
             <Panel key={report.id}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="font-[family-name:var(--font-syne)] text-lg font-bold">{show.name}</p>
-                  <p className="text-sm text-[var(--ink-soft)]">
+                  <p className="font-display text-[1.4rem]">{show.name}</p>
+                  <p className="text-[1.05rem] text-[var(--muted)]">
                     {edition.year} · {formatDate(edition.startDate)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-xl font-bold ${net >= 0 ? "text-[var(--field)]" : "text-[var(--signal-deep)]"}`}>
+                  <p
+                    className={`text-[1.75rem] font-bold ${
+                      net >= 0 ? "text-[var(--good)]" : "text-[var(--accent-deep)]"
+                    }`}
+                  >
                     {formatMoney(net)}
                   </p>
-                  <p className="text-xs text-[var(--ink-soft)]">net</p>
+                  <p className="text-base text-[var(--muted)]">net</p>
                 </div>
               </div>
-              <dl className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+              <dl className="mt-4 grid grid-cols-2 gap-3 text-[1.05rem] sm:grid-cols-4">
                 <div>
-                  <dt className="text-xs text-[var(--ink-soft)]">Gross</dt>
-                  <dd>{formatMoney(report.grossSales)}</dd>
+                  <dt className="text-base text-[var(--muted)]">Gross</dt>
+                  <dd className="font-bold">{formatMoney(report.grossSales)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-[var(--ink-soft)]">Expenses</dt>
-                  <dd>{formatMoney(expenses)}</dd>
+                  <dt className="text-base text-[var(--muted)]">Expenses</dt>
+                  <dd className="font-bold">{formatMoney(expenses)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-[var(--ink-soft)]">Booth</dt>
-                  <dd>{formatMoney(report.boothFee)}</dd>
+                  <dt className="text-base text-[var(--muted)]">Booth</dt>
+                  <dd className="font-bold">{formatMoney(report.boothFee)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-[var(--ink-soft)]">Aggregate</dt>
+                  <dt className="text-base text-[var(--muted)]">Ranking</dt>
                   <dd>
                     <Badge tone={report.optInAggregate ? "field" : "neutral"}>
                       {report.optInAggregate ? "opted in" : "private only"}
@@ -119,13 +132,19 @@ export default async function RoiPage() {
                 </div>
               </dl>
               {breakdowns.length ? (
-                <p className="mt-2 text-xs text-[var(--ink-soft)]">
-                  {breakdowns.map((b) => `${MEDIUM_LABELS[b.medium]} ${formatMoney(b.sales)}`).join(" · ")}
+                <p className="mt-3 text-base text-[var(--muted)]">
+                  {breakdowns
+                    .map((b) => `${MEDIUM_LABELS[b.medium]} ${formatMoney(b.sales)}`)
+                    .join(" · ")}
                 </p>
               ) : null}
             </Panel>
           ))}
-          {!rows.length ? <Panel><p className="text-sm text-[var(--ink-soft)]">No logs yet.</p></Panel> : null}
+          {!rows.length ? (
+            <Panel>
+              <p className="text-[1.125rem] text-[var(--muted)]">No logs yet.</p>
+            </Panel>
+          ) : null}
         </div>
       </div>
     </div>
@@ -134,15 +153,16 @@ export default async function RoiPage() {
 
 function Field({ name, label }: { name: string; label: string }) {
   return (
-    <label className="grid gap-1">
-      <span>{label}</span>
+    <label className="ss-label">
+      {label}
       <input
         type="number"
         name={name}
         min={0}
         step={1}
         defaultValue={0}
-        className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2"
+        className="ss-input"
+        inputMode="numeric"
       />
     </label>
   );

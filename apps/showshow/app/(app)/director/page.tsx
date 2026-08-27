@@ -30,15 +30,18 @@ export default async function DirectorPage() {
   return (
     <div>
       <PageHeader
-        eyebrow={director.verified ? `Verified · ${director.verifiedDomain}` : "Unverified"}
         title="Director desk"
-        description="Announcements, waitlist marketplace, and promoted listings — revenue that doesn't take a cut from artists."
+        description={
+          director.verified
+            ? `Verified for ${director.verifiedDomain}. Post announcements, open waitlist booths, and manage promoted listings.`
+            : "Post announcements, open waitlist booths, and manage promoted listings."
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Your shows</h2>
-          <ul className="mt-3 space-y-2 text-sm">
+          <h2 className="font-display text-lg font-bold">Your shows</h2>
+          <ul className="mt-3 space-y-2 text-[1.05rem]">
             {shows.map((s) => (
               <li key={s.id} className="flex items-center justify-between gap-2">
                 <span className="font-medium">{s.name}</span>
@@ -49,29 +52,29 @@ export default async function DirectorPage() {
         </Panel>
 
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Promoted listings</h2>
-          <ul className="mt-3 space-y-2 text-sm">
+          <h2 className="font-display text-lg font-bold">Promoted listings</h2>
+          <ul className="mt-3 space-y-2 text-[1.05rem]">
             {promotions.map((p) => (
               <li key={p.id}>
                 Budget {formatCents(p.budgetCents)} · {p.status} · ends {formatDate(p.endsAt)}
               </li>
             ))}
-            {!promotions.length ? <li className="text-[var(--ink-soft)]">No active boosts</li> : null}
+            {!promotions.length ? <li className="text-[var(--muted)]">No active boosts</li> : null}
           </ul>
-          <p className="mt-3 text-xs text-[var(--ink-soft)]">
+          <p className="mt-3 text-base text-[var(--muted)]">
             Directors pay to boost visibility. Artists keep 100% of booth sales and sponsorships.
           </p>
         </Panel>
 
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Post announcement</h2>
+          <h2 className="font-display text-lg font-bold">Post announcement</h2>
           {edition ? (
-            <form action={createAnnouncementAction} className="mt-4 grid gap-3 text-sm">
+            <form action={createAnnouncementAction} className="mt-4 grid gap-4 text-[1.125rem]">
               <input type="hidden" name="editionId" value={edition.id} />
               <input type="hidden" name="directorUserId" value={user.id} />
-              <label className="grid gap-1">
+              <label className="ss-label">
                 <span>Kind</span>
-                <select name="kind" className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2">
+                <select name="kind" className="ss-select">
                   <option value="general">general</option>
                   <option value="opening">opening</option>
                   <option value="deadline_extension">deadline extension</option>
@@ -82,21 +85,21 @@ export default async function DirectorPage() {
                 name="title"
                 required
                 placeholder="Title"
-                className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2"
+                className="ss-input"
               />
               <textarea
                 name="body"
                 required
                 rows={3}
                 placeholder="Announcement body"
-                className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2"
+                className="ss-input"
               />
-              <button type="submit" className="rounded-full bg-[var(--ink)] px-4 py-2 text-white">
+              <button type="submit" className="ss-btn ss-btn-secondary">
                 Publish
               </button>
             </form>
           ) : null}
-          <ul className="mt-4 space-y-2 border-t border-[var(--line)] pt-4 text-sm">
+          <ul className="mt-4 space-y-2 border-t border-[var(--line)] pt-4 text-[1.05rem]">
             {announcements.map((a) => (
               <li key={a.id}>
                 <Badge>{a.kind}</Badge> {a.title}
@@ -106,8 +109,8 @@ export default async function DirectorPage() {
         </Panel>
 
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Waitlist marketplace</h2>
-          <p className="mt-1 text-sm text-[var(--ink-soft)]">
+          <h2 className="font-display text-lg font-bold">Waitlist marketplace</h2>
+          <p className="mt-1 text-[1.05rem] text-[var(--muted)]">
             When an accepted artist drops, open a booth for waitlisted artists instantly.
           </p>
           {edition ? (
@@ -116,14 +119,14 @@ export default async function DirectorPage() {
               <input
                 name="boothLabel"
                 placeholder="Booth label"
-                className="rounded-full border border-[var(--line)] bg-white/80 px-3 py-2 text-sm"
+                className="ss-input"
               />
-              <button type="submit" className="rounded-full bg-[var(--signal)] px-4 py-2 text-sm font-semibold text-white">
+              <button type="submit" className="ss-btn ss-btn-primary">
                 Open booth
               </button>
             </form>
           ) : null}
-          <ul className="mt-4 space-y-2 text-sm">
+          <ul className="mt-4 space-y-2 text-[1.05rem]">
             {waitlist.map((w) => (
               <li key={w.id}>
                 {w.boothLabel ?? "Booth"} · <Badge tone="warn">{w.status}</Badge>

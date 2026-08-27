@@ -28,15 +28,14 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   return (
     <div>
       <PageHeader
-        eyebrow={`${artist.city}, ${artist.region}`}
         title={artist.displayName}
-        description={artist.tagline}
+        description={`${artist.city}, ${artist.region}. ${artist.tagline}`}
         actions={
           <>
-            <Link href={`/artists/${artist.slug}/store`} className="rounded-full bg-[var(--ink)] px-4 py-2 text-sm text-white">
+            <Link href={`/artists/${artist.slug}/store`} className="ss-btn ss-btn-secondary">
               Store
             </Link>
-            <Link href={`/artists/${artist.slug}/sponsor`} className="rounded-full bg-[var(--signal)] px-4 py-2 text-sm font-semibold text-white">
+            <Link href={`/artists/${artist.slug}/sponsor`} className="ss-btn ss-btn-primary">
               Sponsor
             </Link>
           </>
@@ -46,7 +45,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
           <Panel>
-            <p className="text-sm leading-relaxed">{artist.bio}</p>
+            <p className="text-[1.05rem] leading-relaxed">{artist.bio}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {artist.mediums.map((m) => (
                 <Badge key={m} tone="field">
@@ -54,36 +53,36 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
                 </Badge>
               ))}
             </div>
-            <p className="mt-3 text-xs text-[var(--ink-soft)]">
+            <p className="mt-3 text-base text-[var(--muted)]">
               {followers} followers · booth default {artist.boothDefaultSize ?? "—"} · Stripe Connect{" "}
               {artist.stripeConnectReady ? "ready" : "pending"}
             </p>
           </Panel>
 
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Upcoming schedule</h2>
-            <ul className="mt-3 space-y-2 text-sm">
+            <h2 className="font-display text-lg font-bold">Upcoming schedule</h2>
+            <ul className="mt-3 space-y-2 text-[1.05rem]">
               {upcoming.map(({ a, edition, show }) => (
                 <li key={a.id} className="flex justify-between gap-3">
                   <Link href={`/shows/${show.slug}`} className="font-medium hover:text-[var(--field)]">
                     {show.name}
                   </Link>
-                  <span className="text-[var(--ink-soft)]">
+                  <span className="text-[var(--muted)]">
                     {formatDate(edition.startDate, "MMM d")} · {a.status}
                   </span>
                 </li>
               ))}
-              {!upcoming.length ? <li className="text-[var(--ink-soft)]">No public schedule yet</li> : null}
+              {!upcoming.length ? <li className="text-[var(--muted)]">No public schedule yet</li> : null}
             </ul>
           </Panel>
 
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Recent posts</h2>
+            <h2 className="font-display text-lg font-bold">Recent posts</h2>
             <ul className="mt-3 space-y-3">
               {posts.map((p) => (
                 <li key={p.id} className="text-sm">
                   <p>{p.body}</p>
-                  <p className="text-xs text-[var(--ink-soft)]">{formatDate(p.createdAt)}</p>
+                  <p className="text-base text-[var(--muted)]">{formatDate(p.createdAt)}</p>
                 </li>
               ))}
             </ul>
@@ -92,29 +91,29 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
 
         <div className="space-y-6">
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Shop preview</h2>
+            <h2 className="font-display text-lg font-bold">Shop preview</h2>
             <ul className="mt-3 space-y-3">
               {products.map((p) => (
-                <li key={p.id} className="flex justify-between gap-3 text-sm">
+                <li key={p.id} className="flex justify-between gap-3 text-[1.05rem]">
                   <span>{p.title}</span>
                   <span className="font-medium">{formatCents(p.priceCents)}</span>
                 </li>
               ))}
-              {!products.length ? <li className="text-[var(--ink-soft)]">No products</li> : null}
+              {!products.length ? <li className="text-[var(--muted)]">No products</li> : null}
             </ul>
             <Link href={`/artists/${artist.slug}/store`} className="mt-3 inline-block text-sm text-[var(--field-bright)]">
               Open store →
             </Link>
           </Panel>
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Sponsor tiers</h2>
+            <h2 className="font-display text-lg font-bold">Sponsor tiers</h2>
             <ul className="mt-3 space-y-3">
               {tiers.map((t) => (
                 <li key={t.id}>
                   <p className="font-medium">
                     {t.name} · {formatCents(t.monthlyPriceCents)}/mo
                   </p>
-                  <p className="text-xs text-[var(--ink-soft)]">{t.perks.join(" · ")}</p>
+                  <p className="text-base text-[var(--muted)]">{t.perks.join(" · ")}</p>
                 </li>
               ))}
             </ul>

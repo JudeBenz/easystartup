@@ -1,17 +1,17 @@
-import type { Metadata } from "next";
-import { Figtree, Syne } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Atkinson_Hyperlegible, Big_Shoulders } from "next/font/google";
 import "./globals.css";
 
-const syne = Syne({
-  variable: "--font-syne",
+const display = Big_Shoulders({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["500", "600"],
 });
 
-const figtree = Figtree({
-  variable: "--font-figtree",
+const body = Atkinson_Hyperlegible({
+  variable: "--font-body",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -20,13 +20,19 @@ export const metadata: Metadata = {
     template: "%s · ShowShow",
   },
   description:
-    "The social platform and directory for art fair artists — shows, ROI, applications, and first-party rankings.",
+    "Art fair directory, private ROI tracker, and application tools for exhibiting artists.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#F0F2F4",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${syne.variable} ${figtree.variable} antialiased`}>{children}</body>
+      <body className={`${display.variable} ${body.variable}`}>{children}</body>
     </html>
   );
 }

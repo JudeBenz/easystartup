@@ -20,7 +20,6 @@ export default async function PersonalCalendarPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Artist tools"
         title="My season"
         description="Booked and applied shows laid out for the year."
       />
@@ -29,10 +28,10 @@ export default async function PersonalCalendarPage() {
           <Panel key={booking.id}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <Link href={`/shows/${show.slug}`} className="font-[family-name:var(--font-syne)] text-lg font-bold">
+                <Link href={`/shows/${show.slug}`} className="font-display text-lg font-bold">
                   {show.name}
                 </Link>
-                <p className="text-sm text-[var(--ink-soft)]">
+                <p className="text-[1.05rem] text-[var(--muted)]">
                   {formatDate(edition.startDate)} – {formatDate(edition.endDate)} · {show.primaryCity}
                 </p>
               </div>
@@ -40,7 +39,7 @@ export default async function PersonalCalendarPage() {
             </div>
           </Panel>
         ))}
-        {!rows.length ? <Panel><p className="text-sm text-[var(--ink-soft)]">No bookings yet — accept a show or mark applied.</p></Panel> : null}
+        {!rows.length ? <Panel><p className="text-[1.05rem] text-[var(--muted)]">No bookings yet — accept a show or mark applied.</p></Panel> : null}
       </div>
     </div>
   );

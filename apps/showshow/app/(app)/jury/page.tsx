@@ -15,22 +15,21 @@ export default async function JuryPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Artist tools"
         title="Jury feedback exchange"
         description="Share which application images got you in — artist-owned assets only, no scraped prospectus copy."
       />
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <Panel>
-          <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Share an outcome</h2>
+          <h2 className="font-display text-lg font-bold">Share an outcome</h2>
           {!artistId ? (
-            <p className="mt-3 text-sm text-[var(--ink-soft)]">Switch to an artist persona to post.</p>
+            <p className="mt-3 text-[1.05rem] text-[var(--muted)]">Switch to an artist persona to post.</p>
           ) : (
-            <form action={createJuryFeedbackAction} className="mt-4 grid gap-3 text-sm">
+            <form action={createJuryFeedbackAction} className="mt-4 grid gap-4 text-[1.125rem]">
               <input type="hidden" name="artistId" value={artistId} />
-              <label className="grid gap-1">
+              <label className="ss-label">
                 <span>Show</span>
-                <select name="editionId" required className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2">
+                <select name="editionId" required className="ss-select">
                   {editions.map(({ edition, showName }) => (
                     <option key={edition.id} value={edition.id}>
                       {showName}
@@ -38,25 +37,25 @@ export default async function JuryPage() {
                   ))}
                 </select>
               </label>
-              <label className="grid gap-1">
+              <label className="ss-label">
                 <span>Outcome</span>
-                <select name="outcome" className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2">
+                <select name="outcome" className="ss-select">
                   <option value="accepted">accepted</option>
                   <option value="waitlisted">waitlisted</option>
                   <option value="declined">declined</option>
                 </select>
               </label>
-              <label className="grid gap-1">
+              <label className="ss-label">
                 <span>What you submitted / what worked</span>
                 <textarea
                   name="notes"
                   rows={3}
                   required
                   placeholder="e.g. three tableware sets + one sculptural vessel"
-                  className="rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2"
+                  className="ss-input"
                 />
               </label>
-              <button type="submit" className="rounded-full bg-[var(--signal)] px-4 py-2 font-semibold text-white">
+              <button type="submit" className="ss-btn ss-btn-primary">
                 Share feedback
               </button>
             </form>
@@ -71,7 +70,7 @@ export default async function JuryPage() {
                   <Link href={`/artists/${artist.slug}`} className="font-semibold hover:text-[var(--field)]">
                     {artist.displayName}
                   </Link>
-                  <p className="text-sm text-[var(--ink-soft)]">
+                  <p className="text-[1.05rem] text-[var(--muted)]">
                     <Link href={`/shows/${show.slug}`} className="hover:text-[var(--field)]">
                       {show.name}
                     </Link>{" "}
@@ -86,13 +85,13 @@ export default async function JuryPage() {
                   {row.outcome}
                 </Badge>
               </div>
-              {row.notes ? <p className="mt-3 text-sm">{row.notes}</p> : null}
-              <p className="mt-2 text-xs text-[var(--ink-soft)]">{formatDate(row.createdAt)}</p>
+              {row.notes ? <p className="mt-3 text-[1.05rem]">{row.notes}</p> : null}
+              <p className="mt-2 text-base text-[var(--muted)]">{formatDate(row.createdAt)}</p>
             </Panel>
           ))}
           {!rows.length ? (
             <Panel>
-              <p className="text-sm text-[var(--ink-soft)]">No shared jury notes yet.</p>
+              <p className="text-[1.05rem] text-[var(--muted)]">No shared jury notes yet.</p>
             </Panel>
           ) : null}
         </div>

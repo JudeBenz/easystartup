@@ -21,11 +21,10 @@ export default async function WeekendModePage({ params }: { params: Promise<{ sl
   return (
     <div>
       <PageHeader
-        eyebrow="Show-weekend mode"
         title={show.name}
         description="Booth map, favorites, and artists you follow — a reason to open the app at the fair."
         actions={
-          <Link href={`/shows/${show.slug}`} className="rounded-full border border-[var(--line)] bg-white/80 px-4 py-2 text-sm">
+          <Link href={`/shows/${show.slug}`} className="ss-btn ss-btn-ghost">
             Show details
           </Link>
         }
@@ -33,7 +32,7 @@ export default async function WeekendModePage({ params }: { params: Promise<{ sl
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <Panel className="overflow-hidden !p-0">
-          <div className="border-b border-[var(--line)] px-5 py-3 text-sm text-[var(--ink-soft)]">
+          <div className="border-b border-[var(--line)] px-5 py-3 text-[1.05rem] text-[var(--muted)]">
             Booth map · {current?.venueName}
             {isFavorite ? (
               <Badge tone="signal"> favorited</Badge>
@@ -56,18 +55,18 @@ export default async function WeekendModePage({ params }: { params: Promise<{ sl
 
         <div className="space-y-6">
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Artists you follow here</h2>
-            <ul className="mt-3 space-y-2 text-sm">
+            <h2 className="font-display text-lg font-bold">Artists you follow here</h2>
+            <ul className="mt-3 space-y-2 text-[1.05rem]">
               {artistsYouFollow.map((a) => (
                 <li key={a.id}>
                   <Link href={`/artists/${a.slug}`} className="font-medium hover:text-[var(--field)]">
                     {a.displayName}
                   </Link>
-                  <span className="text-[var(--ink-soft)]"> · {a.mediums.join(", ")}</span>
+                  <span className="text-[var(--muted)]"> · {a.mediums.join(", ")}</span>
                 </li>
               ))}
               {!artistsYouFollow.length ? (
-                <li className="text-[var(--ink-soft)]">
+                <li className="text-[var(--muted)]">
                   Switch to Lee (showgoer) who follows Aria & Sam, or follow artists from their profiles.
                 </li>
               ) : null}
@@ -75,19 +74,19 @@ export default async function WeekendModePage({ params }: { params: Promise<{ sl
           </Panel>
 
           <Panel>
-            <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Booth-sit nearby</h2>
-            <ul className="mt-3 space-y-2 text-sm">
+            <h2 className="font-display text-lg font-bold">Booth-sit nearby</h2>
+            <ul className="mt-3 space-y-2 text-[1.05rem]">
               {boothOffers.map((o) => (
                 <li key={o.id}>{o.availableWindows}{o.notes ? ` — ${o.notes}` : ""}</li>
               ))}
-              {!boothOffers.length ? <li className="text-[var(--ink-soft)]">No offers posted</li> : null}
+              {!boothOffers.length ? <li className="text-[var(--muted)]">No offers posted</li> : null}
             </ul>
           </Panel>
 
           {current ? (
             <Panel>
-              <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold">Today at the fair</h2>
-              <p className="mt-2 text-sm text-[var(--ink-soft)]">
+              <h2 className="font-display text-lg font-bold">Today at the fair</h2>
+              <p className="mt-2 text-[1.05rem] text-[var(--muted)]">
                 {formatDate(current.startDate)} – {formatDate(current.endDate)}
               </p>
             </Panel>
