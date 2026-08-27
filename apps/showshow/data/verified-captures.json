@@ -56,15 +56,15 @@
     "notes": "Applications open year-round with no hard deadline; best apply Jan–Mar; primary review in March, rolling through August; apps after August held for following year. Booth fees ~$1,500–$5,000+ (avg a little over $2,000) by sq ft/frontage, finalized in interview. $25 application fee. Indoor curated/juried fine art + music holiday bazaar."
   },
   "armonk-outdoor-art-show": {
-    "captureConfidence": "medium",
+    "captureConfidence": "high",
     "directorEmail": "info@armonkoutdoorartshow.org",
     "endDate": "2026-09-27",
-    "fullAddress": "205 Business Park Dr, Armonk, NY 10504",
+    "fullAddress": "Armonk, NY",
     "juryProcess": "panel",
     "sourceUrl": "https://www.armonkoutdoorartshow.org/",
     "startDate": "2026-09-26",
-    "venueName": "Armonk Outdoor Art Show field",
-    "notes": "64th Annual Sept 26–27, 2026, ~160 juried artists. Apps closed for 2026; 2027 apps open December. Booth dollar amounts not on for-artists page (refund policy references app/booth fees)."
+    "venueName": "Armonk / North Castle",
+    "notes": "64th Annual Sept 26–27, 2026. Benefits Friends of the North Castle Public Library. Booth/application fees not on public artists pages at capture."
   },
   "art-and-apples-festival": {
     "sourceUrl": "https://pccart.org/festival/festival-artists-2/",
@@ -313,13 +313,14 @@
     "applicationDeadline": "2026-01-23",
     "captureConfidence": "medium",
     "directorEmail": "office@arts-festival.com",
-    "endDate": "2026-07-12",
+    "endDate": "2027-07-11",
     "fullAddress": "State College, PA",
     "juryProcess": "panel",
-    "sourceUrl": "https://arts-festival.com/sidewalk-sale/",
-    "startDate": "2026-07-09",
+    "sourceUrl": "https://www.arts-festival.com/",
+    "startDate": "2027-07-07",
     "venueName": "Downtown State College / Penn State University Park",
-    "notes": "2026 Sidewalk Sale hours July 9–11 10–7 and July 12 11–4 (Children & Youth Day July 9). ZAPP jury deadline Jan 23. Panel of four jurors; $20k prizes. Future festival July 7–11, 2027. Booth fee amounts not on sidewalk-sale page."
+    "notes": "Site marks calendars for July 7–11, 2027. 2026 sidewalk sale was July 9–12. Booth fees not on public pages at capture; site says 2027 details update by June 1, 2027. 125k+ visitors claimed on homepage.",
+    "attendance": 125000
   },
   "chastain-park-arts-festival": {
     "captureConfidence": "medium",
@@ -376,14 +377,15 @@
     "venueName": "Miami festival grounds"
   },
   "columbus-arts-festival": {
-    "sourceUrl": "https://www.columbusartsfestival.org/press-room/applications-open-for-2026-columbus-arts-festival-on-september-8",
+    "sourceUrl": "https://www.columbusartsfestival.org/apply/visual-artists",
     "startDate": "2026-06-12",
     "endDate": "2026-06-14",
-    "applicationDeadline": "2025-12-12",
+    "applicationDeadline": "2026-12-11",
     "juryProcess": "blind",
     "venueName": "Downtown Columbus riverfront",
-    "fullAddress": "Downtown riverfront, Columbus, OH",
-    "notes": "64th annual June 12–14, 2026. Visual artist apps due Dec 12, 2025 5pm. Blind jury of experts. ~230 booths from 1000+ apps. Site often 403 to crawlers; facts from official press room. 2026 booth fee schedule not confirmed on fetched pages."
+    "fullAddress": "Columbus, OH",
+    "notes": "2026 festival June 12–14 (press). 2027 applications open Sept 7, 2026 and close Dec 11, 2026. Blind jury via ZAPP. Current booth fees not confirmed on 2027 prospectus text at capture (older PDFs listed $595/10x10 + $40 app — not applied as current).",
+    "captureConfidence": "medium"
   },
   "cooper-young-festival": {
     "captureConfidence": "medium",
@@ -793,16 +795,17 @@
   "old-town-art-fair": {
     "applicationDeadline": "2027-01-15",
     "applicationFee": 25,
-    "captureConfidence": "low",
-    "directorEmail": "info@oldtowntriangle.com",
-    "fullAddress": "1763 N North Park Ave, Chicago, IL 60614",
+    "captureConfidence": "high",
+    "directorEmail": "info@oldtownartfair.org",
+    "fullAddress": "1763 N. North Park Avenue, Chicago, IL 60614",
     "juryProcess": "panel",
-    "sourceUrl": "https://www.oldtowntriangle.com/old-town-art-fair/",
+    "sourceUrl": "https://www.oldtownartfair.org/exhibit/",
     "venueName": "Old Town Triangle Historic District",
     "startDate": "2027-06-12",
     "endDate": "2027-06-13",
     "attendance": 35000,
-    "notes": "2027 fair June 12–13; apply Oct 1, 2026–Jan 15, 2027 via ZAPP. Independent jury of gallery owners, artists, curators. 2026 was June 13–14. 2027 booth/app dollar amounts not yet posted on official pages."
+    "notes": "2027 fair Sat–Sun June 12–13. Application window Oct 1, 2026 – Jan 15, 2027 via ZAPP. Booth fee not published on exhibit page. ~35k attendance on homepage; ~30k on exhibit page.",
+    "directorPhone": "312-337-1938"
   },
   "orange-beach-festival-of-art": {
     "sourceUrl": "https://www.orangebeachal.gov/338/Orange-Beach-Festival-of-Art",
