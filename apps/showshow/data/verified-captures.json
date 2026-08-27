@@ -73,21 +73,31 @@
     "applicationDeadline": "2026-03-31",
     "juryProcess": "panel",
     "venueName": "Rochester Municipal Park",
-    "fullAddress": "Rochester Municipal Park, Rochester, MI (Paint Creek Center for the Arts, 407 Pine Street, Rochester, MI)",
+    "fullAddress": "Rochester Municipal Park, Rochester, MI",
     "attendance": 50000,
     "directorName": "Shaun Hayes",
     "directorEmail": "shaun@pccart.org",
-    "notes": "60th year; Fri 2-7, Sat 10-7, Sun 10-4. 250+ exhibitors. artandapples.com listed URL failed; organizer site is pccart.org. 2026 artist apps closed March 31; 2027 apps open Oct 2026. Booth fee amounts on ZAPP only."
+    "notes": "artandapples.com redirects to pccart.org (Paint Creek Center for the Arts). 60th year; Fri 2-7, Sat 10-7, Sun 10-4; 200+/275 artists. Applications closed March 31, 2026 via Zapp; application/booth dollar amounts not stated on pccart.org (only on off-domain Zapp). Executive Director Shaun Hayes; PCCA office 407 Pine Street, Rochester, MI 48307.",
+    "directorPhone": "248-651-4110",
+    "captureConfidence": "medium"
   },
   "art-birmingham": {
-    "sourceUrl": "https://www.theguild.org/fair/art-birmingham/",
+    "sourceUrl": "https://www.theguild.org/wp-content/uploads/2018/06/2026-BAF-Prospectus.pdf",
     "startDate": "2026-05-09",
     "endDate": "2026-05-10",
-    "juryProcess": "panel",
-    "venueName": "Shain Park / streets surrounding Shain Park",
-    "fullAddress": "Downtown Birmingham surrounding Shain Park, Birmingham, MI 48012",
+    "juryProcess": "blind",
+    "venueName": "Shain Park",
+    "fullAddress": "Shain Park / streets surrounding Shain Park, downtown Birmingham, MI",
     "attendance": 20000,
-    "notes": "45th year; Sat 10-6, Sun 10-5; Mother's Day weekend. Produced by The Guild of Artists & Artisans with Birmingham Bloomfield Art Center. Listed artbirmingham.com returned empty; Guild page used. Booth/app dollar fees not on Guild page (historically ZAPP)."
+    "notes": "artbirmingham.com is a park/lander; official producer pages on theguild.org with 2026 prospectus PDF. Jury fee $30; 10x10 booth $395 (+$65 corner); double $790 (+$65 corner). Late apps +$25. Prospectus requires no visible signatures/names in jury images. Approx 20,000 fairgoers per Guild fair page. Contact ext. 301 per prospectus.",
+    "boothFeeMin": 395,
+    "boothFeeMax": 790,
+    "applicationFee": 30,
+    "applicationDeadline": "2026-02-16",
+    "directorName": "Nicole McKay",
+    "directorEmail": "nicole@theguild.org",
+    "directorPhone": "734-662-3382",
+    "captureConfidence": "high"
   },
   "art-city-austin": {
     "sourceUrl": "https://a3austin.org/event/the-2026-a3-fiesta/",
@@ -234,8 +244,8 @@
     "startDate": "2026-10-09",
     "venueName": "Virginia Beach Boardwalk",
     "applicationDeadline": "2026-05-31",
-    "juryProcess": "panel",
-    "notes": "70th Annual Virginia MOCA Boardwalk Art Show Oct 9–11, 2026. Produced by Virginia MOCA (not VA Fest). Best in Show $10,000. Apply deadline May 31 per MOCA artist call. Booth fees not on MOCA page."
+    "juryProcess": "unknown",
+    "notes": "70th Annual Virginia MOCA Boardwalk Art Show presented by Atlantic Union Bank. Listed URL vafest.org is unrelated; official pages are on virginiamoca.org. No booth/application fees published on official pages reviewed. Volunteer contact summer@virginiamoca.org. Museum address 5811 Wesleyan Drive, Virginia Beach, VA 23455; phone 757-425-0000."
   },
   "boston-arts-festival": {
     "captureConfidence": "medium",
@@ -325,16 +335,17 @@
     "attendance": 125000
   },
   "chastain-park-arts-festival": {
-    "captureConfidence": "medium",
+    "captureConfidence": "low",
     "directorEmail": "info@affps.com",
     "endDate": "2026-11-08",
-    "fullAddress": "4469 Stella Drive, Atlanta, GA 30327 (locator; Park Drive festival site)",
-    "sourceUrl": "https://chastainparkartsfestival.com/",
+    "fullAddress": "4469 Stella Drive, Atlanta, GA 30327",
+    "sourceUrl": "https://www.chastainparkartsfestival.com/",
     "startDate": "2026-11-07",
     "venueName": "Chastain Park",
     "juryProcess": "panel",
     "directorName": "Jennifer Humphrey and Brian Greene",
-    "notes": "Fall Arts Festival Nov 7-8, 2026; Spring Arts Festival May 8-9, 2027. Sat 10-5, Sun 11-5. ~175 artists; Atlanta Foundation for Public Spaces. App fee/deadline for Fall 2026 were on ZAPP call (not restated on chastainparkartsfestival.com). Also randallfox2003@yahoo.com for partnerships."
+    "notes": "Fall Arts Festival Nov 7-8, 2026; Spring May 8-9, 2027. Sat 10-5, Sun 11-5; ~175 artists. Festival Directors Jennifer Humphrey and Brian Greene; also randallfox2003@yahoo.com. general-info-for-artists lists $30/$300 fees but only with 2022-2023 deadlines (stale); 2026 fee amounts not verified on official pages. Applications via Zapplication from AFFPS calendar.",
+    "directorPhone": "470-929-6095"
   },
   "cherry-creek-arts-festival": {
     "applicationDeadline": "2026-12-01",
@@ -485,14 +496,17 @@
     "notes": "75th Annual; Fri–Sun 10am–5pm. Apps open July 6, 2026. Late app +$25 after Sept 21. Single $375; double $750; prime corner +$75. 10'x12' spaces. Listed URL fairhopeartscraftsfestival.com does not resolve; official site is fairhopeartsandcraftsfestival.com."
   },
   "fall-crafts-at-lyndhurst": {
-    "sourceUrl": "https://www.artrider.com/exhibitor-info-and-applications",
-    "startDate": "2027-09-17",
-    "endDate": "2027-09-19",
+    "sourceUrl": "https://www.artrider.com/fall-crafts-at-lyndhurst-2026",
+    "startDate": "2026-09-18",
+    "endDate": "2026-09-20",
     "applicationDeadline": "2026-11-02",
     "juryProcess": "panel",
-    "venueName": "Lyndhurst Mansion grounds",
+    "venueName": "Lyndhurst",
     "fullAddress": "635 South Broadway, Tarrytown, NY 10591",
-    "notes": "Produced by Artrider (listed officialWebsiteUrl artisanalliance.org appears incorrect). 2027 Fall Crafts at Lyndhurst Sept 17-19; app deadline Nov 2, 2026 (late Nov 11). 2026 show was Sept 18-20. Address: 635 South Broadway, Tarrytown, NY 10591. Source: artrider.com exhibitor info."
+    "notes": "Listed artisanalliance.org is incorrect; produced by Artrider Productions (artrider.com); venue page lyndhurst.org/events/fall-crafts/. Fri 10-5, Sat 10-6, Sun 10-5. Exhibitor FAQ has Booth Fees section but amounts not visible in public HTML. 2026 applications closed; wait list noted on artrider exhibitor info.",
+    "directorEmail": "crafts@artrider.com",
+    "directorPhone": "845-331-7900",
+    "captureConfidence": "low"
   },
   "festival-of-the-arts-grand-rapids": {
     "sourceUrl": "https://festivalgr.org/",
@@ -595,18 +609,21 @@
     "notes": "Listed hotspringsartcenter.com unrelated/unreachable; official site hotspringsartsandcraftsfair.com (Garland County Extension Homemakers). 57th fair Oct 2–4 2026; Fri–Sat 9–6, Sun 11–4. Single ~10x10 $150; double ~20x10 $300; +$30 electricity. Returning apps due Mar 31 2026 to reserve same space (application form also cites Mar 1 for same-space); payment by Jul 1; new vendors deadline Sept 1 2026. Committee jury; cash/check only. Chairman Jane Oliver 501-520-1333 / chevy4035@aol.com; also info@hotspringsartsandcraftsfair.com on Facebook."
   },
   "hyde-park-square-art-show": {
-    "captureConfidence": "low",
-    "fullAddress": "Hyde Park Square (Erie Ave closed from Edwards to Michigan), Cincinnati, OH 45208",
+    "captureConfidence": "medium",
+    "fullAddress": "Hyde Park Square (Erie Ave closed from Edwards to Michigan), Cincinnati, OH",
     "juryProcess": "panel",
-    "sourceUrl": "https://www.hydeparksquare.org/events",
+    "sourceUrl": "https://www.hydeparksquare.org/event/hyde-park-square-art-show",
     "venueName": "Hyde Park Square",
     "startDate": "2026-10-04",
     "endDate": "2026-10-04",
-    "notes": "60th annual; Sun Oct 4, 2026 10am-5pm; 200+ juried artists. Official site lists event but not booth/application dollar fees. Application historically via ZAPP."
+    "notes": "60th year; Sun Oct 4, 2026 10am-5pm; 200+ juried artists; free admission. Site states proceeds from artist application fees support school art programs but does not publish fee amounts. Organizer: Hyde Park Square Art Show Committee.",
+    "directorEmail": "hpartshowinfo@aol.com",
+    "directorPhone": "513-324-3990",
+    "attendance": 20000
   },
   "jazz-fest-crafts-nola": {
     "captureConfidence": "medium",
-    "fullAddress": "Fair Grounds Race Course, 1751 Gentilly Blvd, New Orleans, LA",
+    "fullAddress": "Fair Grounds Race Course, 1751 Gentilly Boulevard, New Orleans, LA",
     "sourceUrl": "https://www.nojazzfest.com/faq/",
     "venueName": "Fair Grounds Race Course",
     "startDate": "2027-04-22",
@@ -714,17 +731,18 @@
     "notes": "Lewiston Council on the Arts. Aug 8–9 2026; Sat 10–6, Sun 10–5. 25,000+ visitors; 200+ artists/performers/concessionaires. Artist apps via Zapplication (Instagram call from official account); early-bird app fee $30 through Mar 31 2026, $50 Apr 1–24 late window; notify by May 15; booth purchase deadline Jun 8 per 2026 call listing. Booth $ amount not published on artcouncil.org pages reviewed. Artist questions artstaff2@artcouncil.org; org Director@artcouncil.org / 716-754-0166."
   },
   "longs-park-art-festival": {
-    "captureConfidence": "low",
+    "captureConfidence": "medium",
     "directorEmail": "info@longspark.org",
     "fullAddress": "1441 Harrisburg Pike, Lancaster, PA 17601",
     "juryProcess": "panel",
-    "sourceUrl": "https://www.longspark.org/",
+    "sourceUrl": "https://www.longspark.org/art-festival",
     "venueName": "Long's Park",
     "startDate": "2026-09-04",
     "endDate": "2026-09-06",
     "applicationDeadline": "2026-03-01",
     "applicationFee": 20,
-    "notes": "48th annual Labor Day weekend; Fri-Sat 10-6, Sun 10-5; 200+ juried exhibitors. Application fee $20 noted on artist applications page (2025 cycle text still shown; 2026 deadline March 1). Booth fees on ZAPP."
+    "notes": "48th annual Labor Day weekend; Fri-Sat 10-6, Sun 10-5; 200+ juried exhibitors. Interim Executive Director Kristin Chronister; Festival Art Director Rick Faulkner. Official site lists $20 application fee for 2025 cycle only; 2026 booth/application fees not published on longspark.org pages reviewed.",
+    "directorName": "Kristin Chronister"
   },
   "main-st-fort-worth-arts-festival": {
     "captureConfidence": "medium",
@@ -857,12 +875,12 @@
   "piccolo-spoleto-outdoor-art": {
     "captureConfidence": "medium",
     "endDate": "2026-06-06",
-    "fullAddress": "329 Meeting Street, Charleston, SC",
-    "juryProcess": "panel",
+    "fullAddress": "Marion Square, 329 Meeting Street, Charleston, SC",
+    "juryProcess": "unknown",
     "sourceUrl": "https://piccolospoleto.com/piccolo-spoleto-outdoor-art-exhibition/",
     "startDate": "2026-05-22",
     "venueName": "Marion Square",
-    "notes": "46th/47th annual Outdoor Art Exhibition May 22–June 6, 2026 (optional June 7). Free admission. Juried 2D outdoor gallery in Marion Square. Booth/app fees not on festival exhibition page."
+    "notes": "46th Annual Piccolo Spoleto Outdoor Art Exhibition; hours 10am-5pm daily; June 7 optional for exhibitors; free admission. No booth or application fees listed on piccolospoleto.com or psoae.org pages reviewed. Related org psoae.org lists Board President John Michiels."
   },
   "piedmont-park-arts-festival": {
     "sourceUrl": "https://piedmontparkartsfestival.com/",
@@ -881,14 +899,15 @@
   "plaza-art-fair": {
     "endDate": "2026-09-27",
     "fullAddress": "400 Nichols Rd, Kansas City, MO 64112",
-    "juryProcess": "panel",
+    "juryProcess": "unknown",
     "sourceUrl": "https://www.plazaartfair.com/",
     "startDate": "2026-09-25",
     "venueName": "Country Club Plaza",
     "applicationDeadline": "2026-04-12",
     "attendance": 250000,
-    "notes": "2026 Plaza Art Fair Fri–Sun Sept 25–27. Site also cites historical 250k+ crowds. Booth fees not published on plazaartfair.com public pages at capture (apply via third-party portal — fees not ingested from aggregator hosts).",
-    "captureConfidence": "high"
+    "notes": "95th year; Fri 5-9pm, Sat 10am-9pm, Sun 11am-5pm. Dedicated site plazaartfair.com (linked from Country Club Plaza). Attendance 250,000 stated for 2024 edition on same site; 240 artists. No booth/application fees on official pages; FAQ artist apply link points to Zapplication (fees not copied).",
+    "captureConfidence": "medium",
+    "directorEmail": "plazaartfair@evenergy.com"
   },
   "port-clinton-art-festival": {
     "captureConfidence": "medium",
@@ -946,7 +965,7 @@
     "captureConfidence": "low"
   },
   "saint-louis-art-fair": {
-    "captureConfidence": "high",
+    "captureConfidence": "medium",
     "directorEmail": "info@saintlouisartfair.com",
     "endDate": "2026-09-20",
     "fullAddress": "8235 Forsyth Blvd #205, Clayton, MO 63105",
@@ -955,7 +974,7 @@
     "startDate": "2026-09-18",
     "venueName": "Downtown Clayton",
     "attendance": 130000,
-    "notes": "2026 fair Sept 18–20. Booth fees not on public pages at capture; contact info@saintlouisartfair.com / 314-863-0278.",
+    "notes": "33rd annual presented by Emerson, Sept 18-20, 2026. Office/contact on Clayton address. Site lists Artist Application in nav and publishes jurors, but no booth/application fee amounts on publicly accessible pages (some paths blocked/empty).",
     "directorPhone": "314-863-0278"
   },
   "santa-fe-folk-art-market": {
@@ -1176,10 +1195,12 @@
     "sourceUrl": "https://www.wellsstreetartfest.us/",
     "startDate": "2026-06-13",
     "endDate": "2026-06-14",
-    "venueName": "Wells Street / Old Town",
-    "fullAddress": "1400 N Wells Street area, Chicago, IL",
+    "venueName": "Wells Street, Old Town",
+    "fullAddress": "Wells St. from North Ave. to Division St., Chicago, IL",
     "directorEmail": "OTMRA@oldtownchicago.org",
-    "notes": "2026 festival June 13–14 with 127 artists; produced by Old Town Merchants & Residents Association. wellsstreetartfest.com unreachable; .us is live official. Booth fees not on thank-you homepage."
+    "notes": "wellsstreetartfest.com did not load; official 2026 site is wellsstreetartfest.us (Old Town Merchants & Residents Association). 127 artists in 2026. No artist booth/application fees published on official pages reviewed (vendor apps on oldtownchicago.org are for merchants/bars).",
+    "juryProcess": "unknown",
+    "captureConfidence": "low"
   },
   "winter-park-sidewalk-art-festival": {
     "applicationDeadline": "2026-09-23",
