@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 /**
  * Writes life-os/.env.local from environment secrets (does not print secret values).
- *
- * Accepts either:
- *   NEXT_PUBLIC_SUPABASE_URL  OR  SUPABASE_PROJECT_ID (Reference ID)
- * plus:
- *   NEXT_PUBLIC_SUPABASE_ANON_KEY
  */
 import { writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -25,7 +20,7 @@ if (!url) {
   process.exit(1);
 }
 if (!anon) {
-  console.error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+  console.error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY (publishable key).");
   process.exit(1);
 }
 
@@ -35,14 +30,14 @@ const lines = [
   `NEXT_PUBLIC_SUPABASE_ANON_KEY=${anon}`,
 ];
 
-if (process.env.GEMINI_API_KEY) {
-  lines.push(`GEMINI_API_KEY=${process.env.GEMINI_API_KEY}`);
-}
-if (process.env.SUPABASE_ACCESS_TOKEN) {
-  lines.push(`SUPABASE_ACCESS_TOKEN=${process.env.SUPABASE_ACCESS_TOKEN}`);
-}
-if (process.env.SUPABASE_PROJECT_ID) {
-  lines.push(`SUPABASE_PROJECT_ID=${process.env.SUPABASE_PROJECT_ID}`);
+for (const key of [
+  "SUPABASE_SECRET_KEY",
+  "SUPABASE_PROJECT_ID",
+  "DATABASE_URL",
+  "GEMINI_API_KEY",
+  "SUPABASE_ACCESS_TOKEN",
+]) {
+  if (process.env[key]) lines.push(`${key}=${process.env[key]}`);
 }
 
 const out = resolve(root, ".env.local");
