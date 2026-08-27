@@ -15,8 +15,8 @@ Your life, organized like a Los Santos workstation: open **Maze Bank** to check 
 | Surface | How | Notes |
 |---------|-----|-------|
 | **Desktop (browser)** | Next.js PWA | Full GTA desktop — icons, draggable windows, taskbar |
-| **Phone (browser)** | PWA "Add to Home Screen" | App launcher grid → full-screen modules |
-| **Phone (native)** | Capacitor wrapper | Same web app, App Store / Play Store ready |
+| **Phone (browser)** | PWA "Add to Home Screen" | App launcher grid → full-screen modules; **live updates on deploy** |
+| **Phone (native)** | Capacitor wrapper | Same live URL via `CAPACITOR_SERVER_URL` — store shell, web updates |
 | **Sync** | Supabase (Phase 2) | Auth + Postgres + realtime; local-first until then |
 
 **Phase 1 (this build):** Local-first with `localStorage` persistence, sync-ready data layer, PWA installable, Capacitor config stubbed.

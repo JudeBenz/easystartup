@@ -67,8 +67,11 @@ export function MobileLauncher() {
         ))}
       </div>
 
-      <footer className="border-t border-white/10 px-4 py-3 text-center text-[10px] text-blue-200/50">
-        Tap an app to open · Data saved locally
+      <footer className="space-y-1 border-t border-white/10 px-4 py-3 text-center text-[10px] text-blue-200/50">
+        <p>Tap an app to open · Data saved locally</p>
+        <p className="text-blue-200/70">
+          Install tip: Safari Share → Add to Home Screen · Chrome → Install app
+        </p>
       </footer>
     </div>
   );

@@ -142,10 +142,22 @@ export function SettingsApp() {
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
             Install on Phone
           </h3>
+          <p className="mt-1 text-xs text-gray-500">
+            Deploy once, then Add to Home Screen. New features appear when you
+            reopen the app after we deploy — no App Store wait. Full guide:{" "}
+            <code className="rounded bg-gray-100 px-1">PHONE.md</code>
+          </p>
           <ol className="mt-2 list-inside list-decimal space-y-1 text-xs text-gray-600">
-            <li>Open this app in Safari (iOS) or Chrome (Android)</li>
-            <li>Tap Share → &quot;Add to Home Screen&quot;</li>
-            <li>Launch Life OS like a native app</li>
+            <li>
+              Deploy to Vercel (<code className="rounded bg-gray-100 px-1">npx vercel --prod</code>)
+            </li>
+            <li>Open the URL on your phone</li>
+            <li>
+              <strong>iPhone:</strong> Safari → Share → Add to Home Screen
+            </li>
+            <li>
+              <strong>Android:</strong> Chrome → Install app / Add to Home screen
+            </li>
           </ol>
         </section>
 

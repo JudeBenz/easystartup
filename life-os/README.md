@@ -36,6 +36,16 @@ pnpm dev          # http://localhost:3000
 
 See `DESIGN.md` for the full architecture, sync plan, and roadmap.
 
+## Phone app (home screen + live updates)
+
+See **`PHONE.md`** for the full guide.
+
+1. Deploy: `cd life-os && npx vercel --prod` (add `GEMINI_API_KEY` in Vercel)
+2. On phone: open the URL → **Add to Home Screen** / **Install app**
+3. Every time we push/deploy, reopen Life OS on your phone → you get the update
+
+Optional Capstore wrapper can load the same live URL (`CAPACITOR_SERVER_URL`).
+
 ## LifeInvader AI — talk to control everything
 
 Open **LifeInvader** (or click the 🤖 floating button) and say things like:
