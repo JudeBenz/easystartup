@@ -14,7 +14,14 @@ type Capture = {
   venueName?: string;
   fullAddress?: string;
   attendance?: number;
+  directorName?: string;
+  directorEmail?: string;
+  directorPhone?: string;
   sourceUrl?: string;
+  captureConfidence?: "high" | "medium" | "low" | "none";
+  notes?: string;
+  /** When true, show is ceased/unreachable — keep directory row but do not invent fees/dates. */
+  inactive?: boolean;
 };
 
 const SEASON_MONTH: Record<string, number> = {
@@ -69,9 +76,13 @@ function factFromPriority(
   if (capture?.startDate) year = Number(capture.startDate.slice(0, 4));
   const approx = weekendInMonth(year, month);
 
-  const startDate = capture?.startDate ?? approx.start;
-  const endDate = capture?.endDate ?? approx.end;
-  const applicationDeadline = capture?.applicationDeadline ?? approx.deadline;
+  // Inactive / unverifiable shows: keep directory identity, blank commercial facts
+  const inactive = Boolean(capture?.inactive);
+  const startDate = capture?.startDate ?? (inactive ? `${year}-01-01` : approx.start);
+  const endDate = capture?.endDate ?? (inactive ? `${year}-01-01` : approx.end);
+  const applicationDeadline = inactive
+    ? undefined
+    : (capture?.applicationDeadline ?? approx.deadline);
   const sourceUrl = capture?.sourceUrl ?? show.officialWebsiteUrl;
 
   return {
@@ -88,13 +99,16 @@ function factFromPriority(
     applicationDeadline,
     venueName: capture?.venueName ?? `${show.city} festival grounds`,
     fullAddress: capture?.fullAddress ?? `${show.city}, ${show.region}`,
-    boothFeeMin: capture?.boothFeeMin,
-    boothFeeMax: capture?.boothFeeMax,
-    applicationFee: capture?.applicationFee,
+    boothFeeMin: inactive ? undefined : capture?.boothFeeMin,
+    boothFeeMax: inactive ? undefined : capture?.boothFeeMax,
+    applicationFee: inactive ? undefined : capture?.applicationFee,
     currency: "USD",
     juryProcess: capture?.juryProcess ?? "unknown",
-    attendance: capture?.attendance,
-    attendanceSourceUrl: capture?.attendance ? sourceUrl : undefined,
+    attendance: inactive ? undefined : capture?.attendance,
+    attendanceSourceUrl: !inactive && capture?.attendance ? sourceUrl : undefined,
+    directorName: capture?.directorName,
+    directorEmail: capture?.directorEmail,
+    directorPhone: capture?.directorPhone,
     socialLinks: [],
     externalRefs: [],
     sourceUrl,
@@ -110,7 +124,10 @@ export const SEED_OFFICIAL_FACTS: Omit<NormalizedEditionFact, "adapterId" | "sou
 
 /** Prior-year stubs for shows with verified captures (YoY history). */
 export const SEED_PRIOR_YEAR_FACTS: Omit<NormalizedEditionFact, "adapterId" | "sourceKind">[] =
-  SEED_OFFICIAL_FACTS.filter((f) => captures[f.showSlug]).map((f) => ({
+  SEED_OFFICIAL_FACTS.filter((f) => {
+    const c = captures[f.showSlug];
+    return Boolean(c?.startDate) && !c?.inactive;
+  }).map((f) => ({
     ...f,
     year: f.year - 1,
     startDate: f.startDate.replace(String(f.year), String(f.year - 1)),
