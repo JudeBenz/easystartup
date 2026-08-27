@@ -75,7 +75,7 @@ export const MODULES: LifeModule[] = [
     color: "#4a5568",
     iconBg: "bg-slate-600",
     glyph: "⚙️",
-    defaultSize: { w: 420, h: 380 },
+    defaultSize: { w: 480, h: 560 },
     component: SettingsApp,
   },
 ];
