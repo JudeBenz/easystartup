@@ -67,6 +67,12 @@ Expect `{ "ok": true, "postgres": true, ... }` when env is wired.
 
 After seed or signup, grant director verification access:
 
+```bash
+ADMIN_EMAIL=you@example.com pnpm --filter showshow db:bootstrap
+```
+
+Or raw SQL:
+
 ```sql
 UPDATE users SET roles = roles || '["admin"]'::jsonb WHERE email = 'you@example.com';
 ```
