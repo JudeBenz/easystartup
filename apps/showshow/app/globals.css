@@ -1,0 +1,346 @@
+@import "tailwindcss";
+
+/*
+  Theme tokens. Default = rust & turquoise.
+  Switch with html[data-theme="…"] from Settings (cookie ss_theme).
+*/
+:root,
+[data-theme="rust-turquoise"] {
+  --paper: #f2f6f5;
+  --surface: #ffffff;
+  --ink: #1a1f1e;
+  --muted: #3f4a48;
+  --line: #c5d0cd;
+  --accent: #b54a2a;
+  --accent-deep: #8f3a20;
+  --good: #0f7f7b;
+  --warn: #8a5a00;
+  --focus: #0f7f7b;
+  --paper-2: #e4ecea;
+}
+
+[data-theme="fair-crimson"] {
+  --paper: #f0f2f4;
+  --surface: #ffffff;
+  --ink: #0e1116;
+  --muted: #3d4654;
+  --line: #c5ccd6;
+  --accent: #b91c1c;
+  --accent-deep: #8f1515;
+  --good: #0f5c45;
+  --warn: #8a5a00;
+  --focus: #0b57d0;
+  --paper-2: #e4e8ec;
+}
+
+[data-theme="spruce-copper"] {
+  --paper: #eef3f0;
+  --surface: #ffffff;
+  --ink: #14201a;
+  --muted: #3d5248;
+  --line: #c4d2c9;
+  --accent: #c46b3a;
+  --accent-deep: #9a522c;
+  --good: #1f5c45;
+  --warn: #8a5a00;
+  --focus: #1f5c45;
+  --paper-2: #dfe8e2;
+}
+
+[data-theme="indigo-sand"] {
+  --paper: #f3f0e8;
+  --surface: #fffcf7;
+  --ink: #1a1a18;
+  --muted: #4a463c;
+  --line: #d4cfc2;
+  --accent: #2f3a8f;
+  --accent-deep: #232b6c;
+  --good: #3f6b5a;
+  --warn: #8a5a00;
+  --focus: #2f3a8f;
+  --paper-2: #e8e3d6;
+}
+
+[data-theme="midnight-sea"] {
+  --paper: #0f1716;
+  --surface: #182422;
+  --ink: #e8efed;
+  --muted: #a9b8b4;
+  --line: #2c3b38;
+  --accent: #e07a4b;
+  --accent-deep: #c45f33;
+  --good: #3dbdb5;
+  --warn: #e0b14a;
+  --focus: #3dbdb5;
+  --paper-2: #141d1c;
+}
+
+:root {
+  --radius-panel: 10px;
+  --radius-control: 6px;
+  --tap: 48px;
+  --shadow: none;
+  --background: var(--paper);
+  --foreground: var(--ink);
+  /* legacy aliases used in pages */
+  --ink-soft: var(--muted);
+  --chalk: var(--surface);
+  --field: var(--good);
+  --field-bright: var(--good);
+  --signal: var(--accent);
+  --signal-deep: var(--accent-deep);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-body), "Atkinson Hyperlegible", ui-sans-serif, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 28%, white);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 100;
+  border-radius: var(--radius-control);
+  background: var(--ink);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.font-display {
+  font-family: var(--font-display), "Bebas Neue", Impact, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.ss-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  padding: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .ss-panel {
+    padding: 1.5rem;
+  }
+}
+
+.ss-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none !important;
+}
+
+.ss-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ss-btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.ss-btn-primary:hover {
+  background: var(--accent-deep);
+}
+
+.ss-btn-secondary {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.ss-btn-secondary:hover {
+  border-color: var(--ink);
+}
+
+.ss-btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.ss-input,
+.ss-select,
+.ss-textarea {
+  width: 100%;
+  min-height: var(--tap);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  padding: 0.7rem 0.9rem;
+}
+
+.ss-textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.ss-input:focus,
+.ss-select:focus,
+.ss-textarea:focus {
+  border-color: var(--focus);
+  outline: 3px solid color-mix(in oklab, var(--focus) 35%, white);
+  outline-offset: 0;
+}
+
+.ss-label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ss-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.ss-chip-good {
+  border-color: color-mix(in oklab, var(--good) 35%, var(--line));
+  background: color-mix(in oklab, var(--good) 10%, white);
+  color: var(--good);
+}
+
+.ss-chip-accent {
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--line));
+  background: color-mix(in oklab, var(--accent) 10%, white);
+  color: var(--accent-deep);
+}
+
+.ss-chip-warn {
+  border-color: color-mix(in oklab, var(--warn) 35%, var(--line));
+  background: color-mix(in oklab, var(--warn) 12%, white);
+  color: var(--warn);
+}
+
+/* Leaflet map */
+.ss-leaflet .leaflet-container {
+  font: inherit;
+  background: var(--paper);
+}
+.ss-map-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Show detail — presence without card stacks */
+@keyframes ss-show-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.ss-show-hero-copy {
+  animation: ss-show-rise 0.55s ease-out both;
+}
+.ss-show-hero-stats {
+  animation: ss-show-rise 0.55s ease-out 0.12s both;
+}
+.ss-ticket-strip {
+  animation: ss-show-rise 0.5s ease-out 0.18s both;
+}
+.ss-show-block {
+  animation: ss-show-rise 0.45s ease-out both;
+}
+
+/* Comfortable reading measure */
+.ss-prose {
+  max-width: 65ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
