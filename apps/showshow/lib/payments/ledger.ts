@@ -1,8 +1,21 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { requirePostgres } from "@/lib/db/client";
-import { ledgerEntries, stripeEvents, orders, promotions, artists } from "@/lib/db/schema";
-import { feeCentsFromGross, requireStripe } from "@/lib/payments/stripe";
+import {
+  artists,
+  ledgerEntries,
+  orders,
+  patronageSubscriptions,
+  products,
+  promotions,
+  shows,
+  stripeEvents,
+} from "@/lib/db/schema";
+import {
+  feeCentsFromGross,
+  platformFeeBps,
+  requireStripe,
+} from "@/lib/payments/stripe";
 
 export async function recordStripeEvent(input: {
   id: string;
@@ -175,6 +188,100 @@ export async function createProductCheckout(input: {
   return session;
 }
 
+export async function createSponsorshipCheckout(input: {
+  subscriptionId: string;
+  tierName: string;
+  monthlyPriceCents: number;
+  patronEmail: string;
+  patronUserId: string;
+  artistId: string;
+  artistConnectAccountId: string;
+  successUrl: string;
+  cancelUrl: string;
+}) {
+  const stripe = requireStripe();
+  const db = requirePostgres();
+  const platformFee = feeCentsFromGross(input.monthlyPriceCents);
+  const idempotencyKey = `sponsor_checkout_${input.subscriptionId}`;
+
+  const existingLed = await db
+    .select()
+    .from(ledgerEntries)
+    .where(eq(ledgerEntries.idempotencyKey, idempotencyKey))
+    .limit(1)
+    .then((r) => r[0]);
+  if (!existingLed) {
+    await db.insert(ledgerEntries).values({
+      id: `led_${nanoid(12)}`,
+      kind: "sponsorship",
+      status: "pending",
+      amountCents: input.monthlyPriceCents,
+      platformFeeCents: platformFee,
+      currency: "USD",
+      payerUserId: input.patronUserId,
+      payeeArtistId: input.artistId,
+      idempotencyKey,
+      metadata: {
+        subscriptionId: input.subscriptionId,
+        tierName: input.tierName,
+      },
+    });
+  }
+
+  const feePercent = Math.min(platformFeeBps() / 100, 30);
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: "subscription",
+      customer_email: input.patronEmail,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: input.monthlyPriceCents,
+            recurring: { interval: "month" },
+            product_data: { name: `Sponsor · ${input.tierName}` },
+          },
+        },
+      ],
+      subscription_data: {
+        application_fee_percent: feePercent,
+        transfer_data: { destination: input.artistConnectAccountId },
+        metadata: {
+          showshowSubscriptionId: input.subscriptionId,
+          showshowArtistId: input.artistId,
+          showshowKind: "sponsorship",
+        },
+      },
+      success_url: input.successUrl,
+      cancel_url: input.cancelUrl,
+      metadata: {
+        showshowSubscriptionId: input.subscriptionId,
+        showshowKind: "sponsorship",
+      },
+    },
+    { idempotencyKey },
+  );
+
+  await db
+    .update(patronageSubscriptions)
+    .set({
+      stripeCheckoutSessionId: session.id,
+      updatedAt: new Date(),
+    })
+    .where(eq(patronageSubscriptions.id, input.subscriptionId));
+
+  await db
+    .update(ledgerEntries)
+    .set({
+      stripeCheckoutSessionId: session.id,
+      updatedAt: new Date(),
+    })
+    .where(eq(ledgerEntries.idempotencyKey, idempotencyKey));
+
+  return session;
+}
+
 export async function createPromotionCheckout(input: {
   promotionId: string;
   showName: string;
@@ -246,6 +353,7 @@ export async function createPromotionCheckout(input: {
 export async function handleCheckoutCompleted(session: {
   id: string;
   payment_intent?: string | { id?: string } | null;
+  subscription?: string | { id?: string } | null;
   metadata?: Record<string, string> | null;
 }) {
   const db = requirePostgres();
@@ -254,9 +362,19 @@ export async function handleCheckoutCompleted(session: {
     typeof session.payment_intent === "string"
       ? session.payment_intent
       : session.payment_intent?.id ?? null;
+  const subId =
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id ?? null;
 
   if (kind === "store_sale" && session.metadata?.showshowOrderId) {
     const orderId = session.metadata.showshowOrderId;
+    const order = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.id, orderId))
+      .limit(1)
+      .then((r) => r[0]);
     await db
       .update(orders)
       .set({
@@ -265,6 +383,14 @@ export async function handleCheckoutCompleted(session: {
         updatedAt: new Date(),
       })
       .where(eq(orders.id, orderId));
+    if (order) {
+      await db
+        .update(products)
+        .set({
+          inventory: sql`greatest(${products.inventory} - ${order.quantity}, 0)`,
+        })
+        .where(eq(products.id, order.productId));
+    }
     await db
       .update(ledgerEntries)
       .set({
@@ -278,6 +404,12 @@ export async function handleCheckoutCompleted(session: {
 
   if (kind === "promotion" && session.metadata?.showshowPromotionId) {
     const promotionId = session.metadata.showshowPromotionId;
+    const promo = await db
+      .select()
+      .from(promotions)
+      .where(eq(promotions.id, promotionId))
+      .limit(1)
+      .then((r) => r[0]);
     await db
       .update(promotions)
       .set({
@@ -285,6 +417,12 @@ export async function handleCheckoutCompleted(session: {
         stripePaymentIntentId: pi ?? undefined,
       })
       .where(eq(promotions.id, promotionId));
+    if (promo) {
+      await db
+        .update(shows)
+        .set({ promotedUntil: promo.endsAt })
+        .where(eq(shows.id, promo.showId));
+    }
     await db
       .update(ledgerEntries)
       .set({
@@ -294,6 +432,29 @@ export async function handleCheckoutCompleted(session: {
         updatedAt: new Date(),
       })
       .where(eq(ledgerEntries.promotionId, promotionId));
+  }
+
+  if (kind === "sponsorship" && session.metadata?.showshowSubscriptionId) {
+    const subscriptionId = session.metadata.showshowSubscriptionId;
+    await db
+      .update(patronageSubscriptions)
+      .set({
+        status: "active",
+        stripeSubscriptionId: subId ?? undefined,
+        stripeCheckoutSessionId: session.id,
+        updatedAt: new Date(),
+      })
+      .where(eq(patronageSubscriptions.id, subscriptionId));
+    await db
+      .update(ledgerEntries)
+      .set({
+        status: "succeeded",
+        stripeCheckoutSessionId: session.id,
+        stripePaymentIntentId: pi ?? undefined,
+        updatedAt: new Date(),
+        metadata: { subscriptionId, stripeSubscriptionId: subId },
+      })
+      .where(eq(ledgerEntries.idempotencyKey, `sponsor_checkout_${subscriptionId}`));
   }
 }
 

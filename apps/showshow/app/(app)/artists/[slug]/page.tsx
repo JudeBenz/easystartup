@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader, Panel, Badge } from "@/components/ui";
 import { formatCents, formatDate, MEDIUM_LABELS } from "@/lib/format";
-import { getArtist } from "@/lib/store";
+import { getApplicationsForArtist, getArtist } from "@/lib/store";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -14,15 +14,12 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   const { slug } = await params;
   const data = await getArtist(slug);
   if (!data) notFound();
-  const { artist, products, tiers, posts, applications, followers, db } = data;
+  const { artist, products, tiers, posts, followers } = data;
+  const appRows = await getApplicationsForArtist(artist.id);
 
-  const upcoming = applications
-    .filter((a) => a.status === "accepted" || a.status === "applied")
-    .map((a) => {
-      const edition = db.editions.find((e) => e.id === a.editionId)!;
-      const show = db.shows.find((s) => s.id === edition.showId)!;
-      return { a, edition, show };
-    })
+  const upcoming = appRows
+    .filter(({ app }) => app.status === "accepted" || app.status === "applied")
+    .map(({ app, edition, show }) => ({ a: app, edition, show }))
     .sort((x, y) => x.edition.startDate.localeCompare(y.edition.startDate));
 
   return (

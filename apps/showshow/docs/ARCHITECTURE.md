@@ -98,3 +98,7 @@ SHOWSHOW_PLATFORM_FEE_BPS=500
 - Keep provenance on show facts (copyright-safe ingestion stays).
 - Opt-in ROI aggregates remain self-reported — never sold as audited financials.
 - Soft-delete users; hard-delete PII only via documented erasure job.
+
+
+## Cutover status
+When `DATABASE_URL` is set, directory / applications / ROI / claims / commerce reads+writes go through Postgres (`lib/store/pg-repo.ts`). Demo JSON remains the fallback for local UI without a database. Feed/routes/weekend social graphs still use the demo store until those tables are seeded — money paths never do.
