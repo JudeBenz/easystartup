@@ -98,3 +98,14 @@ SHOWSHOW_PLATFORM_FEE_BPS=500
 - Keep provenance on show facts (copyright-safe ingestion stays).
 - Opt-in ROI aggregates remain self-reported — never sold as audited financials.
 - Soft-delete users; hard-delete PII only via documented erasure job.
+
+
+## Cutover status
+When `DATABASE_URL` is set, directory / applications / ROI / claims / director / commerce / social (feed, follows, routes, weekend) use Postgres. Demo JSON remains the fallback for local UI without a database.
+
+## Overnight completion (PR #4+)
+- Auth guards on all mutations; middleware on protected routes
+- Social graph tables + feed composer, follow/favorite, routes/calendar/weekend PG cutover
+- Product/tier management, orders + ship flow, admin director verification
+- Stripe refund + subscription.deleted webhooks; ledger reconcile cron
+- Health probe, error pages, privacy/terms, sitemap/robots/manifest, security headers

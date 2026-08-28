@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader, Panel, Badge } from "@/components/ui";
 import { formatCents, formatDate, MEDIUM_LABELS } from "@/lib/format";
-import { getArtist } from "@/lib/store";
+import { toggleFollowArtistAction } from "@/lib/actions-more";
+import { getApplicationsForArtist, getArtist } from "@/lib/store";
+import { getSessionUser } from "@/lib/session-data";
+import { isPostgresEnabled } from "@/lib/db/client";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -14,24 +17,36 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   const { slug } = await params;
   const data = await getArtist(slug);
   if (!data) notFound();
-  const { artist, products, tiers, posts, applications, followers, db } = data;
+  const { artist, products, tiers, posts, followers } = data;
+  const user = await getSessionUser();
+  const appRows = await getApplicationsForArtist(artist.id);
+  let following = false;
+  if (isPostgresEnabled() && user.id !== artist.userId) {
+    const { pgIsFollowingArtist } = await import("@/lib/store/pg-social");
+    following = await pgIsFollowingArtist(user.id, artist.id);
+  }
 
-  const upcoming = applications
-    .filter((a) => a.status === "accepted" || a.status === "applied")
-    .map((a) => {
-      const edition = db.editions.find((e) => e.id === a.editionId)!;
-      const show = db.shows.find((s) => s.id === edition.showId)!;
-      return { a, edition, show };
-    })
+  const upcoming = appRows
+    .filter(({ app }) => app.status === "accepted" || app.status === "applied")
+    .map(({ app, edition, show }) => ({ a: app, edition, show }))
     .sort((x, y) => x.edition.startDate.localeCompare(y.edition.startDate));
 
   return (
     <div>
       <PageHeader
         title={artist.displayName}
-        description={`${artist.city}, ${artist.region} · ${artist.tagline}`}
+        description={`${artist.city}, ${artist.region} · ${artist.tagline} · ${followers} follower${followers === 1 ? "" : "s"}`}
         actions={
           <>
+            {isPostgresEnabled() && user.id !== artist.userId ? (
+              <form action={toggleFollowArtistAction}>
+                <input type="hidden" name="artistId" value={artist.id} />
+                <input type="hidden" name="artistSlug" value={artist.slug} />
+                <button type="submit" className="ss-btn ss-btn-secondary min-h-[var(--tap)]">
+                  {following ? "Unfollow" : "Follow"}
+                </button>
+              </form>
+            ) : null}
             <Link href={`/artists/${artist.slug}/store`} className="ss-btn ss-btn-secondary">
               Store
             </Link>
@@ -54,8 +69,14 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
               ))}
             </div>
             <p className="mt-3 text-base text-[var(--muted)]">
-              {followers} followers · booth default {artist.boothDefaultSize ?? "—"} · Stripe Connect{" "}
-              {artist.stripeConnectReady ? "ready" : "pending"}
+              {followers} follower{followers === 1 ? "" : "s"}
+              {user.id === artist.userId ? (
+                <>
+                  {" "}
+                  · booth default {artist.boothDefaultSize ?? "—"} · Stripe Connect{" "}
+                  {artist.stripeConnectReady ? "ready" : "pending"}
+                </>
+              ) : null}
             </p>
           </Panel>
 

@@ -11,10 +11,13 @@ import type {
 import { getDb, mutateDb, resetDb } from "./db";
 import { computeAggregates, MIN_N } from "./seed";
 import { haversineMiles } from "@/lib/format";
+import { isPostgresEnabled } from "@/lib/db/client";
+import * as pg from "./pg-repo";
 
 export { MIN_N, resetDb };
 
 export async function listShows() {
+  if (isPostgresEnabled()) return pg.pgListShows();
   const db = await getDb();
   return db.shows
     .map((show) => {
@@ -35,6 +38,7 @@ export async function listShows() {
 }
 
 export async function getShowBySlug(slug: string) {
+  if (isPostgresEnabled()) return pg.pgGetShowBySlug(slug);
   const db = await getDb();
   const show = db.shows.find((s) => s.slug === slug);
   if (!show) return null;
@@ -79,6 +83,7 @@ export async function getShowBySlug(slug: string) {
 }
 
 export async function listEditionsForCalendar() {
+  if (isPostgresEnabled()) return pg.pgListEditionsForCalendar();
   const db = await getDb();
   return db.editions
     .filter((e) => e.status === "upcoming" || e.status === "active")
@@ -107,6 +112,7 @@ export async function listRankedShows() {
 }
 
 export async function getArtist(slugOrId: string) {
+  if (isPostgresEnabled()) return pg.pgGetArtist(slugOrId);
   const db = await getDb();
   const artist =
     db.artists.find((a) => a.slug === slugOrId || a.id === slugOrId) ?? null;
@@ -122,6 +128,7 @@ export async function getArtist(slugOrId: string) {
 }
 
 export async function listArtists() {
+  if (isPostgresEnabled()) return pg.pgListArtists();
   const db = await getDb();
   return db.artists.map((artist) => ({
     artist,
@@ -131,6 +138,7 @@ export async function listArtists() {
 }
 
 export async function getApplicationsForArtist(artistId: string) {
+  if (isPostgresEnabled()) return pg.pgGetApplicationsForArtist(artistId);
   const db = await getDb();
   return db.applications
     .filter((a) => a.artistId === artistId)
@@ -157,6 +165,7 @@ export async function upsertApplication(input: {
   officialApplyUrl: string;
   notes?: string;
 }) {
+  if (isPostgresEnabled()) return pg.pgUpsertApplication(input);
   return mutateDb((db) => {
     const existing = db.applications.find(
       (a) => a.artistId === input.artistId && a.editionId === input.editionId,
@@ -193,6 +202,7 @@ export async function upsertApplication(input: {
 }
 
 export async function getRoiForArtist(artistId: string) {
+  if (isPostgresEnabled()) return pg.pgGetRoiForArtist(artistId);
   const db = await getDb();
   return db.roiReports
     .filter((r) => r.artistId === artistId)
@@ -227,6 +237,7 @@ export async function createRoiReport(input: {
   notes?: string;
   breakdowns?: { medium: RoiMediumBreakdown["medium"]; sales: number; unitsSold: number }[];
 }) {
+  if (isPostgresEnabled()) return pg.pgCreateRoiReport(input);
   return mutateDb((db) => {
     const now = new Date().toISOString();
     const report: RoiReport = {
@@ -260,6 +271,7 @@ export async function createRoiReport(input: {
 
 /** Peer signal for a show: opted-in self-reported nets only (no aggregator data). */
 export async function getShowRoiSignal(showId: string) {
+  if (isPostgresEnabled()) return pg.pgGetShowRoiSignal(showId);
   const db = await getDb();
   const editionIds = new Set(db.editions.filter((e) => e.showId === showId).map((e) => e.id));
   const opted = db.roiReports.filter((r) => r.optInAggregate && editionIds.has(r.editionId));
@@ -297,6 +309,10 @@ export async function getShowRoiSignal(showId: string) {
 }
 
 export async function listRoutes() {
+  if (isPostgresEnabled()) {
+    const { pgListRoutes } = await import('./pg-social');
+    return pgListRoutes();
+  }
   const db = await getDb();
   return db.routes.map((route) => {
     const stops = db.routeStops
@@ -312,6 +328,10 @@ export async function listRoutes() {
 }
 
 export async function getFeed() {
+  if (isPostgresEnabled()) {
+    const { pgGetFeed } = await import('./pg-social');
+    return pgGetFeed();
+  }
   const db = await getDb();
   return db.posts
     .slice()
@@ -330,6 +350,7 @@ export async function getFeed() {
 }
 
 export async function addComment(editionId: string, authorUserId: string, body: string) {
+  if (isPostgresEnabled()) return pg.pgAddComment(editionId, authorUserId, body);
   return mutateDb((db) => {
     const comment: ShowComment = {
       id: nanoid(10),
@@ -344,6 +365,10 @@ export async function addComment(editionId: string, authorUserId: string, body: 
 }
 
 export async function getPersonalCalendar(artistId: string) {
+  if (isPostgresEnabled()) {
+    const { pgGetPersonalCalendar } = await import('./pg-social');
+    return pgGetPersonalCalendar(artistId);
+  }
   const db = await getDb();
   return db.bookings
     .filter((b) => b.artistId === artistId)
@@ -356,6 +381,10 @@ export async function getPersonalCalendar(artistId: string) {
 }
 
 export async function getWeekendMode(showSlug: string, showgoerUserId: string) {
+  if (isPostgresEnabled()) {
+    const { pgGetWeekendMode } = await import('./pg-social');
+    return pgGetWeekendMode(showSlug, showgoerUserId);
+  }
   const detail = await getShowBySlug(showSlug);
   if (!detail?.current) return null;
   const db = await getDb();
@@ -407,6 +436,7 @@ export async function claimShow(input: {
   showId: string;
   contactEmail: string;
 }) {
+  if (isPostgresEnabled()) return pg.pgClaimShow(input);
   return mutateDb((db) => {
     const show = db.shows.find((s) => s.id === input.showId);
     if (!show) throw new Error("Show not found");
@@ -445,11 +475,13 @@ export async function claimShow(input: {
 }
 
 export async function listClaimableShows() {
+  if (isPostgresEnabled()) return pg.pgListClaimableShows();
   const db = await getDb();
   return db.shows.slice().sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getDirectorDashboard(userId: string) {
+  if (isPostgresEnabled()) return pg.pgGetDirectorDashboard(userId);
   const db = await getDb();
   const director = db.directors.find((d) => d.userId === userId);
   if (!director) return null;
@@ -474,6 +506,7 @@ export async function createAnnouncement(input: {
   body: string;
   kind: DemoData["announcements"][0]["kind"];
 }) {
+  if (isPostgresEnabled()) return pg.pgCreateAnnouncement(input);
   return mutateDb((db) => {
     const row = {
       id: nanoid(10),
@@ -486,6 +519,7 @@ export async function createAnnouncement(input: {
 }
 
 export async function openWaitlistBooth(editionId: string, boothLabel?: string) {
+  if (isPostgresEnabled()) return pg.pgOpenWaitlistBooth(editionId, boothLabel);
   return mutateDb((db) => {
     const row = {
       id: nanoid(10),
@@ -500,6 +534,7 @@ export async function openWaitlistBooth(editionId: string, boothLabel?: string) 
 }
 
 export async function getEditionOptions(): Promise<{ edition: ShowEdition; showName: string }[]> {
+  if (isPostgresEnabled()) return pg.pgGetEditionOptions();
   const db = await getDb();
   return db.editions
     .filter((e) => e.year >= 2025)
@@ -511,6 +546,7 @@ export async function getEditionOptions(): Promise<{ edition: ShowEdition; showN
 }
 
 export async function listJuryFeedback() {
+  if (isPostgresEnabled()) return pg.pgListJuryFeedback();
   const db = await getDb();
   return db.juryFeedback
     .slice()
@@ -530,6 +566,7 @@ export async function createJuryFeedback(input: {
   notes?: string;
   imageUrls?: string[];
 }) {
+  if (isPostgresEnabled()) return pg.pgCreateJuryFeedback(input);
   return mutateDb((db) => {
     const row = {
       id: nanoid(10),
@@ -546,6 +583,7 @@ export async function createJuryFeedback(input: {
 }
 
 export async function listBoothSit() {
+  if (isPostgresEnabled()) return pg.pgListBoothSit();
   const db = await getDb();
   const resolve = (editionId: string, artistId: string) => {
     const edition = db.editions.find((e) => e.id === editionId)!;
@@ -565,6 +603,7 @@ export async function createBoothOffer(input: {
   availableWindows: string;
   notes?: string;
 }) {
+  if (isPostgresEnabled()) return pg.pgCreateBoothOffer(input);
   return mutateDb((db) => {
     const row = { id: nanoid(10), ...input };
     db.boothOffers.push(row);
@@ -577,6 +616,7 @@ export async function createBoothRequest(input: {
   editionId: string;
   neededWindow: string;
 }) {
+  if (isPostgresEnabled()) return pg.pgCreateBoothRequest(input);
   return mutateDb((db) => {
     const row = {
       id: nanoid(10),
@@ -589,6 +629,7 @@ export async function createBoothRequest(input: {
 }
 
 export async function listAlerts(artistId?: string | null) {
+  if (isPostgresEnabled()) return pg.pgListAlerts(artistId);
   const db = await getDb();
   type AlertRow = {
     kind: "operational" | "deadline";
@@ -664,6 +705,7 @@ export async function listAlerts(artistId?: string | null) {
 }
 
 export async function stats() {
+  if (isPostgresEnabled()) return pg.pgStats();
   const db = await getDb();
   return {
     shows: db.shows.length,

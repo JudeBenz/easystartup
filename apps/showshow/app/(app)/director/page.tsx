@@ -5,16 +5,25 @@ import { getSessionUser } from "@/lib/session-data";
 import { getDirectorDashboard, listClaimableShows } from "@/lib/store";
 import {
   claimShowAction,
+  checkoutPromotionAction,
   createAnnouncementAction,
   openWaitlistAction,
 } from "@/lib/actions";
+import { isPostgresEnabled } from "@/lib/db/client";
+import { isStripeConfigured } from "@/lib/payments/stripe";
 
 export const metadata = { title: "Director" };
 
-export default async function DirectorPage() {
+export default async function DirectorPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const user = await getSessionUser();
   const dash = await getDirectorDashboard(user.id);
   const claimable = await listClaimableShows();
+  const live = isPostgresEnabled() && isStripeConfigured();
+  const sp = await searchParams;
 
   if (!dash) {
     return (
@@ -64,6 +73,7 @@ export default async function DirectorPage() {
   const edition = editions[0];
   const claimedIds = new Set(director.showIds);
   const more = claimable.filter((s) => !claimedIds.has(s.id));
+  const primaryShow = shows[0];
 
   return (
     <div>
@@ -75,6 +85,22 @@ export default async function DirectorPage() {
             : "Claim pending verification. You can still manage announcements for claimed shows."
         }
       />
+
+      {sp.promoted ? (
+        <Panel className="mb-4">
+          <p className="text-[1.05rem] text-[var(--good)]">
+            Promotion paid — directory boost activates when the Stripe webhook lands.
+          </p>
+        </Panel>
+      ) : null}
+
+      {sp.cancelled ? (
+        <Panel className="mb-4">
+          <p className="text-[1.05rem] text-[var(--muted)]">
+            Checkout cancelled — nothing was charged.
+          </p>
+        </Panel>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
@@ -127,9 +153,46 @@ export default async function DirectorPage() {
             ))}
             {!promotions.length ? <li className="text-[var(--muted)]">No active boosts</li> : null}
           </ul>
-          <p className="mt-3 text-base text-[var(--muted)]">
-            Directors pay to boost visibility. Artists keep 100% of booth sales and sponsorships.
-          </p>
+          {primaryShow && live ? (
+            <form
+              action={checkoutPromotionAction}
+              className="mt-4 grid gap-3 border-t border-[var(--line)] pt-4"
+            >
+              <input type="hidden" name="showId" value={primaryShow.id} />
+              <p className="text-base font-bold">Boost {primaryShow.name}</p>
+              <label className="ss-label">
+                Budget (cents)
+                <input
+                  name="budgetCents"
+                  type="number"
+                  min={2500}
+                  step={500}
+                  defaultValue={5000}
+                  className="ss-input"
+                />
+              </label>
+              <label className="ss-label">
+                Days
+                <input
+                  name="days"
+                  type="number"
+                  min={7}
+                  max={30}
+                  defaultValue={14}
+                  className="ss-input"
+                />
+              </label>
+              <button type="submit" className="ss-btn ss-btn-primary min-h-[var(--tap)]">
+                Pay with Stripe
+              </button>
+            </form>
+          ) : (
+            <p className="mt-3 text-base text-[var(--muted)]">
+              {live
+                ? "Claim a show to purchase a boost."
+                : "Directors pay to boost visibility once DATABASE_URL + Stripe are set. Artists keep 100% of booth sales and sponsorships."}
+            </p>
+          )}
         </Panel>
 
         <Panel>

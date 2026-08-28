@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { PageHeader, Panel, Badge } from "@/components/ui";
+import { EmptyState } from "@/components/empty-state";
+import { SubmitButton } from "@/components/submit-button";
 import { formatDate } from "@/lib/format";
 import { getSessionArtistId, getSessionUser } from "@/lib/session-data";
 import { getApplicationsForArtist, getEditionOptions } from "@/lib/store";
 import { updateApplicationAction } from "@/lib/actions";
+import { isPostgresEnabled } from "@/lib/db/client";
 import type { ApplicationStatus } from "@/types/domain";
 
 export const metadata = { title: "Applications" };
@@ -28,13 +31,34 @@ function daysUntil(iso?: string) {
 export default async function ApplicationsPage() {
   const user = await getSessionUser();
   const artistId = await getSessionArtistId();
+  const pg = isPostgresEnabled();
+
   if (!artistId) {
     return (
       <div>
-        <PageHeader title="Application tracker" description="Switch to an artist persona." />
-        <Panel>
-          <p className="text-sm">{user.name} is not an artist in this demo.</p>
-        </Panel>
+        <PageHeader
+          title="Application tracker"
+          description="Track status and deadlines for every show you apply to."
+        />
+        <EmptyState
+          title="Artist profile required"
+          description={
+            pg
+              ? "Create an artist account to track applications, deadlines, and reminders."
+              : "Switch to an artist demo persona from the menu, or enable Postgres and create an account."
+          }
+          action={
+            pg
+              ? { href: "/settings", label: "Create artist account" }
+              : { href: "/settings", label: "Open settings" }
+          }
+          secondary={{ href: "/shows", label: "Browse shows" }}
+        />
+        {!pg ? (
+          <p className="mt-4 text-center text-sm text-[var(--muted)]">
+            Signed in as {user.name} ({user.roles.join(", ")})
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -68,6 +92,13 @@ export default async function ApplicationsPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-3">
+          {!apps.length ? (
+            <EmptyState
+              title="No applications yet"
+              description="Add a show from the panel on the right. We'll track deadlines and send reminders when email is configured."
+              secondary={{ href: "/shows", label: "Browse shows" }}
+            />
+          ) : null}
           {apps.map(({ app, edition, show }) => {
             const days = daysUntil(edition.applicationDeadline);
             return (
@@ -135,9 +166,9 @@ export default async function ApplicationsPage() {
                         </option>
                       ))}
                     </select>
-                    <button type="submit" className="ss-btn ss-btn-ghost min-h-[var(--tap)]">
+                    <SubmitButton className="ss-btn ss-btn-ghost min-h-[var(--tap)]" pendingLabel="Saving…">
                       Update status
-                    </button>
+                    </SubmitButton>
                   </div>
                   <label className="ss-label">
                     Notes
@@ -157,38 +188,42 @@ export default async function ApplicationsPage() {
 
         <Panel>
           <h2 className="font-display text-lg font-bold">Track another show</h2>
-          <form action={updateApplicationAction} className="mt-4 grid gap-3 text-sm">
-            <input type="hidden" name="artistId" value={artistId} />
-            <input type="hidden" name="status" value="interested" />
-            <label className="ss-label">
-              <span>Edition</span>
-              <select name="editionId" required className="ss-input">
-                {addable.map(({ edition, showName }) => (
-                  <option key={edition.id} value={edition.id}>
-                    {showName}
-                    {edition.applicationDeadline
-                      ? ` · due ${edition.applicationDeadline}`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="ss-label">
-              <span>Official apply URL (optional — we default to /apply)</span>
-              <input
-                name="officialApplyUrl"
-                placeholder="https://…"
-                className="ss-input"
-              />
-            </label>
-            <label className="ss-label">
-              <span>Notes</span>
-              <textarea name="notes" rows={2} className="ss-textarea" />
-            </label>
-            <button type="submit" className="ss-btn ss-btn-primary min-h-[var(--tap)]">
-              Add to tracker
-            </button>
-          </form>
+          {addable.length ? (
+            <form action={updateApplicationAction} className="mt-4 grid gap-3 text-sm">
+              <input type="hidden" name="artistId" value={artistId} />
+              <input type="hidden" name="status" value="interested" />
+              <label className="ss-label">
+                <span>Edition</span>
+                <select name="editionId" required className="ss-input">
+                  {addable.map(({ edition, showName }) => (
+                    <option key={edition.id} value={edition.id}>
+                      {showName}
+                      {edition.applicationDeadline
+                        ? ` · due ${edition.applicationDeadline}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="ss-label">
+                <span>Official apply URL (optional — we default to /apply)</span>
+                <input
+                  name="officialApplyUrl"
+                  placeholder="https://…"
+                  className="ss-input"
+                />
+              </label>
+              <label className="ss-label">
+                <span>Notes</span>
+                <textarea name="notes" rows={2} className="ss-textarea" />
+              </label>
+              <SubmitButton pendingLabel="Adding…">Add to tracker</SubmitButton>
+            </form>
+          ) : (
+            <p className="mt-3 text-[1.05rem] text-[var(--muted)]">
+              You&apos;re tracking every upcoming edition we have on file.
+            </p>
+          )}
         </Panel>
       </div>
     </div>

@@ -1,27 +1,38 @@
 import { PageHeader, Panel, Badge } from "@/components/ui";
+import { EmptyState } from "@/components/empty-state";
 import { formatDate, formatMoney, MEDIUM_LABELS } from "@/lib/format";
-import { getSessionArtistId, getSessionUser } from "@/lib/session-data";
+import { getSessionArtistId } from "@/lib/session-data";
 import { getEditionOptions, getRoiForArtist, getShowRoiSignal, listShows } from "@/lib/store";
 import { saveRoiAction } from "@/lib/actions";
+import { isPostgresEnabled } from "@/lib/db/client";
 
 export const metadata = { title: "ROI tracker" };
 
 export default async function RoiPage() {
-  const user = await getSessionUser();
   const artistId = await getSessionArtistId();
 
   if (!artistId) {
+    const pg = isPostgresEnabled();
     return (
       <div>
         <PageHeader
           title="ROI tracker"
-          description="Switch to an artist (Aria or Sam) in Menu to log private show economics."
+          description="Private booth economics — opt in to aggregate signals that power ranked shows."
         />
-        <Panel>
-          <p className="text-[1.125rem]">
-            {user.name} is not set up as an artist in this demo.
-          </p>
-        </Panel>
+        <EmptyState
+          title="Artist profile required"
+          description={
+            pg
+              ? "Log booth fees, travel, and sales per show. Only you see raw numbers unless you opt into aggregates."
+              : "Switch to an artist demo persona from the menu to try the ROI tracker."
+          }
+          action={
+            pg
+              ? { href: "/settings", label: "Create artist account" }
+              : { href: "/settings", label: "Open settings" }
+          }
+          secondary={{ href: "/shows/ranked", label: "See ranked shows" }}
+        />
       </div>
     );
   }

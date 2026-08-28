@@ -391,3 +391,291 @@ export const auditLog = pgTable(
   },
   (t) => [index("audit_entity_idx").on(t.entityType, t.entityId)],
 );
+
+/** Social / ops tables — same product surface as the demo store. */
+export const showComments = pgTable(
+  "show_comments",
+  {
+    id: text("id").primaryKey(),
+    editionId: text("edition_id")
+      .notNull()
+      .references(() => editions.id, { onDelete: "cascade" }),
+    authorUserId: text("author_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("comments_edition_idx").on(t.editionId)],
+);
+
+export const announcements = pgTable(
+  "announcements",
+  {
+    id: text("id").primaryKey(),
+    editionId: text("edition_id")
+      .notNull()
+      .references(() => editions.id, { onDelete: "cascade" }),
+    directorUserId: text("director_user_id")
+      .notNull()
+      .references(() => users.id),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    kind: text("kind").notNull().default("general"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("announcements_edition_idx").on(t.editionId)],
+);
+
+export const waitlistBooths = pgTable("waitlist_booths", {
+  id: text("id").primaryKey(),
+  editionId: text("edition_id")
+    .notNull()
+    .references(() => editions.id, { onDelete: "cascade" }),
+  boothLabel: text("booth_label"),
+  status: text("status").notNull().default("open"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const juryFeedback = pgTable("jury_feedback", {
+  id: text("id").primaryKey(),
+  artistId: text("artist_id")
+    .notNull()
+    .references(() => artists.id, { onDelete: "cascade" }),
+  editionId: text("edition_id")
+    .notNull()
+    .references(() => editions.id, { onDelete: "cascade" }),
+  outcome: text("outcome").notNull(),
+  notes: text("notes"),
+  imageUrls: jsonb("image_urls").$type<string[]>().notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const boothOffers = pgTable("booth_offers", {
+  id: text("id").primaryKey(),
+  artistId: text("artist_id")
+    .notNull()
+    .references(() => artists.id, { onDelete: "cascade" }),
+  editionId: text("edition_id")
+    .notNull()
+    .references(() => editions.id, { onDelete: "cascade" }),
+  availableWindows: text("available_windows").notNull(),
+  notes: text("notes"),
+});
+
+export const boothRequests = pgTable("booth_requests", {
+  id: text("id").primaryKey(),
+  artistId: text("artist_id")
+    .notNull()
+    .references(() => artists.id, { onDelete: "cascade" }),
+  editionId: text("edition_id")
+    .notNull()
+    .references(() => editions.id, { onDelete: "cascade" }),
+  neededWindow: text("needed_window").notNull(),
+  status: text("status").notNull().default("open"),
+});
+
+export const patronageSubscriptions = pgTable(
+  "patronage_subscriptions",
+  {
+    id: text("id").primaryKey(),
+    tierId: text("tier_id")
+      .notNull()
+      .references(() => sponsorshipTiers.id),
+    patronUserId: text("patron_user_id")
+      .notNull()
+      .references(() => users.id),
+    artistId: text("artist_id")
+      .notNull()
+      .references(() => artists.id),
+    status: text("status").notNull().default("pending"),
+    stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("patronage_patron_idx").on(t.patronUserId)],
+);
+
+export const showAggregates = pgTable(
+  "show_aggregates",
+  {
+    id: text("id").primaryKey(),
+    editionId: text("edition_id")
+      .notNull()
+      .references(() => editions.id, { onDelete: "cascade" }),
+    showId: text("show_id")
+      .notNull()
+      .references(() => shows.id, { onDelete: "cascade" }),
+    sampleSize: integer("sample_size").notNull(),
+    medianNet: integer("median_net"),
+    medianGrossSales: integer("median_gross_sales"),
+    medianTotalExpenses: integer("median_total_expenses"),
+    topMediums: jsonb("top_mediums")
+      .$type<{ medium: string; share: number }[]>()
+      .notNull()
+      .default([]),
+    label: text("label").notNull().default("self_reported"),
+    computedAt: timestamp("computed_at", { withTimezone: true }).notNull().defaultNow(),
+    minNMet: boolean("min_n_met").notNull().default(false),
+  },
+  (t) => [index("aggregates_show_idx").on(t.showId)],
+);
+
+/** Idempotent deadline email sends. */
+export const emailDeliveries = pgTable(
+  "email_deliveries",
+  {
+    id: text("id").primaryKey(),
+    kind: text("kind").notNull(),
+    toEmail: text("to_email").notNull(),
+    entityId: text("entity_id").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+    providerId: text("provider_id"),
+  },
+  (t) => [uniqueIndex("email_delivery_uidx").on(t.kind, t.entityId, t.toEmail)],
+);
+
+/** Social graph + content */
+export const follows = pgTable(
+  "follows",
+  {
+    id: text("id").primaryKey(),
+    followerUserId: text("follower_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    artistId: text("artist_id")
+      .notNull()
+      .references(() => artists.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("follows_uidx").on(t.followerUserId, t.artistId)],
+);
+
+export const favoriteShows = pgTable(
+  "favorite_shows",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    showId: text("show_id")
+      .notNull()
+      .references(() => shows.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("favorite_shows_uidx").on(t.userId, t.showId)],
+);
+
+export const posts = pgTable(
+  "posts",
+  {
+    id: text("id").primaryKey(),
+    authorUserId: text("author_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    artistId: text("artist_id").references(() => artists.id, { onDelete: "set null" }),
+    editionId: text("edition_id").references(() => editions.id, { onDelete: "set null" }),
+    body: text("body").notNull(),
+    imageUrl: text("image_url"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("posts_created_idx").on(t.createdAt)],
+);
+
+export const artistBookings = pgTable(
+  "artist_bookings",
+  {
+    id: text("id").primaryKey(),
+    artistId: text("artist_id")
+      .notNull()
+      .references(() => artists.id, { onDelete: "cascade" }),
+    editionId: text("edition_id")
+      .notNull()
+      .references(() => editions.id, { onDelete: "cascade" }),
+    intent: text("intent").notNull().default("booked"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("bookings_artist_idx").on(t.artistId)],
+);
+
+export const showRoutes = pgTable(
+  "show_routes",
+  {
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull(),
+    name: text("name").notNull(),
+    region: text("region").notNull(),
+    seasonLabel: text("season_label").notNull(),
+    description: text("description").notNull().default(""),
+  },
+  (t) => [uniqueIndex("routes_slug_uidx").on(t.slug)],
+);
+
+export const routeStops = pgTable("route_stops", {
+  id: text("id").primaryKey(),
+  routeId: text("route_id")
+    .notNull()
+    .references(() => showRoutes.id, { onDelete: "cascade" }),
+  editionId: text("edition_id")
+    .notNull()
+    .references(() => editions.id, { onDelete: "cascade" }),
+  order: integer("order").notNull(),
+  travelMilesFromPrev: integer("travel_miles_from_prev"),
+  travelHoursFromPrev: integer("travel_hours_from_prev"),
+});
+
+export const showAlerts = pgTable(
+  "show_alerts",
+  {
+    id: text("id").primaryKey(),
+    editionId: text("edition_id")
+      .notNull()
+      .references(() => editions.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("show_alerts_edition_idx").on(t.editionId)],
+);
+
+export const roiBreakdowns = pgTable("roi_breakdowns", {
+  id: text("id").primaryKey(),
+  reportId: text("report_id")
+    .notNull()
+    .references(() => roiReports.id, { onDelete: "cascade" }),
+  medium: text("medium").notNull(),
+  sales: integer("sales").notNull(),
+  unitsSold: integer("units_sold").notNull().default(0),
+});
+
+export const showSocialLinks = pgTable("show_social_links", {
+  id: text("id").primaryKey(),
+  editionId: text("edition_id")
+    .notNull()
+    .references(() => editions.id, { onDelete: "cascade" }),
+  platform: text("platform").notNull(),
+  url: text("url").notNull(),
+});
+
+export const showExternalRefs = pgTable("show_external_refs", {
+  id: text("id").primaryKey(),
+  showId: text("show_id")
+    .notNull()
+    .references(() => shows.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  url: text("url").notNull(),
+  kind: text("kind").notNull().default("other"),
+});
+
+export const factProvenance = pgTable("fact_provenance", {
+  id: text("id").primaryKey(),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id").notNull(),
+  field: text("field").notNull(),
+  sourceUrl: text("source_url").notNull(),
+  sourceKind: text("source_kind").notNull().default("official_site"),
+  capturedAt: timestamp("captured_at", { withTimezone: true }).notNull().defaultNow(),
+  adapterId: text("adapter_id").notNull().default("manual"),
+});

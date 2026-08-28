@@ -1,13 +1,16 @@
+import Link from "next/link";
 import { getSessionUser, listUsers } from "@/lib/session-data";
 import { switchUserAction, resetDemoAction } from "@/lib/actions";
 import { SiteNav } from "@/components/site-nav";
+import { isDemoPersonasEnabled } from "@/lib/demo-mode";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
   const users = await listUsers();
   const role = user.roles[0] ?? "guest";
+  const demo = isDemoPersonasEnabled();
 
-  const personaForm = (
+  const personaForm = demo ? (
     <form action={switchUserAction} className="grid gap-3">
       <label className="ss-label" htmlFor="persona">
         Choose a demo person
@@ -28,14 +31,20 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         Switch person
       </button>
     </form>
+  ) : (
+    <p className="text-[1.05rem] text-[var(--muted)]">
+      Demo personas are off. Sign in from Settings.
+    </p>
   );
 
-  const resetForm = (
+  const resetForm = demo ? (
     <form action={resetDemoAction}>
       <button type="submit" className="ss-btn ss-btn-secondary w-full sm:w-auto">
         Reset demo data
       </button>
     </form>
+  ) : (
+    <span />
   );
 
   return (
@@ -53,8 +62,14 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <footer className="mx-auto hidden max-w-6xl px-6 pb-8 text-base text-[var(--muted)] lg:block">
-        Facts from official show sites. Rankings come from artist reports, not
-        guidebooks.
+        Facts from official show sites. Rankings come from artist reports, not guidebooks.{" "}
+        <Link href="/privacy" className="underline">
+          Privacy
+        </Link>
+        {" · "}
+        <Link href="/terms" className="underline">
+          Terms
+        </Link>
       </footer>
     </div>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader, Panel, Badge } from "@/components/ui";
+import { EmptyState } from "@/components/empty-state";
 import { formatCents, MEDIUM_LABELS } from "@/lib/format";
 import { getArtist } from "@/lib/store";
 import { checkoutProductAction, startArtistConnectAction } from "@/lib/actions";
@@ -40,15 +41,30 @@ export default async function ArtistStorePage({
             : "Wire DATABASE_URL + Stripe keys to enable live Connect checkout. Until then this lists inventory only."
         }
         actions={
-          <Link href={`/artists/${artist.slug}`} className="ss-btn ss-btn-ghost">
-            Back to profile
-          </Link>
+          <>
+            <Link href={`/artists/${artist.slug}`} className="ss-btn ss-btn-ghost">
+              Back to profile
+            </Link>
+            {isOwner && live ? (
+              <Link href={`/artists/${artist.slug}/store/manage`} className="ss-btn ss-btn-secondary">
+                Manage inventory
+              </Link>
+            ) : null}
+          </>
         }
       />
 
       {sp.paid ? (
         <Panel className="mb-4">
           <p className="text-[1.05rem] text-[var(--good)]">Payment received — ledger will mark paid via webhook.</p>
+        </Panel>
+      ) : null}
+
+      {sp.cancelled ? (
+        <Panel className="mb-4">
+          <p className="text-[1.05rem] text-[var(--muted)]">
+            Checkout cancelled — nothing was charged.
+          </p>
         </Panel>
       ) : null}
 
@@ -73,6 +89,21 @@ export default async function ArtistStorePage({
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
+        {!products.length ? (
+          <EmptyState
+            title="No products listed"
+            description={
+              isOwner
+                ? "Add inventory from the manage page when Stripe is configured."
+                : "This artist hasn't listed anything for sale yet."
+            }
+            action={
+              isOwner && live
+                ? { href: `/artists/${artist.slug}/store/manage`, label: "Manage inventory" }
+                : { href: `/artists/${artist.slug}`, label: "Back to profile" }
+            }
+          />
+        ) : null}
         {products.map((p) => (
           <Panel key={p.id}>
             <div className="flex items-start justify-between gap-3">
