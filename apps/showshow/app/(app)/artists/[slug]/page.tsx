@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader, Panel, Badge } from "@/components/ui";
 import { formatCents, formatDate, MEDIUM_LABELS } from "@/lib/format";
+import { toggleFollowArtistAction } from "@/lib/actions-more";
 import { getApplicationsForArtist, getArtist } from "@/lib/store";
+import { getSessionUser } from "@/lib/session-data";
+import { isPostgresEnabled } from "@/lib/db/client";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -15,7 +18,13 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   const data = await getArtist(slug);
   if (!data) notFound();
   const { artist, products, tiers, posts, followers } = data;
+  const user = await getSessionUser();
   const appRows = await getApplicationsForArtist(artist.id);
+  let following = false;
+  if (isPostgresEnabled() && user.id !== artist.userId) {
+    const { pgIsFollowingArtist } = await import("@/lib/store/pg-social");
+    following = await pgIsFollowingArtist(user.id, artist.id);
+  }
 
   const upcoming = appRows
     .filter(({ app }) => app.status === "accepted" || app.status === "applied")
@@ -26,9 +35,18 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     <div>
       <PageHeader
         title={artist.displayName}
-        description={`${artist.city}, ${artist.region} · ${artist.tagline}`}
+        description={`${artist.city}, ${artist.region} · ${artist.tagline} · ${followers} follower${followers === 1 ? "" : "s"}`}
         actions={
           <>
+            {isPostgresEnabled() && user.id !== artist.userId ? (
+              <form action={toggleFollowArtistAction}>
+                <input type="hidden" name="artistId" value={artist.id} />
+                <input type="hidden" name="artistSlug" value={artist.slug} />
+                <button type="submit" className="ss-btn ss-btn-secondary min-h-[var(--tap)]">
+                  {following ? "Unfollow" : "Follow"}
+                </button>
+              </form>
+            ) : null}
             <Link href={`/artists/${artist.slug}/store`} className="ss-btn ss-btn-secondary">
               Store
             </Link>

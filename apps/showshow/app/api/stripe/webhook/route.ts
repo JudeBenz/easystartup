@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireStripe } from "@/lib/payments/stripe";
 import {
   handleCheckoutCompleted,
+  handleChargeRefunded,
+  handleSubscriptionDeleted,
   markStripeEventProcessed,
   recordStripeEvent,
   syncConnectAccountReady,
@@ -72,6 +74,22 @@ export async function POST(req: NextRequest) {
           charges_enabled?: boolean;
         };
         await syncConnectAccountReady(account.id, Boolean(account.charges_enabled));
+        break;
+      }
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as { id: string };
+        await handleSubscriptionDeleted(sub.id);
+        break;
+      }
+      case "charge.refunded": {
+        const charge = event.data.object as { payment_intent?: string | null };
+        if (charge.payment_intent) {
+          await handleChargeRefunded(
+            typeof charge.payment_intent === "string"
+              ? charge.payment_intent
+              : String(charge.payment_intent),
+          );
+        }
         break;
       }
       default:

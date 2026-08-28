@@ -40,9 +40,16 @@ export default async function ArtistStorePage({
             : "Wire DATABASE_URL + Stripe keys to enable live Connect checkout. Until then this lists inventory only."
         }
         actions={
-          <Link href={`/artists/${artist.slug}`} className="ss-btn ss-btn-ghost">
-            Back to profile
-          </Link>
+          <>
+            <Link href={`/artists/${artist.slug}`} className="ss-btn ss-btn-ghost">
+              Back to profile
+            </Link>
+            {isOwner && live ? (
+              <Link href={`/artists/${artist.slug}/store/manage`} className="ss-btn ss-btn-secondary">
+                Manage inventory
+              </Link>
+            ) : null}
+          </>
         }
       />
 

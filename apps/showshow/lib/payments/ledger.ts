@@ -466,6 +466,26 @@ export async function syncConnectAccountReady(accountId: string, chargesEnabled:
     .where(eq(artists.stripeConnectAccountId, accountId));
 }
 
+export async function handleSubscriptionDeleted(subscriptionId: string) {
+  const db = requirePostgres();
+  await db
+    .update(patronageSubscriptions)
+    .set({ status: "cancelled", updatedAt: new Date() })
+    .where(eq(patronageSubscriptions.stripeSubscriptionId, subscriptionId));
+}
+
+export async function handleChargeRefunded(paymentIntentId: string) {
+  const db = requirePostgres();
+  await db
+    .update(orders)
+    .set({ status: "refunded", updatedAt: new Date() })
+    .where(eq(orders.stripePaymentIntentId, paymentIntentId));
+  await db
+    .update(ledgerEntries)
+    .set({ status: "refunded", updatedAt: new Date() })
+    .where(eq(ledgerEntries.stripePaymentIntentId, paymentIntentId));
+}
+
 /** Pending ledger rows older than N hours — ops reconciliation hook. */
 export async function listStalePendingLedger(hours = 24) {
   const db = requirePostgres();

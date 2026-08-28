@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader, Panel, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
+import { toggleFavoriteShowAction } from "@/lib/actions-more";
 import { getSessionUser } from "@/lib/session-data";
 import { getWeekendMode } from "@/lib/store";
+import { isPostgresEnabled } from "@/lib/db/client";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -37,6 +39,15 @@ export default async function WeekendModePage({ params }: { params: Promise<{ sl
             {isFavorite ? (
               <Badge tone="signal"> favorited</Badge>
             ) : null}
+            {isPostgresEnabled() ? (
+              <form action={toggleFavoriteShowAction} className="mt-2">
+                <input type="hidden" name="showId" value={show.id} />
+                <input type="hidden" name="showSlug" value={show.slug} />
+                <button type="submit" className="ss-btn ss-btn-secondary text-sm min-h-[var(--tap)]">
+                  {isFavorite ? "Remove favorite" : "Favorite this show"}
+                </button>
+              </form>
+            ) : null}
           </div>
           <div className="relative aspect-[16/10] bg-[linear-gradient(135deg,#dfe8e4,#c9d6e2)]">
             <div className="absolute inset-6 grid grid-cols-6 gap-2">
@@ -67,7 +78,7 @@ export default async function WeekendModePage({ params }: { params: Promise<{ sl
               ))}
               {!artistsYouFollow.length ? (
                 <li className="text-[var(--muted)]">
-                  Switch to Lee (showgoer) who follows Aria & Sam, or follow artists from their profiles.
+                  Follow artists from their profiles to see them here at the fair.
                 </li>
               ) : null}
             </ul>

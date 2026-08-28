@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { PageHeader, Panel, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
+import { createPostAction } from "@/lib/actions-more";
 import { getFeed } from "@/lib/store";
+import { isPostgresEnabled } from "@/lib/db/client";
 
 export const metadata = { title: "Feed" };
 
 export default async function FeedPage() {
   const posts = await getFeed();
+  const canPost = isPostgresEnabled();
 
   return (
     <div>
@@ -14,17 +17,32 @@ export default async function FeedPage() {
         title="Feed"
         description="Artists post work and show updates. Showgoers follow favorites."
       />
+
+      {canPost ? (
+        <Panel className="mb-6">
+          <form action={createPostAction} className="grid gap-3">
+            <textarea
+              name="body"
+              required
+              rows={3}
+              placeholder="Share studio progress, booth prep, or a show update…"
+              className="ss-input"
+            />
+            <button type="submit" className="ss-btn ss-btn-primary w-fit min-h-[var(--tap)]">
+              Post
+            </button>
+          </form>
+        </Panel>
+      ) : null}
+
       <div className="mx-auto max-w-2xl space-y-4">
         {posts.map(({ post, author, artist, show }) => (
           <Panel key={post.id} className="">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={author.avatarUrl ?? "https://api.dicebear.com/9.x/shapes/svg?seed=x"}
-                  alt=""
-                  className="h-10 w-10 rounded-full bg-white"
-                />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--line)] text-sm font-bold">
+                  {(artist?.displayName ?? author.name).slice(0, 1)}
+                </div>
                 <div>
                   <p className="font-semibold">
                     {artist ? (
@@ -35,7 +53,9 @@ export default async function FeedPage() {
                       author.name
                     )}
                   </p>
-                  <p className="text-base text-[var(--muted)]">{formatDate(post.createdAt, "MMM d · h:mm a")}</p>
+                  <p className="text-base text-[var(--muted)]">
+                    {formatDate(post.createdAt, "MMM d · h:mm a")}
+                  </p>
                 </div>
               </div>
               {show ? <Badge tone="field">{show.name}</Badge> : null}
@@ -43,6 +63,11 @@ export default async function FeedPage() {
             <p className="mt-4 text-[15px] leading-relaxed">{post.body}</p>
           </Panel>
         ))}
+        {!posts.length ? (
+          <Panel>
+            <p className="text-[var(--muted)]">No posts yet. Be the first to share an update.</p>
+          </Panel>
+        ) : null}
       </div>
     </div>
   );

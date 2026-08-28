@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getSessionUser, listUsers } from "@/lib/session-data";
 import { switchUserAction, resetDemoAction } from "@/lib/actions";
 import { SiteNav } from "@/components/site-nav";
@@ -66,8 +67,14 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <footer className="mx-auto hidden max-w-6xl px-6 pb-8 text-base text-[var(--muted)] lg:block">
-        Facts from official show sites. Rankings come from artist reports, not
-        guidebooks.
+        Facts from official show sites. Rankings come from artist reports, not guidebooks.{" "}
+        <Link href="/privacy" className="underline">
+          Privacy
+        </Link>
+        {" · "}
+        <Link href="/terms" className="underline">
+          Terms
+        </Link>
       </footer>
     </div>
   );

@@ -18,6 +18,12 @@ import {
 } from "@/lib/store";
 import type { ApplicationStatus } from "@/types/domain";
 import type { Medium } from "@/types/domain";
+import {
+  requireArtistId,
+  requireArtistOwner,
+  requireSessionUser,
+  requireVerifiedDirector,
+} from "@/lib/auth/guards";
 
 export async function switchUserAction(formData: FormData) {
   if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1" && process.env.DATABASE_URL?.trim()) {
@@ -45,7 +51,9 @@ export async function resetDemoAction() {
 }
 
 export async function saveRoiAction(formData: FormData) {
-  const artistId = String(formData.get("artistId"));
+  const { artistId } = await requireArtistId();
+  const formArtistId = String(formData.get("artistId"));
+  if (formArtistId !== artistId) throw new Error("Not authorized");
   const editionId = String(formData.get("editionId"));
   const boothFee = Number(formData.get("boothFee") || 0);
   const travel = Number(formData.get("travel") || 0);
@@ -88,8 +96,9 @@ export async function saveRoiAction(formData: FormData) {
 }
 
 export async function updateApplicationAction(formData: FormData) {
+  const { artistId } = await requireArtistId();
   await upsertApplication({
-    artistId: String(formData.get("artistId")),
+    artistId,
     editionId: String(formData.get("editionId")),
     status: String(formData.get("status")) as ApplicationStatus,
     officialApplyUrl: String(formData.get("officialApplyUrl") || ""),
@@ -101,8 +110,9 @@ export async function updateApplicationAction(formData: FormData) {
 }
 
 export async function claimShowAction(formData: FormData) {
+  const user = await requireSessionUser();
   await claimShow({
-    userId: String(formData.get("userId")),
+    userId: user.id,
     showId: String(formData.get("showId")),
     contactEmail: String(formData.get("contactEmail")),
   });
@@ -111,18 +121,20 @@ export async function claimShowAction(formData: FormData) {
 }
 
 export async function addCommentAction(formData: FormData) {
+  const user = await requireSessionUser();
   await addComment(
     String(formData.get("editionId")),
-    String(formData.get("authorUserId")),
+    user.id,
     String(formData.get("body")),
   );
   revalidatePath(`/shows/${String(formData.get("showSlug"))}`);
 }
 
 export async function createAnnouncementAction(formData: FormData) {
+  const user = await requireVerifiedDirector();
   await createAnnouncement({
     editionId: String(formData.get("editionId")),
-    directorUserId: String(formData.get("directorUserId")),
+    directorUserId: user.id,
     title: String(formData.get("title")),
     body: String(formData.get("body")),
     kind: String(formData.get("kind")) as "opening" | "deadline_extension" | "cancellation" | "general",
@@ -131,6 +143,7 @@ export async function createAnnouncementAction(formData: FormData) {
 }
 
 export async function openWaitlistAction(formData: FormData) {
+  await requireVerifiedDirector();
   await openWaitlistBooth(
     String(formData.get("editionId")),
     String(formData.get("boothLabel") || "") || undefined,
@@ -139,8 +152,9 @@ export async function openWaitlistAction(formData: FormData) {
 }
 
 export async function createJuryFeedbackAction(formData: FormData) {
+  const { artistId } = await requireArtistId();
   await createJuryFeedback({
-    artistId: String(formData.get("artistId")),
+    artistId,
     editionId: String(formData.get("editionId")),
     outcome: String(formData.get("outcome")) as "accepted" | "waitlisted" | "declined",
     notes: String(formData.get("notes") || "") || undefined,
@@ -149,8 +163,9 @@ export async function createJuryFeedbackAction(formData: FormData) {
 }
 
 export async function createBoothOfferAction(formData: FormData) {
+  const { artistId } = await requireArtistId();
   await createBoothOffer({
-    artistId: String(formData.get("artistId")),
+    artistId,
     editionId: String(formData.get("editionId")),
     availableWindows: String(formData.get("availableWindows")),
     notes: String(formData.get("notes") || "") || undefined,
@@ -159,8 +174,9 @@ export async function createBoothOfferAction(formData: FormData) {
 }
 
 export async function createBoothRequestAction(formData: FormData) {
+  const { artistId } = await requireArtistId();
   await createBoothRequest({
-    artistId: String(formData.get("artistId")),
+    artistId,
     editionId: String(formData.get("editionId")),
     neededWindow: String(formData.get("neededWindow")),
   });
@@ -195,6 +211,7 @@ export async function checkoutProductAction(formData: FormData) {
     .limit(1)
     .then((r) => r[0]);
   if (!product || !product.active) throw new Error("Product not found");
+  if (product.inventory < quantity) throw new Error("Insufficient inventory");
   const artist = await db
     .select()
     .from(artists)
@@ -245,6 +262,7 @@ export async function startArtistConnectAction(formData: FormData) {
     throw new Error("Connect onboarding requires DATABASE_URL and Stripe keys.");
   }
   const artistId = String(formData.get("artistId"));
+  await requireArtistOwner(artistId);
   const origin = process.env.AUTH_URL ?? "http://localhost:3000";
   const slug = String(formData.get("artistSlug"));
   const { url } = await createArtistConnectOnboarding(
@@ -317,6 +335,7 @@ export async function checkoutSponsorshipAction(formData: FormData) {
 }
 
 export async function checkoutPromotionAction(formData: FormData) {
+  await requireVerifiedDirector();
   const { redirect } = await import("next/navigation");
   const { eq } = await import("drizzle-orm");
   const { nanoid } = await import("nanoid");

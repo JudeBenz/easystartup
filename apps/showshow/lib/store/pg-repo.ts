@@ -20,6 +20,8 @@ import {
   sponsorshipTiers,
   users,
   waitlistBooths,
+  follows,
+  roiBreakdowns,
 } from "@/lib/db/schema";
 import type {
   Application,
@@ -525,7 +527,7 @@ export async function pgGetArtist(slugOrId: string) {
   const userRow = await db.query.users.findFirst({ where: eq(users.id, artist.userId) });
   if (!userRow) return null;
 
-  const [productRows, tierRows, appRows] = await Promise.all([
+  const [productRows, tierRows, appRows, followerRows] = await Promise.all([
     db
       .select()
       .from(products)
@@ -535,6 +537,7 @@ export async function pgGetArtist(slugOrId: string) {
       .from(sponsorshipTiers)
       .where(and(eq(sponsorshipTiers.artistId, artist.id), eq(sponsorshipTiers.active, true))),
     db.select().from(applications).where(eq(applications.artistId, artist.id)),
+    db.select({ id: follows.id }).from(follows).where(eq(follows.artistId, artist.id)),
   ]);
 
   return {
@@ -545,7 +548,7 @@ export async function pgGetArtist(slugOrId: string) {
     posts: [] as DemoData["posts"],
     applications: appRows.map(mapApplication),
     bookings: [] as DemoData["bookings"],
-    followers: 0,
+    followers: followerRows.length,
   };
 }
 
@@ -556,10 +559,15 @@ export async function pgListArtists() {
     .from(artists)
     .innerJoin(users, eq(artists.userId, users.id));
 
+  const allFollows = await db.select().from(follows);
+  const countByArtist = new Map<string, number>();
+  for (const f of allFollows) {
+    countByArtist.set(f.artistId, (countByArtist.get(f.artistId) ?? 0) + 1);
+  }
   return rows.map((r) => ({
     artist: mapArtist(r.artist),
     user: mapUser(r.user),
-    followers: 0,
+    followers: countByArtist.get(r.artist.id) ?? 0,
   }));
 }
 
@@ -653,6 +661,18 @@ export async function pgGetRoiForArtist(artistId: string) {
     .innerJoin(shows, eq(editions.showId, shows.id))
     .where(eq(roiReports.artistId, artistId));
 
+  const breakdownRows = rows.length
+    ? await db
+        .select()
+        .from(roiBreakdowns)
+        .where(
+          inArray(
+            roiBreakdowns.reportId,
+            rows.map((r) => r.report.id),
+          ),
+        )
+    : [];
+
   return rows
     .map((r) => {
       const report = mapRoi(r.report);
@@ -660,11 +680,20 @@ export async function pgGetRoiForArtist(artistId: string) {
       const show = mapShow(r.show);
       const expenses =
         report.boothFee + report.travel + report.lodging + report.otherExpenses;
+      const breakdowns = breakdownRows
+        .filter((b) => b.reportId === report.id)
+        .map((b) => ({
+          id: b.id,
+          reportId: b.reportId,
+          medium: b.medium as RoiMediumBreakdown["medium"],
+          sales: b.sales,
+          unitsSold: b.unitsSold,
+        }));
       return {
         report,
         edition,
         show,
-        breakdowns: [] as RoiMediumBreakdown[],
+        breakdowns,
         expenses,
         net: report.grossSales - expenses,
       };
@@ -705,6 +734,15 @@ export async function pgCreateRoiReport(input: {
     updatedAt: now,
   };
   await db.insert(roiReports).values(row);
+  for (const b of input.breakdowns ?? []) {
+    await db.insert(roiBreakdowns).values({
+      id: nanoid(8),
+      reportId: id,
+      medium: b.medium,
+      sales: b.sales,
+      unitsSold: b.unitsSold,
+    });
+  }
 
   const edition = await db.query.editions.findFirst({
     where: eq(editions.id, input.editionId),

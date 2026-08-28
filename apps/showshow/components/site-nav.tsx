@@ -27,6 +27,7 @@ const MORE: NavItem[] = [
   { href: "/alerts", label: "Alerts" },
   { href: "/artists", label: "Artists" },
   { href: "/director", label: "Director desk", roles: ["director", "admin"] },
+  { href: "/orders", label: "Orders" },
   { href: "/settings", label: "Settings" },
 ];
 

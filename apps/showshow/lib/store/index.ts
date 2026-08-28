@@ -309,6 +309,10 @@ export async function getShowRoiSignal(showId: string) {
 }
 
 export async function listRoutes() {
+  if (isPostgresEnabled()) {
+    const { pgListRoutes } = await import('./pg-social');
+    return pgListRoutes();
+  }
   const db = await getDb();
   return db.routes.map((route) => {
     const stops = db.routeStops
@@ -324,6 +328,10 @@ export async function listRoutes() {
 }
 
 export async function getFeed() {
+  if (isPostgresEnabled()) {
+    const { pgGetFeed } = await import('./pg-social');
+    return pgGetFeed();
+  }
   const db = await getDb();
   return db.posts
     .slice()
@@ -357,6 +365,10 @@ export async function addComment(editionId: string, authorUserId: string, body: 
 }
 
 export async function getPersonalCalendar(artistId: string) {
+  if (isPostgresEnabled()) {
+    const { pgGetPersonalCalendar } = await import('./pg-social');
+    return pgGetPersonalCalendar(artistId);
+  }
   const db = await getDb();
   return db.bookings
     .filter((b) => b.artistId === artistId)
@@ -369,6 +381,10 @@ export async function getPersonalCalendar(artistId: string) {
 }
 
 export async function getWeekendMode(showSlug: string, showgoerUserId: string) {
+  if (isPostgresEnabled()) {
+    const { pgGetWeekendMode } = await import('./pg-social');
+    return pgGetWeekendMode(showSlug, showgoerUserId);
+  }
   const detail = await getShowBySlug(showSlug);
   if (!detail?.current) return null;
   const db = await getDb();
