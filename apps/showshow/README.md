@@ -24,7 +24,7 @@ pnpm --filter showshow dev
 - **Routes & personal calendar** — curated circuits + season layout
 - **Social** — artist profiles, feed, show comments, director announcements
 - **Weekend mode** — booth map, followed artists at the show
-- **Commerce scaffolding** — artist store + Sponsor an Artist (Stripe Connect placeholders)
+- **Commerce** — artist store, Sponsor an Artist, director promotions via Stripe Connect + ledger
 - **Director desk** — verified announcements, waitlist marketplace, promoted listings
 
 ## Copyright-safe data rules (built in)
@@ -49,7 +49,7 @@ Use the header Switch control:
 
 Next.js 15 · React 19 · Tailwind 4 · Zod · **Postgres + Drizzle** (when `DATABASE_URL` is set) · Auth.js · Stripe Connect · durable demo JSON fallback
 
-Production architecture (money, auth, hosting): [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+Production architecture: [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) · Deploy: [`docs/DEPLOY.md`](./docs/DEPLOY.md)
 
 ```bash
 # optional local Postgres

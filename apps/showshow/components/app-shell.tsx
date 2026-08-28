@@ -2,12 +2,19 @@ import { getSessionUser, listUsers } from "@/lib/session-data";
 import { switchUserAction, resetDemoAction } from "@/lib/actions";
 import { SiteNav } from "@/components/site-nav";
 
+function demoPersonasEnabled() {
+  return (
+    process.env.SHOWSHOW_DEMO_PERSONAS === "1" || !process.env.DATABASE_URL?.trim()
+  );
+}
+
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
   const users = await listUsers();
   const role = user.roles[0] ?? "guest";
+  const demo = demoPersonasEnabled();
 
-  const personaForm = (
+  const personaForm = demo ? (
     <form action={switchUserAction} className="grid gap-3">
       <label className="ss-label" htmlFor="persona">
         Choose a demo person
@@ -28,14 +35,20 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         Switch person
       </button>
     </form>
+  ) : (
+    <p className="text-[1.05rem] text-[var(--muted)]">
+      Demo personas are off. Sign in from Settings.
+    </p>
   );
 
-  const resetForm = (
+  const resetForm = demo ? (
     <form action={resetDemoAction}>
       <button type="submit" className="ss-btn ss-btn-secondary w-full sm:w-auto">
         Reset demo data
       </button>
     </form>
+  ) : (
+    <span />
   );
 
   return (

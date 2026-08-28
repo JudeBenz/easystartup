@@ -56,7 +56,14 @@ export async function POST(req: NextRequest) {
           payment_intent?: string | null;
           metadata?: Record<string, string> | null;
         };
-        await handleCheckoutCompleted(session);
+        await handleCheckoutCompleted(
+          session as {
+            id: string;
+            payment_intent?: string | null;
+            subscription?: string | null;
+            metadata?: Record<string, string> | null;
+          },
+        );
         break;
       }
       case "account.updated": {

@@ -20,6 +20,9 @@ import type { ApplicationStatus } from "@/types/domain";
 import type { Medium } from "@/types/domain";
 
 export async function switchUserAction(formData: FormData) {
+  if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1" && process.env.DATABASE_URL?.trim()) {
+    throw new Error("Demo personas disabled");
+  }
   const userId = String(formData.get("userId") || "user_aria");
   const jar = await cookies();
   jar.set(SESSION_COOKIE, userId, { path: "/" });
@@ -34,6 +37,9 @@ export async function setThemeAction(formData: FormData) {
 }
 
 export async function resetDemoAction() {
+  if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1" && process.env.DATABASE_URL?.trim()) {
+    throw new Error("Demo reset disabled");
+  }
   await resetDb();
   revalidatePath("/", "layout");
 }
@@ -247,4 +253,161 @@ export async function startArtistConnectAction(formData: FormData) {
     `${origin}/artists/${slug}/store?connect=refresh`,
   );
   redirect(url);
+}
+
+export async function checkoutSponsorshipAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { eq } = await import("drizzle-orm");
+  const { nanoid } = await import("nanoid");
+  const { isPostgresEnabled, requirePostgres } = await import("@/lib/db/client");
+  const { isStripeConfigured } = await import("@/lib/payments/stripe");
+  const { createSponsorshipCheckout } = await import("@/lib/payments/ledger");
+  const { getSessionUser } = await import("@/lib/session-data");
+  const { artists, patronageSubscriptions, sponsorshipTiers } = await import(
+    "@/lib/db/schema"
+  );
+
+  if (!isPostgresEnabled() || !isStripeConfigured()) {
+    throw new Error("Sponsorship requires DATABASE_URL and Stripe keys.");
+  }
+
+  const tierId = String(formData.get("tierId"));
+  const user = await getSessionUser();
+  const db = requirePostgres();
+  const tier = await db
+    .select()
+    .from(sponsorshipTiers)
+    .where(eq(sponsorshipTiers.id, tierId))
+    .limit(1)
+    .then((r) => r[0]);
+  if (!tier?.active) throw new Error("Tier not found");
+  const artist = await db
+    .select()
+    .from(artists)
+    .where(eq(artists.id, tier.artistId))
+    .limit(1)
+    .then((r) => r[0]);
+  if (!artist?.stripeConnectAccountId || !artist.stripeConnectReady) {
+    throw new Error("Artist Connect account is not ready");
+  }
+
+  const subscriptionId = `sub_${nanoid(10)}`;
+  await db.insert(patronageSubscriptions).values({
+    id: subscriptionId,
+    tierId: tier.id,
+    patronUserId: user.id,
+    artistId: artist.id,
+    status: "pending",
+  });
+
+  const origin = process.env.AUTH_URL ?? "http://localhost:3000";
+  const session = await createSponsorshipCheckout({
+    subscriptionId,
+    tierName: tier.name,
+    monthlyPriceCents: tier.monthlyPriceCents,
+    patronEmail: user.email,
+    patronUserId: user.id,
+    artistId: artist.id,
+    artistConnectAccountId: artist.stripeConnectAccountId,
+    successUrl: `${origin}/artists/${artist.slug}/sponsor?subscribed=1`,
+    cancelUrl: `${origin}/artists/${artist.slug}/sponsor?cancelled=1`,
+  });
+  if (!session.url) throw new Error("Stripe did not return a checkout URL");
+  redirect(session.url);
+}
+
+export async function checkoutPromotionAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { eq } = await import("drizzle-orm");
+  const { nanoid } = await import("nanoid");
+  const { isPostgresEnabled, requirePostgres } = await import("@/lib/db/client");
+  const { isStripeConfigured } = await import("@/lib/payments/stripe");
+  const { createPromotionCheckout } = await import("@/lib/payments/ledger");
+  const { getSessionUser } = await import("@/lib/session-data");
+  const { promotions, shows } = await import("@/lib/db/schema");
+
+  if (!isPostgresEnabled() || !isStripeConfigured()) {
+    throw new Error("Promotions require DATABASE_URL and Stripe keys.");
+  }
+
+  const showId = String(formData.get("showId"));
+  const budgetCents = Math.max(2500, Number(formData.get("budgetCents") || 5000));
+  const days = Math.min(30, Math.max(7, Number(formData.get("days") || 14)));
+  const user = await getSessionUser();
+  const db = requirePostgres();
+  const show = await db
+    .select()
+    .from(shows)
+    .where(eq(shows.id, showId))
+    .limit(1)
+    .then((r) => r[0]);
+  if (!show) throw new Error("Show not found");
+
+  const startsAt = new Date();
+  const endsAt = new Date(Date.now() + days * 86400000);
+  const promotionId = `promo_${nanoid(10)}`;
+  await db.insert(promotions).values({
+    id: promotionId,
+    showId,
+    directorUserId: user.id,
+    startsAt,
+    endsAt,
+    budgetCents,
+    status: "pending",
+  });
+
+  const origin = process.env.AUTH_URL ?? "http://localhost:3000";
+  const session = await createPromotionCheckout({
+    promotionId,
+    showName: show.name,
+    budgetCents,
+    payerEmail: user.email,
+    payerUserId: user.id,
+    successUrl: `${origin}/director?promoted=1`,
+    cancelUrl: `${origin}/director?cancelled=1`,
+  });
+  if (!session.url) throw new Error("Stripe did not return a checkout URL");
+  redirect(session.url);
+}
+
+export async function registerAccountAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { isPostgresEnabled } = await import("@/lib/db/client");
+  const { signIn } = await import("@/lib/auth");
+  const { pgRegisterUser } = await import("@/lib/store/pg-repo");
+
+  if (!isPostgresEnabled()) {
+    throw new Error("Signup requires DATABASE_URL (Postgres).");
+  }
+
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
+  const password = String(formData.get("password") || "");
+  const roleRaw = String(formData.get("role") || "artist");
+  const roles =
+    roleRaw === "director"
+      ? (["director", "showgoer"] as const)
+      : roleRaw === "showgoer"
+        ? (["showgoer"] as const)
+        : (["artist", "showgoer"] as const);
+
+  if (!name || !email || password.length < 8) {
+    throw new Error("Name, email, and password (8+ chars) are required.");
+  }
+
+  await pgRegisterUser({
+    name,
+    email,
+    password,
+    roles: [...roles],
+  });
+
+  await signIn("credentials", {
+    email,
+    password,
+    redirectTo: "/settings",
+  });
+  redirect("/settings");
 }
