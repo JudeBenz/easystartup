@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader, Panel, Badge } from "@/components/ui";
+import { EmptyState } from "@/components/empty-state";
 import { formatCents, MEDIUM_LABELS } from "@/lib/format";
 import { getArtist } from "@/lib/store";
 import { checkoutProductAction, startArtistConnectAction } from "@/lib/actions";
@@ -59,6 +60,14 @@ export default async function ArtistStorePage({
         </Panel>
       ) : null}
 
+      {sp.cancelled ? (
+        <Panel className="mb-4">
+          <p className="text-[1.05rem] text-[var(--muted)]">
+            Checkout cancelled — nothing was charged.
+          </p>
+        </Panel>
+      ) : null}
+
       {isOwner && live ? (
         <Panel className="mb-4">
           <form action={startArtistConnectAction} className="flex flex-wrap items-center gap-3">
@@ -80,6 +89,21 @@ export default async function ArtistStorePage({
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
+        {!products.length ? (
+          <EmptyState
+            title="No products listed"
+            description={
+              isOwner
+                ? "Add inventory from the manage page when Stripe is configured."
+                : "This artist hasn't listed anything for sale yet."
+            }
+            action={
+              isOwner && live
+                ? { href: `/artists/${artist.slug}/store/manage`, label: "Manage inventory" }
+                : { href: `/artists/${artist.slug}`, label: "Back to profile" }
+            }
+          />
+        ) : null}
         {products.map((p) => (
           <Panel key={p.id}>
             <div className="flex items-start justify-between gap-3">

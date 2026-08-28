@@ -24,6 +24,7 @@ import {
   requireSessionUser,
   requireVerifiedDirector,
 } from "@/lib/auth/guards";
+import { flashUrl } from "@/lib/flash";
 
 export async function switchUserAction(formData: FormData) {
   if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1" && process.env.DATABASE_URL?.trim()) {
@@ -389,6 +390,31 @@ export async function checkoutPromotionAction(formData: FormData) {
   redirect(session.url);
 }
 
+export async function signInAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { AuthError } = await import("next-auth");
+  const { signIn } = await import("@/lib/auth");
+
+  const email = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
+  const password = String(formData.get("password") || "");
+  const next = String(formData.get("next") || "/settings");
+
+  if (!email || !password) {
+    redirect(flashUrl("/settings", { error: "Email and password are required.", next }));
+  }
+
+  try {
+    await signIn("credentials", { email, password, redirectTo: next });
+  } catch (err) {
+    if (err instanceof AuthError) {
+      redirect(flashUrl("/settings", { error: "Invalid email or password.", next }));
+    }
+    throw err;
+  }
+}
+
 export async function registerAccountAction(formData: FormData) {
   const { redirect } = await import("next/navigation");
   const { isPostgresEnabled } = await import("@/lib/db/client");
@@ -396,7 +422,7 @@ export async function registerAccountAction(formData: FormData) {
   const { pgRegisterUser } = await import("@/lib/store/pg-repo");
 
   if (!isPostgresEnabled()) {
-    throw new Error("Signup requires DATABASE_URL (Postgres).");
+    redirect(flashUrl("/settings", { error: "Signup requires DATABASE_URL (Postgres)." }));
   }
 
   const name = String(formData.get("name") || "").trim();
@@ -413,22 +439,30 @@ export async function registerAccountAction(formData: FormData) {
         : (["artist", "showgoer"] as const);
 
   if (!name || !email || password.length < 8) {
-    throw new Error("Name, email, and password (8+ chars) are required.");
+    redirect(
+      flashUrl("/settings", {
+        error: "Name, email, and password (8+ characters) are required.",
+      }),
+    );
   }
 
-  await pgRegisterUser({
-    name,
-    email,
-    password,
-    roles: [...roles],
-  });
+  try {
+    await pgRegisterUser({
+      name,
+      email,
+      password,
+      roles: [...roles],
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Could not create account.";
+    redirect(flashUrl("/settings", { error: msg }));
+  }
 
-  await signIn("credentials", {
-    email,
-    password,
-    redirectTo: "/settings",
-  });
-  redirect("/settings");
+  try {
+    await signIn("credentials", { email, password, redirectTo: "/settings" });
+  } catch {
+    redirect(flashUrl("/settings", { success: "Account created. Sign in with your email." }));
+  }
 }
 
 export async function requestPasswordResetAction(formData: FormData) {
@@ -467,7 +501,14 @@ export async function resetPasswordAction(formData: FormData) {
   const password = String(formData.get("password") || "");
   const confirm = String(formData.get("confirm") || "");
 
-  if (password !== confirm) throw new Error("Passwords do not match.");
-  await resetPasswordWithToken({ email, token, password });
+  if (password !== confirm) {
+    redirect(flashUrl("/reset-password", { error: "Passwords do not match.", email, token }));
+  }
+  try {
+    await resetPasswordWithToken({ email, token, password });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Could not reset password.";
+    redirect(flashUrl("/reset-password", { error: msg, email, token }));
+  }
   redirect("/settings?reset=1");
 }

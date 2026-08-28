@@ -1,12 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect, unstable_rethrow } from "next/navigation";
 import {
   requireAdmin,
   requireArtistId,
   requireArtistOwner,
   requireSessionUser,
 } from "@/lib/auth/guards";
+import { flashUrl } from "@/lib/flash";
 
 export async function toggleFollowArtistAction(formData: FormData) {
   const user = await requireSessionUser();
@@ -31,19 +33,30 @@ export async function toggleFavoriteShowAction(formData: FormData) {
 }
 
 export async function createPostAction(formData: FormData) {
-  const user = await requireSessionUser();
-  const body = String(formData.get("body") || "").trim();
-  if (!body) throw new Error("Post body required");
-  const { isPostgresEnabled } = await import("@/lib/db/client");
-  if (!isPostgresEnabled()) throw new Error("Posts require Postgres");
-  const { pgCreatePost } = await import("@/lib/store/pg-social");
-  let artistId: string | undefined;
-  if (user.roles.includes("artist")) {
-    const { getArtistIdForUser } = await import("@/lib/store");
-    artistId = (await getArtistIdForUser(user.id)) ?? undefined;
+  try {
+    const user = await requireSessionUser();
+    const body = String(formData.get("body") || "").trim();
+    if (!body) {
+      redirect(flashUrl("/feed", { error: "Write something before posting." }));
+    }
+    const { isPostgresEnabled } = await import("@/lib/db/client");
+    if (!isPostgresEnabled()) {
+      redirect(flashUrl("/feed", { error: "Posts require Postgres." }));
+    }
+    const { pgCreatePost } = await import("@/lib/store/pg-social");
+    let artistId: string | undefined;
+    if (user.roles.includes("artist")) {
+      const { getArtistIdForUser } = await import("@/lib/store");
+      artistId = (await getArtistIdForUser(user.id)) ?? undefined;
+    }
+    await pgCreatePost({ authorUserId: user.id, body, artistId });
+    revalidatePath("/feed");
+    redirect("/feed?posted=1");
+  } catch (err) {
+    unstable_rethrow(err);
+    const msg = err instanceof Error ? err.message : "Could not post.";
+    redirect(flashUrl("/feed", { error: msg }));
   }
-  await pgCreatePost({ authorUserId: user.id, body, artistId });
-  revalidatePath("/feed");
 }
 
 export async function saveProductAction(formData: FormData) {

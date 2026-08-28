@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader, Panel } from "@/components/ui";
+import { FormBanner } from "@/components/form-banner";
+import { SubmitButton } from "@/components/submit-button";
 import { resetPasswordAction } from "@/lib/actions";
 import { isPostgresEnabled } from "@/lib/db/client";
 
@@ -22,6 +24,8 @@ export default async function ResetPasswordPage({
         title="Reset password"
         description="Choose a new password for your ShowShow account."
       />
+
+      <FormBanner searchParams={params} />
 
       {!pg ? (
         <Panel>
@@ -60,9 +64,7 @@ export default async function ResetPasswordPage({
               placeholder="Confirm new password"
               className="ss-input"
             />
-            <button type="submit" className="ss-btn ss-btn-primary min-h-[var(--tap)]">
-              Update password
-            </button>
+            <SubmitButton>Update password</SubmitButton>
           </form>
         </Panel>
       )}

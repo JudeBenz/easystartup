@@ -51,6 +51,14 @@ export default async function SponsorPage({
         </Panel>
       ) : null}
 
+      {sp.cancelled ? (
+        <Panel className="mb-4">
+          <p className="text-[1.05rem] text-[var(--muted)]">
+            Checkout cancelled — nothing was charged.
+          </p>
+        </Panel>
+      ) : null}
+
       <div className="grid gap-4 md:grid-cols-2">
         {tiers.map((t) => (
           <Panel key={t.id}>

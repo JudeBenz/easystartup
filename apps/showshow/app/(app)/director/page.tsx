@@ -94,6 +94,14 @@ export default async function DirectorPage({
         </Panel>
       ) : null}
 
+      {sp.cancelled ? (
+        <Panel className="mb-4">
+          <p className="text-[1.05rem] text-[var(--muted)]">
+            Checkout cancelled — nothing was charged.
+          </p>
+        </Panel>
+      ) : null}
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
           <h2 className="font-display text-lg font-bold">Your shows</h2>

@@ -2,18 +2,13 @@ import Link from "next/link";
 import { getSessionUser, listUsers } from "@/lib/session-data";
 import { switchUserAction, resetDemoAction } from "@/lib/actions";
 import { SiteNav } from "@/components/site-nav";
-
-function demoPersonasEnabled() {
-  return (
-    process.env.SHOWSHOW_DEMO_PERSONAS === "1" || !process.env.DATABASE_URL?.trim()
-  );
-}
+import { isDemoPersonasEnabled } from "@/lib/demo-mode";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
   const users = await listUsers();
   const role = user.roles[0] ?? "guest";
-  const demo = demoPersonasEnabled();
+  const demo = isDemoPersonasEnabled();
 
   const personaForm = demo ? (
     <form action={switchUserAction} className="grid gap-3">

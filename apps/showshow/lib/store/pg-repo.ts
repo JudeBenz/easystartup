@@ -1364,6 +1364,10 @@ export async function pgRegisterUser(input: {
   const db = requirePostgres();
   const now = new Date();
   const email = input.email.trim().toLowerCase();
+  const existing = await db.query.users.findFirst({ where: eq(users.email, email) });
+  if (existing) {
+    throw new Error("An account with this email already exists. Sign in or reset your password.");
+  }
   const passwordHash = await hash(input.password, 10);
   const roles = input.roles.length ? input.roles : (["showgoer"] as UserRole[]);
   const userId = `user_${nanoid(10)}`;

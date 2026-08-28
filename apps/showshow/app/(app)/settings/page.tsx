@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { PageHeader, Panel, Badge } from "@/components/ui";
-import { registerAccountAction, setThemeAction } from "@/lib/actions";
+import { FormBanner } from "@/components/form-banner";
+import { SubmitButton } from "@/components/submit-button";
+import { registerAccountAction, setThemeAction, signInAction } from "@/lib/actions";
 import {
   DEFAULT_THEME,
   THEME_COOKIE,
@@ -11,12 +13,18 @@ import {
 import { isPostgresEnabled } from "@/lib/db/client";
 import { isStripeConfigured } from "@/lib/payments/stripe";
 import { isEmailConfigured } from "@/lib/email/resend";
-import { auth, signIn, signOut } from "@/lib/auth";
+import { auth, signOut } from "@/lib/auth";
 import { getSessionUser } from "@/lib/session-data";
+import { isDemoPersonasEnabled } from "@/lib/demo-mode";
 
 export const metadata = { title: "Settings" };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
   const jar = await cookies();
   const current = resolveThemeId(jar.get(THEME_COOKIE)?.value ?? DEFAULT_THEME);
   const active = getThemePreset(current);
@@ -25,6 +33,8 @@ export default async function SettingsPage() {
   const pg = isPostgresEnabled();
   const stripeOk = isStripeConfigured();
   const emailOk = isEmailConfigured();
+  const demo = isDemoPersonasEnabled();
+  const next = typeof sp.next === "string" ? sp.next : undefined;
 
   return (
     <div>
@@ -33,26 +43,32 @@ export default async function SettingsPage() {
         description="Account, theme, and system readiness for production hosting."
       />
 
+      <FormBanner searchParams={sp} />
+
+      {next && !session?.user ? (
+        <Panel className="mb-6 border-l-4 border-[var(--accent)]">
+          <p className="text-[1.05rem]">
+            Sign in to continue to{" "}
+            <code className="text-sm">{next}</code>
+          </p>
+        </Panel>
+      ) : null}
+
       <Panel className="mb-6">
         <h2 className="font-display text-[1.4rem]">Account</h2>
         <p className="mt-2 text-[1.05rem] text-[var(--muted)]">
           Signed in as <strong>{user.name}</strong> ({user.email}) · roles{" "}
           {user.roles.join(", ")}
-          {session?.user ? " · Auth.js session" : " · demo persona cookie"}
+          {session?.user
+            ? " · secure session"
+            : demo
+              ? " · demo persona"
+              : " · sign in for a secure session"}
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <form
-            action={async (fd) => {
-              "use server";
-              await signIn("credentials", {
-                email: String(fd.get("email")),
-                password: String(fd.get("password")),
-                redirectTo: "/settings",
-              });
-            }}
-            className="grid gap-3"
-          >
+          <form action={signInAction} className="grid gap-3">
             <p className="text-base font-bold">Email sign-in</p>
+            {next ? <input type="hidden" name="next" value={next} /> : null}
             <input
               name="email"
               type="email"
@@ -68,19 +84,18 @@ export default async function SettingsPage() {
               placeholder="Password"
               className="ss-input"
             />
-            <button type="submit" className="ss-btn ss-btn-primary min-h-[var(--tap)]">
-              Sign in
-            </button>
+            <SubmitButton>Sign in</SubmitButton>
             <p className="text-sm text-[var(--muted)]">
-              Seeded demo password when DB is seeded: <code>showshow</code>
-              {pg ? (
+              {demo ? (
                 <>
-                  {" "}
-                  ·{" "}
-                  <a href="/forgot-password" className="font-medium hover:text-[var(--field)]">
-                    Forgot password?
-                  </a>
+                  Seeded demo password when DB is seeded: <code>showshow</code>
+                  {" · "}
                 </>
+              ) : null}
+              {pg ? (
+                <a href="/forgot-password" className="font-medium hover:text-[var(--field)]">
+                  Forgot password?
+                </a>
               ) : null}
             </p>
           </form>
@@ -92,7 +107,7 @@ export default async function SettingsPage() {
             className="flex flex-col justify-end"
           >
             <button type="submit" className="ss-btn ss-btn-secondary min-h-[var(--tap)]">
-              Sign out Auth.js session
+              Sign out
             </button>
           </form>
         </div>
@@ -129,9 +144,7 @@ export default async function SettingsPage() {
                 <option value="director">Director</option>
               </select>
             </label>
-            <button type="submit" className="ss-btn ss-btn-primary min-h-[var(--tap)]">
-              Create account
-            </button>
+            <SubmitButton>Create account</SubmitButton>
           </form>
         </Panel>
       ) : null}
@@ -219,9 +232,7 @@ export default async function SettingsPage() {
           );
         })}
         <div className="sm:col-span-2">
-          <button type="submit" className="ss-btn ss-btn-primary">
-            Save color scheme
-          </button>
+          <SubmitButton>Save color scheme</SubmitButton>
         </div>
       </form>
     </div>

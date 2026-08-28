@@ -69,8 +69,14 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
               ))}
             </div>
             <p className="mt-3 text-base text-[var(--muted)]">
-              {followers} followers · booth default {artist.boothDefaultSize ?? "—"} · Stripe Connect{" "}
-              {artist.stripeConnectReady ? "ready" : "pending"}
+              {followers} follower{followers === 1 ? "" : "s"}
+              {user.id === artist.userId ? (
+                <>
+                  {" "}
+                  · booth default {artist.boothDefaultSize ?? "—"} · Stripe Connect{" "}
+                  {artist.stripeConnectReady ? "ready" : "pending"}
+                </>
+              ) : null}
             </p>
           </Panel>
 

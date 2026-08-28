@@ -1,15 +1,24 @@
 import Link from "next/link";
 import { PageHeader, Panel, Badge } from "@/components/ui";
+import { FormBanner } from "@/components/form-banner";
+import { SubmitButton } from "@/components/submit-button";
 import { formatDate } from "@/lib/format";
 import { createPostAction } from "@/lib/actions-more";
 import { getFeed } from "@/lib/store";
 import { isPostgresEnabled } from "@/lib/db/client";
+import { auth } from "@/lib/auth";
 
 export const metadata = { title: "Feed" };
 
-export default async function FeedPage() {
+export default async function FeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
   const posts = await getFeed();
-  const canPost = isPostgresEnabled();
+  const pg = isPostgresEnabled();
+  const session = await auth();
 
   return (
     <div>
@@ -18,7 +27,25 @@ export default async function FeedPage() {
         description="Artists post work and show updates. Showgoers follow favorites."
       />
 
-      {canPost ? (
+      <FormBanner searchParams={sp} />
+
+      {!pg ? (
+        <Panel className="mb-6">
+          <p className="text-[1.05rem] text-[var(--muted)]">
+            Posting requires Postgres. Set <code>DATABASE_URL</code> and seed the database to enable
+            the feed composer.
+          </p>
+        </Panel>
+      ) : !session?.user ? (
+        <Panel className="mb-6">
+          <p className="text-[1.05rem] text-[var(--muted)]">
+            <Link href="/settings" className="font-medium underline">
+              Sign in
+            </Link>{" "}
+            to post updates. Browsing the feed works without an account.
+          </p>
+        </Panel>
+      ) : (
         <Panel className="mb-6">
           <form action={createPostAction} className="grid gap-3">
             <textarea
@@ -28,12 +55,10 @@ export default async function FeedPage() {
               placeholder="Share studio progress, booth prep, or a show update…"
               className="ss-input"
             />
-            <button type="submit" className="ss-btn ss-btn-primary w-fit min-h-[var(--tap)]">
-              Post
-            </button>
+            <SubmitButton pendingLabel="Posting…">Post</SubmitButton>
           </form>
         </Panel>
-      ) : null}
+      )}
 
       <div className="mx-auto max-w-2xl space-y-4">
         {posts.map(({ post, author, artist, show }) => (
