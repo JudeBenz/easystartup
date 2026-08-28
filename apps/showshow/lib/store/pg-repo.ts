@@ -22,6 +22,12 @@ import {
   waitlistBooths,
   follows,
   roiBreakdowns,
+  showSocialLinks,
+  showExternalRefs,
+  factProvenance,
+  showAlerts,
+  posts,
+  artistBookings,
 } from "@/lib/db/schema";
 import type {
   Application,
@@ -40,8 +46,12 @@ import type {
   RoiReport,
   Show,
   ShowAggregateMetric,
+  ShowAlert,
   ShowComment,
   ShowEdition,
+  ShowExternalReference,
+  FactProvenance,
+  ShowSocialLink,
   SponsorshipTier,
   User,
   UserRole,
@@ -469,32 +479,114 @@ export async function pgGetShowBySlug(slug: string) {
   let requests: BoothSitRequest[] = [];
 
   if (current) {
-    const [commentRows, announcementRows, waitlistRows, offerRows, requestRows] =
+    const editionIds = eds.map((e) => e.id);
+    const [commentRows, announcementRows, waitlistRows, offerRows, requestRows, socialLinkRows, alertRows, provenanceRows] =
       await Promise.all([
         db.select().from(showComments).where(eq(showComments.editionId, current.id)),
         db.select().from(announcements).where(eq(announcements.editionId, current.id)),
         db.select().from(waitlistBooths).where(eq(waitlistBooths.editionId, current.id)),
         db.select().from(boothOffers).where(eq(boothOffers.editionId, current.id)),
         db.select().from(boothRequests).where(eq(boothRequests.editionId, current.id)),
+        editionIds.length
+          ? db.select().from(showSocialLinks).where(inArray(showSocialLinks.editionId, editionIds))
+          : Promise.resolve([]),
+        editionIds.length
+          ? db.select().from(showAlerts).where(inArray(showAlerts.editionId, editionIds))
+          : Promise.resolve([]),
+        editionIds.length
+          ? db
+              .select()
+              .from(factProvenance)
+              .where(
+                and(
+                  eq(factProvenance.entityType, "edition"),
+                  inArray(factProvenance.entityId, editionIds),
+                ),
+              )
+          : Promise.resolve([]),
       ]);
     comments = commentRows.map(mapComment);
     announcementsList = announcementRows.map(mapAnnouncement);
     waitlist = waitlistRows.map(mapWaitlist);
     offers = offerRows.map(mapBoothOffer);
     requests = requestRows.map(mapBoothRequest);
+
+    const socialLinks: ShowSocialLink[] = socialLinkRows.map((l) => ({
+      id: l.id,
+      editionId: l.editionId,
+      platform: l.platform as ShowSocialLink["platform"],
+      url: l.url,
+    }));
+    const externalRefRows = await db
+      .select()
+      .from(showExternalRefs)
+      .where(eq(showExternalRefs.showId, show.id));
+    const externalRefs: ShowExternalReference[] = externalRefRows.map((r) => ({
+      id: r.id,
+      showId: r.showId,
+      label: r.label,
+      url: r.url,
+      kind: r.kind as ShowExternalReference["kind"],
+    }));
+    const provenance: FactProvenance[] = provenanceRows.map((p) => ({
+      id: p.id,
+      entityType: p.entityType as FactProvenance["entityType"],
+      entityId: p.entityId,
+      field: p.field,
+      sourceUrl: p.sourceUrl,
+      sourceKind: p.sourceKind as FactProvenance["sourceKind"],
+      capturedAt: p.capturedAt.toISOString(),
+      adapterId: p.adapterId,
+    }));
+    const alerts: ShowAlert[] = alertRows.map((a) => ({
+      id: a.id,
+      editionId: a.editionId,
+      kind: a.kind as ShowAlert["kind"],
+      title: a.title,
+      body: a.body,
+      createdAt: a.createdAt.toISOString(),
+    }));
+
+    return {
+      show,
+      editions: eds,
+      current,
+      socialLinks,
+      externalRefs,
+      provenance,
+      aggregates,
+      comments,
+      announcements: announcementsList,
+      alerts,
+      weather: [] as DemoData["weather"],
+      waitlist,
+      boothOffers: offers,
+      boothRequests: requests,
+    };
   }
+
+  const externalRefRows = await db
+    .select()
+    .from(showExternalRefs)
+    .where(eq(showExternalRefs.showId, show.id));
 
   return {
     show,
     editions: eds,
     current,
-    socialLinks: [] as DemoData["socialLinks"],
-    externalRefs: [] as DemoData["externalRefs"],
-    provenance: [] as DemoData["provenance"],
+    socialLinks: [] as ShowSocialLink[],
+    externalRefs: externalRefRows.map((r) => ({
+      id: r.id,
+      showId: r.showId,
+      label: r.label,
+      url: r.url,
+      kind: r.kind as ShowExternalReference["kind"],
+    })),
+    provenance: [] as FactProvenance[],
     aggregates,
     comments,
     announcements: announcementsList,
-    alerts: [] as DemoData["alerts"],
+    alerts: [] as ShowAlert[],
     weather: [] as DemoData["weather"],
     waitlist,
     boothOffers: offers,
@@ -527,7 +619,7 @@ export async function pgGetArtist(slugOrId: string) {
   const userRow = await db.query.users.findFirst({ where: eq(users.id, artist.userId) });
   if (!userRow) return null;
 
-  const [productRows, tierRows, appRows, followerRows] = await Promise.all([
+  const [productRows, tierRows, appRows, followerRows, postRows, bookingRows] = await Promise.all([
     db
       .select()
       .from(products)
@@ -538,6 +630,12 @@ export async function pgGetArtist(slugOrId: string) {
       .where(and(eq(sponsorshipTiers.artistId, artist.id), eq(sponsorshipTiers.active, true))),
     db.select().from(applications).where(eq(applications.artistId, artist.id)),
     db.select({ id: follows.id }).from(follows).where(eq(follows.artistId, artist.id)),
+    db
+      .select()
+      .from(posts)
+      .where(eq(posts.artistId, artist.id))
+      .orderBy(desc(posts.createdAt)),
+    db.select().from(artistBookings).where(eq(artistBookings.artistId, artist.id)),
   ]);
 
   return {
@@ -545,9 +643,23 @@ export async function pgGetArtist(slugOrId: string) {
     user: mapUser(userRow),
     products: productRows.map(mapProduct),
     tiers: tierRows.map(mapTier),
-    posts: [] as DemoData["posts"],
+    posts: postRows.map((p) => ({
+      id: p.id,
+      authorUserId: p.authorUserId,
+      artistId: p.artistId ?? undefined,
+      body: p.body,
+      imageUrl: p.imageUrl ?? undefined,
+      editionId: p.editionId ?? undefined,
+      createdAt: p.createdAt.toISOString(),
+    })),
     applications: appRows.map(mapApplication),
-    bookings: [] as DemoData["bookings"],
+    bookings: bookingRows.map((b) => ({
+      id: b.id,
+      artistId: b.artistId,
+      editionId: b.editionId,
+      intent: b.intent as DemoData["bookings"][number]["intent"],
+      createdAt: b.createdAt.toISOString(),
+    })),
     followers: followerRows.length,
   };
 }
@@ -1136,7 +1248,38 @@ export async function pgListAlerts(artistId?: string | null) {
     href: string;
   };
 
-  const operational: AlertRow[] = [];
+  const alertRows = await db.select().from(showAlerts).orderBy(desc(showAlerts.createdAt));
+  const editionIds = [...new Set(alertRows.map((a) => a.editionId))];
+  const editionRows =
+    editionIds.length > 0
+      ? await db.select().from(editions).where(inArray(editions.id, editionIds))
+      : [];
+  const showIds = [...new Set(editionRows.map((e) => e.showId))];
+  const showRows =
+    showIds.length > 0 ? await db.select().from(shows).where(inArray(shows.id, showIds)) : [];
+
+  const operational: AlertRow[] = alertRows.flatMap((alert) => {
+    const editionRow = editionRows.find((e) => e.id === alert.editionId);
+    const showRow = editionRow ? showRows.find((s) => s.id === editionRow.showId) : undefined;
+    if (!editionRow || !showRow) return [];
+    const edition = mapEdition(editionRow);
+    const show = mapShow(showRow);
+    return [
+      {
+        kind: "operational" as const,
+        id: alert.id,
+        alertKind: alert.kind,
+        title: alert.title,
+        body: alert.body,
+        createdAt: alert.createdAt.toISOString(),
+        edition,
+        show,
+        dueAt: undefined,
+        href: `/shows/${show.slug}`,
+      },
+    ];
+  });
+
   const deadlineRows: AlertRow[] = [];
 
   if (artistId) {

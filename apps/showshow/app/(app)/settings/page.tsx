@@ -73,6 +73,15 @@ export default async function SettingsPage() {
             </button>
             <p className="text-sm text-[var(--muted)]">
               Seeded demo password when DB is seeded: <code>showshow</code>
+              {pg ? (
+                <>
+                  {" "}
+                  ·{" "}
+                  <a href="/forgot-password" className="font-medium hover:text-[var(--field)]">
+                    Forgot password?
+                  </a>
+                </>
+              ) : null}
             </p>
           </form>
           <form

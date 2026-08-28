@@ -430,3 +430,44 @@ export async function registerAccountAction(formData: FormData) {
   });
   redirect("/settings");
 }
+
+export async function requestPasswordResetAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { isPostgresEnabled } = await import("@/lib/db/client");
+  const { requestPasswordReset } = await import("@/lib/auth/password-reset");
+
+  if (!isPostgresEnabled()) {
+    throw new Error("Password reset requires DATABASE_URL (Postgres).");
+  }
+
+  const email = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
+  if (!email) throw new Error("Email is required.");
+
+  const result = await requestPasswordReset(email);
+  const params = new URLSearchParams({ sent: "1" });
+  if (result.previewUrl) params.set("preview", result.previewUrl);
+  redirect(`/forgot-password?${params.toString()}`);
+}
+
+export async function resetPasswordAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { isPostgresEnabled } = await import("@/lib/db/client");
+  const { resetPasswordWithToken } = await import("@/lib/auth/password-reset");
+
+  if (!isPostgresEnabled()) {
+    throw new Error("Password reset requires DATABASE_URL (Postgres).");
+  }
+
+  const email = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
+  const token = String(formData.get("token") || "");
+  const password = String(formData.get("password") || "");
+  const confirm = String(formData.get("confirm") || "");
+
+  if (password !== confirm) throw new Error("Passwords do not match.");
+  await resetPasswordWithToken({ email, token, password });
+  redirect("/settings?reset=1");
+}

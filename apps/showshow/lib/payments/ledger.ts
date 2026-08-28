@@ -400,6 +400,10 @@ export async function handleCheckoutCompleted(session: {
         updatedAt: new Date(),
       })
       .where(eq(ledgerEntries.orderId, orderId));
+    if (order) {
+      const { sendPurchaseReceipt } = await import("@/lib/email/receipts");
+      await sendPurchaseReceipt(orderId).catch(() => undefined);
+    }
   }
 
   if (kind === "promotion" && session.metadata?.showshowPromotionId) {

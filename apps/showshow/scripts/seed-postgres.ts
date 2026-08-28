@@ -9,10 +9,27 @@ import {
   editions,
   applications,
   roiReports,
+  roiBreakdowns,
+  showAggregates,
   products,
   sponsorshipTiers,
   promotions,
   orders,
+  showComments,
+  announcements,
+  waitlistBooths,
+  boothOffers,
+  boothRequests,
+  juryFeedback,
+  follows,
+  posts,
+  artistBookings,
+  showRoutes,
+  routeStops,
+  showAlerts,
+  showSocialLinks,
+  showExternalRefs,
+  factProvenance,
 } from "../lib/db/schema";
 
 /**
@@ -252,6 +269,253 @@ async function main() {
         status: o.status === "cancelled" ? "cancelled" : o.status,
         createdAt: new Date(o.createdAt),
         updatedAt: new Date(),
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log("Seeding ROI breakdowns & aggregates…");
+  for (const b of seed.roiBreakdowns) {
+    await db
+      .insert(roiBreakdowns)
+      .values({
+        id: b.id,
+        reportId: b.reportId,
+        medium: b.medium,
+        sales: b.sales,
+        unitsSold: b.unitsSold,
+      })
+      .onConflictDoNothing();
+  }
+  for (const a of seed.aggregates) {
+    await db
+      .insert(showAggregates)
+      .values({
+        id: a.id,
+        editionId: a.editionId,
+        showId: a.showId,
+        sampleSize: a.sampleSize,
+        medianNet: a.medianNet ?? null,
+        medianGrossSales: a.medianGrossSales ?? null,
+        medianTotalExpenses: a.medianTotalExpenses ?? null,
+        topMediums: a.topMediums,
+        label: a.label,
+        computedAt: new Date(a.computedAt),
+        minNMet: a.minNMet,
+      })
+      .onConflictDoUpdate({
+        target: showAggregates.id,
+        set: {
+          sampleSize: a.sampleSize,
+          medianNet: a.medianNet ?? null,
+          medianGrossSales: a.medianGrossSales ?? null,
+          medianTotalExpenses: a.medianTotalExpenses ?? null,
+          topMediums: a.topMediums,
+          minNMet: a.minNMet,
+          computedAt: new Date(a.computedAt),
+        },
+      });
+  }
+
+  console.log("Seeding show community data…");
+  for (const c of seed.comments) {
+    await db
+      .insert(showComments)
+      .values({
+        id: c.id,
+        editionId: c.editionId,
+        authorUserId: c.authorUserId,
+        body: c.body,
+        createdAt: new Date(c.createdAt),
+      })
+      .onConflictDoNothing();
+  }
+  for (const a of seed.announcements) {
+    await db
+      .insert(announcements)
+      .values({
+        id: a.id,
+        editionId: a.editionId,
+        directorUserId: a.directorUserId,
+        title: a.title,
+        body: a.body,
+        kind: a.kind,
+        createdAt: new Date(a.createdAt),
+      })
+      .onConflictDoNothing();
+  }
+  for (const w of seed.waitlist) {
+    await db
+      .insert(waitlistBooths)
+      .values({
+        id: w.id,
+        editionId: w.editionId,
+        boothLabel: w.boothLabel,
+        status: w.status,
+        createdAt: new Date(w.createdAt),
+      })
+      .onConflictDoNothing();
+  }
+  for (const o of seed.boothOffers) {
+    await db
+      .insert(boothOffers)
+      .values({
+        id: o.id,
+        editionId: o.editionId,
+        artistId: o.artistId,
+        availableWindows: o.availableWindows,
+        notes: o.notes ?? null,
+      })
+      .onConflictDoNothing();
+  }
+  for (const r of seed.boothRequests) {
+    await db
+      .insert(boothRequests)
+      .values({
+        id: r.id,
+        editionId: r.editionId,
+        artistId: r.artistId,
+        neededWindow: r.neededWindow,
+        status: r.status,
+      })
+      .onConflictDoNothing();
+  }
+  for (const j of seed.juryFeedback) {
+    await db
+      .insert(juryFeedback)
+      .values({
+        id: j.id,
+        artistId: j.artistId,
+        editionId: j.editionId,
+        imageUrls: j.imageUrls,
+        outcome: j.outcome,
+        notes: j.notes ?? null,
+        createdAt: new Date(j.createdAt),
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log("Seeding social graph…");
+  for (const f of seed.follows) {
+    await db
+      .insert(follows)
+      .values({
+        id: f.id,
+        followerUserId: f.followerUserId,
+        artistId: f.artistId,
+        createdAt: new Date(f.createdAt),
+      })
+      .onConflictDoNothing();
+  }
+  for (const p of seed.posts) {
+    await db
+      .insert(posts)
+      .values({
+        id: p.id,
+        authorUserId: p.authorUserId,
+        artistId: p.artistId ?? null,
+        editionId: p.editionId ?? null,
+        body: p.body,
+        imageUrl: p.imageUrl ?? null,
+        createdAt: new Date(p.createdAt),
+      })
+      .onConflictDoNothing();
+  }
+  for (const b of seed.bookings) {
+    await db
+      .insert(artistBookings)
+      .values({
+        id: b.id,
+        artistId: b.artistId,
+        editionId: b.editionId,
+        intent: b.intent,
+        createdAt: new Date(b.createdAt),
+      })
+      .onConflictDoNothing();
+  }
+  for (const r of seed.routes) {
+    await db
+      .insert(showRoutes)
+      .values({
+        id: r.id,
+        slug: r.slug,
+        name: r.name,
+        region: r.region,
+        seasonLabel: r.seasonLabel,
+        description: r.description,
+      })
+      .onConflictDoUpdate({
+        target: showRoutes.id,
+        set: {
+          name: r.name,
+          region: r.region,
+          seasonLabel: r.seasonLabel,
+          description: r.description,
+        },
+      });
+  }
+  for (const s of seed.routeStops) {
+    await db
+      .insert(routeStops)
+      .values({
+        id: s.id,
+        routeId: s.routeId,
+        editionId: s.editionId,
+        order: s.order,
+        travelMilesFromPrev: s.travelMilesFromPrev ?? null,
+        travelHoursFromPrev: s.travelHoursFromPrev ?? null,
+      })
+      .onConflictDoNothing();
+  }
+  for (const a of seed.alerts) {
+    await db
+      .insert(showAlerts)
+      .values({
+        id: a.id,
+        editionId: a.editionId,
+        kind: a.kind,
+        title: a.title,
+        body: a.body,
+        createdAt: new Date(a.createdAt),
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log("Seeding provenance & references…");
+  for (const l of seed.socialLinks) {
+    await db
+      .insert(showSocialLinks)
+      .values({
+        id: l.id,
+        editionId: l.editionId,
+        platform: l.platform,
+        url: l.url,
+      })
+      .onConflictDoNothing();
+  }
+  for (const r of seed.externalRefs) {
+    await db
+      .insert(showExternalRefs)
+      .values({
+        id: r.id,
+        showId: r.showId,
+        label: r.label,
+        url: r.url,
+        kind: r.kind,
+      })
+      .onConflictDoNothing();
+  }
+  for (const p of seed.provenance) {
+    await db
+      .insert(factProvenance)
+      .values({
+        id: p.id,
+        entityType: p.entityType,
+        entityId: p.entityId,
+        field: p.field,
+        sourceUrl: p.sourceUrl,
+        sourceKind: p.sourceKind,
+        capturedAt: new Date(p.capturedAt),
+        adapterId: p.adapterId,
       })
       .onConflictDoNothing();
   }
