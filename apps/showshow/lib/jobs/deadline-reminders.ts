@@ -69,11 +69,11 @@ export async function runDeadlineReminders(opts?: { dryRun?: boolean }) {
     const text = `Hi ${row.user.name},\n\nYour application tracker for ${row.show.name} (${row.edition.year}) is “${row.app.status}”. Official deadline: ${deadline}.\n\nUpdate status: ${process.env.AUTH_URL ?? "https://showshow.app"}/applications\n`;
     const html = `<p>Hi ${row.user.name},</p><p>Your application tracker for <strong>${row.show.name}</strong> (${row.edition.year}) is “${row.app.status}”.</p><p>Official deadline: <strong>${deadline}</strong>.</p><p><a href="${process.env.AUTH_URL ?? "https://showshow.app"}/applications">Open applications</a></p>`;
 
-    if (opts?.dryRun || !isEmailConfigured()) {
+    if (dry || !isEmailConfigured()) {
       results.push({
         appId: entityId,
         email: toEmail,
-        status: opts?.dryRun ? "dry_run" : "email_not_configured",
+        status: dry ? "dry_run" : "email_not_configured",
       });
       continue;
     }
