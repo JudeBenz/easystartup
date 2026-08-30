@@ -399,6 +399,79 @@ const DEFS: ProcDef[] = [
       },
     ],
   },
+  // ── iGPS pallet order + bulk transfer — company-agnostic logistics SOP. ─────
+  {
+    id: "proc_igps_pallets",
+    title: "Order iGPS Pallets & Record Bulk Transfers",
+    category: "Logistics",
+    description:
+      "Company-agnostic SOP: order pooled plastic pallets from iGPS, receive them on site, and record every bulk transfer in your inventory system.",
+    ppe: ["Safety shoes", "High-visibility vest", "Gloves"],
+    durationMin: 18,
+    status: "published",
+    authorId: OWNER_ID,
+    createdDaysAgo: -20,
+    currentVersion: 1,
+    steps: [
+      {
+        type: "ppe",
+        title: "Put on dock PPE",
+        body: "Safety shoes, high-visibility vest, and gloves before you work the dock or unload a pallet truck.",
+      },
+      {
+        type: "step",
+        title: "Confirm need and site details",
+        body: "Check current empty-pallet count against the next shipping plan. Note quantity needed, delivery site/location code, requested delivery date, and any special handling (food-grade, RFID scan required). Get approval per your company's purchasing rules if the order exceeds the standing reorder threshold.",
+      },
+      {
+        type: "step",
+        title: "Place the order in the iGPS portal",
+        body: "Log in at portal.igps.net with your company credentials. Create a new order for the delivery location: enter quantity, requested date, and contact on site. Submit and save the iGPS confirmation / order number. If the portal is down, call iGPS at 800-884-0225 and email the confirmation to your logistics distribution list.",
+      },
+      {
+        type: "warning",
+        title: "Do not invent quantities or skip the confirmation",
+        body: "Never place an order without a documented need and never treat a verbal request as complete. Without the iGPS confirmation number, receiving and billing cannot be reconciled — and your company can be billed for pallets you never received.",
+        warningLevel: "critical",
+      },
+      {
+        type: "step",
+        title: "Receive the delivery and count",
+        body: "When the truck arrives, verify the BOL / delivery ticket against the iGPS order number and quantity. Count pallets unloaded. Reject damaged or wrong-type pallets and note shortages on the ticket before the driver leaves. Photo the load if your site requires evidence for claims.",
+      },
+      {
+        type: "step",
+        title: "Record the inbound bulk transfer",
+        body: "In your WMS, ERP, or inventory ledger, post an inbound bulk transfer: From = iGPS (vendor/pool), To = your receiving location or dock bin, Quantity = accepted count, Reference = iGPS order + BOL numbers, Date = receipt date, Operator = your name. Attach or file the signed delivery ticket per your document-retention rules.",
+      },
+      {
+        type: "step",
+        title: "Issue pallets outbound and record the transfer",
+        body: "When product ships on iGPS pallets, record an outbound bulk transfer: From = staging/dock, To = customer or carrier destination (or 'in transit' if that is your convention), Quantity = pallets on the load, Reference = shipment / ASN / trailer number. If your process requires ending the rental with iGPS, scan RFID or barcode and notify iGPS per your account setup.",
+      },
+      {
+        type: "step",
+        title: "Request pickup of empties (when needed)",
+        body: "When empty iGPS pallets accumulate past your site's hold limit, request pickup in the iGPS portal (or via igps.net contact / 800-884-0225). Record the outbound empty transfer the same way as a shipment: From = empty stack location, To = iGPS, Quantity = empties released, Reference = pickup confirmation.",
+      },
+      {
+        type: "quiz",
+        title: "Knowledge check",
+        body: "Confirm what must be logged on every inbound receipt.",
+        quizQuestion:
+          "What must you record when posting an inbound bulk transfer from iGPS?",
+        quizChoices: [
+          "Accepted quantity, iGPS order + BOL references, location, date, and operator",
+          "Only the driver's name",
+          "The weather at the dock",
+          "Nothing — iGPS updates your books automatically",
+        ],
+        quizCorrect: 0,
+        quizExplanation:
+          "Your inventory system is the source of truth for your company. Always log accepted qty, order/BOL refs, location, date, and who posted the transfer so receiving, billing, and audits line up.",
+      },
+    ],
+  },
 ];
 
 export function buildProcedures(): ProceduresSeed {
