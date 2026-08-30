@@ -23,7 +23,7 @@ export function buildTwin(): TwinSeed {
         { id: "zone_storage", label: "Material Storage", x: 4, y: 30, w: 26, h: 26, procedureIds: ["proc_loto"] },
         { id: "zone_assembly", label: "Assembly", x: 34, y: 38, w: 30, h: 24, procedureIds: ["proc_welding_setup"] },
         { id: "zone_qc", label: "Quality Control", x: 68, y: 38, w: 28, h: 24, procedureIds: ["proc_cnc_startup"] },
-        { id: "zone_dock", label: "Shipping Dock", x: 4, y: 66, w: 92, h: 30, procedureIds: ["proc_loto", "proc_igps_pallets"] },
+        { id: "zone_dock", label: "Shipping Dock", x: 4, y: 66, w: 92, h: 30, procedureIds: ["proc_loto"] },
       ],
     },
   ];
