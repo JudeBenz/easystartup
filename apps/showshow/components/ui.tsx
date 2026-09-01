@@ -10,13 +10,14 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between">
+    <div className="mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
       <div className="ss-prose max-w-2xl">
-        <h1 className="font-display text-[1.75rem] leading-tight text-[var(--ink)] md:text-[2.25rem]">
+        <h1 className="font-display text-[2rem] leading-[0.95] text-[var(--ink)] md:text-[2.75rem]">
           {title}
         </h1>
+        <span className="ss-rule" aria-hidden />
         {description ? (
-          <p className="mt-2 text-[1.125rem] text-[var(--muted)]">{description}</p>
+          <p className="mt-3 text-[1.125rem] text-[var(--muted)]">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
@@ -27,11 +28,13 @@ export function PageHeader({
 export function Panel({
   children,
   className,
+  well = false,
 }: {
   children: React.ReactNode;
   className?: string;
+  well?: boolean;
 }) {
-  return <div className={cn("ss-panel", className)}>{children}</div>;
+  return <div className={cn(well ? "ss-well" : "ss-panel", className)}>{children}</div>;
 }
 
 export function Badge({

@@ -12,7 +12,7 @@ export default async function AdminDirectorsPage() {
   try {
     await requireAdmin();
   } catch {
-    redirect("/settings");
+    redirect("/signin?next=/admin/directors");
   }
 
   if (!isPostgresEnabled()) {

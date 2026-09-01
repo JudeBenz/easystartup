@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { PageHeader, Panel, Badge } from "@/components/ui";
 import { formatDate, formatCents } from "@/lib/format";
 import { getSessionUser } from "@/lib/session-data";
@@ -20,6 +21,7 @@ export default async function DirectorPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const user = await getSessionUser();
+  if (!user) redirect("/signin?next=/director");
   const dash = await getDirectorDashboard(user.id);
   const claimable = await listClaimableShows();
   const live = isPostgresEnabled() && isStripeConfigured();

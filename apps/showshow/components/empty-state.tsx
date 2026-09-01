@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Panel } from "@/components/ui";
 
 export function EmptyState({
   title,
@@ -13,13 +12,12 @@ export function EmptyState({
   secondary?: { href: string; label: string };
 }) {
   return (
-    <Panel className="text-center">
-      <h2 className="font-display text-xl font-bold">{title}</h2>
-      <p className="ss-prose mx-auto mt-2 max-w-md text-[1.05rem] text-[var(--muted)]">
-        {description}
-      </p>
+    <div className="max-w-xl border-b border-[var(--line)] py-8">
+      <h2 className="font-display text-[1.75rem] leading-tight">{title}</h2>
+      <span className="ss-rule" aria-hidden />
+      <p className="ss-prose mt-3 text-[1.125rem] text-[var(--muted)]">{description}</p>
       {action || secondary ? (
-        <div className="mt-5 flex flex-wrap justify-center gap-3">
+        <div className="mt-5 flex flex-wrap gap-3">
           {action ? (
             <Link href={action.href} className="ss-btn ss-btn-primary min-h-[var(--tap)]">
               {action.label}
@@ -32,6 +30,6 @@ export function EmptyState({
           ) : null}
         </div>
       ) : null}
-    </Panel>
+    </div>
   );
 }

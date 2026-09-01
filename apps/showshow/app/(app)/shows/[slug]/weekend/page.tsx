@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function WeekendModePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const user = await getSessionUser();
-  const data = await getWeekendMode(slug, user.id);
+  const data = await getWeekendMode(slug, user?.id ?? "");
   if (!data) notFound();
 
   const { show, current, artistsYouFollow, isFavorite, boothOffers } = data;

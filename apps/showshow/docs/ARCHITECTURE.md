@@ -62,7 +62,7 @@ Do **not** put money side effects only in `setTimeout` or best-effort `fs.writeF
 | Files | S3 / R2 | Booth photos, jury images |
 | Email | Resend | Deadlines + receipts |
 | Payments | Stripe Connect Express | Artists onboard fast; 1099-ready |
-| Observability | Sentry + Stripe Dashboard + Postgres logs | Money incidents need traces |
+| Observability | Sentry (`@sentry/nextjs`, env-gated) + Stripe Dashboard + Postgres logs | Money incidents need traces |
 
 Scale to thousands of users is easy on this stack. Scale to **millions** of pageviews is a CDN + query problem, not a rewrite. Scale GMV by tightening Connect + ledger + support playbooks—not by inventing a bank.
 

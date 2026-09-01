@@ -21,7 +21,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   const user = await getSessionUser();
   const appRows = await getApplicationsForArtist(artist.id);
   let following = false;
-  if (isPostgresEnabled() && user.id !== artist.userId) {
+  if (isPostgresEnabled() && user && user.id !== artist.userId) {
     const { pgIsFollowingArtist } = await import("@/lib/store/pg-social");
     following = await pgIsFollowingArtist(user.id, artist.id);
   }
@@ -38,7 +38,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
         description={`${artist.city}, ${artist.region} · ${artist.tagline} · ${followers} follower${followers === 1 ? "" : "s"}`}
         actions={
           <>
-            {isPostgresEnabled() && user.id !== artist.userId ? (
+            {isPostgresEnabled() && user && user.id !== artist.userId ? (
               <form action={toggleFollowArtistAction}>
                 <input type="hidden" name="artistId" value={artist.id} />
                 <input type="hidden" name="artistSlug" value={artist.slug} />
@@ -70,7 +70,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
             </div>
             <p className="mt-3 text-base text-[var(--muted)]">
               {followers} follower{followers === 1 ? "" : "s"}
-              {user.id === artist.userId ? (
+              {user?.id === artist.userId ? (
                 <>
                   {" "}
                   · booth default {artist.boothDefaultSize ?? "—"} · Stripe Connect{" "}

@@ -8,6 +8,7 @@ import { checkoutProductAction, startArtistConnectAction } from "@/lib/actions";
 import { isPostgresEnabled } from "@/lib/db/client";
 import { isStripeConfigured } from "@/lib/payments/stripe";
 import { getSessionUser } from "@/lib/session-data";
+import { StoredImage } from "@/components/stored-image";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -29,7 +30,7 @@ export default async function ArtistStorePage({
   const { artist, products } = data;
   const user = await getSessionUser();
   const live = isPostgresEnabled() && isStripeConfigured();
-  const isOwner = user.id === artist.userId;
+  const isOwner = user?.id === artist.userId;
 
   return (
     <div>
@@ -106,6 +107,11 @@ export default async function ArtistStorePage({
         ) : null}
         {products.map((p) => (
           <Panel key={p.id}>
+            <StoredImage
+              objectKey={p.imageUrl}
+              alt=""
+              className="mb-3 h-40 w-full rounded object-cover"
+            />
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-display text-lg font-bold">{p.title}</h2>

@@ -1,36 +1,15 @@
 import { eq } from "drizzle-orm";
-import { auth } from "@/lib/auth";
 import { getPostgres, isPostgresEnabled } from "@/lib/db/client";
 import { directors } from "@/lib/db/schema";
-import { getArtistIdForUser, getUser } from "@/lib/store";
-import type { User, UserRole } from "@/types/domain";
+import { getArtistIdForUser } from "@/lib/store";
+import type { UserRole } from "@/types/domain";
 
-/** Authenticated user — Auth.js session required when Postgres is enabled. */
-export async function requireSessionUser(): Promise<User> {
-  const session = await auth();
-  if (session?.user?.id) {
-    const fromStore = await getUser(session.user.id);
-    if (fromStore) {
-      return {
-        ...fromStore,
-        roles: session.user.roles?.length ? session.user.roles : fromStore.roles,
-      };
-    }
-    return {
-      id: session.user.id,
-      name: session.user.name ?? "User",
-      email: session.user.email ?? "",
-      roles: session.user.roles ?? [],
-      createdAt: new Date().toISOString(),
-    };
-  }
-
-  if (isPostgresEnabled()) {
-    throw new Error("Sign in required");
-  }
-
+/** Authenticated user. Throws when nobody is signed in. */
+export async function requireSessionUser() {
   const { getSessionUser } = await import("@/lib/session-data");
-  return getSessionUser();
+  const user = await getSessionUser();
+  if (!user) throw new Error("Sign in required");
+  return user;
 }
 
 export async function requireRole(role: UserRole) {

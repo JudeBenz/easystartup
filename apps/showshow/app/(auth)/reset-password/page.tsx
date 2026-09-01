@@ -28,13 +28,13 @@ export default async function ResetPasswordPage({
       <FormBanner searchParams={params} />
 
       {!pg ? (
-        <Panel>
+        <Panel well>
           <p className="text-[1.05rem] text-[var(--muted)]">
             Password reset requires Postgres. Set <code>DATABASE_URL</code> first.
           </p>
         </Panel>
       ) : !email || !token ? (
-        <Panel>
+        <Panel well>
           <p className="text-[1.05rem] text-[var(--muted)]">
             This reset link is incomplete. Request a new one from{" "}
             <Link href="/forgot-password" className="font-medium hover:text-[var(--field)]">
@@ -44,7 +44,7 @@ export default async function ResetPasswordPage({
           </p>
         </Panel>
       ) : (
-        <Panel className="max-w-lg">
+        <Panel well className="max-w-lg">
           <form action={resetPasswordAction} className="grid gap-3">
             <input type="hidden" name="email" value={email} />
             <input type="hidden" name="token" value={token} />

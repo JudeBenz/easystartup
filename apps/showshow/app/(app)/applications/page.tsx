@@ -42,19 +42,11 @@ export default async function ApplicationsPage() {
         />
         <EmptyState
           title="Artist profile required"
-          description={
-            pg
-              ? "Create an artist account to track applications, deadlines, and reminders."
-              : "Switch to an artist demo persona from the menu, or enable Postgres and create an account."
-          }
-          action={
-            pg
-              ? { href: "/settings", label: "Create artist account" }
-              : { href: "/settings", label: "Open settings" }
-          }
+          description="Create an artist account to track applications, deadlines, and reminders."
+          action={{ href: "/join?role=artist", label: "Create artist account" }}
           secondary={{ href: "/shows", label: "Browse shows" }}
         />
-        {!pg ? (
+        {!pg && user ? (
           <p className="mt-4 text-center text-sm text-[var(--muted)]">
             Signed in as {user.name} ({user.roles.join(", ")})
           </p>
@@ -186,7 +178,7 @@ export default async function ApplicationsPage() {
           })}
         </div>
 
-        <Panel>
+        <Panel well>
           <h2 className="font-display text-lg font-bold">Track another show</h2>
           {addable.length ? (
             <form action={updateApplicationAction} className="mt-4 grid gap-3 text-sm">

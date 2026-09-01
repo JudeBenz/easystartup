@@ -39,14 +39,14 @@ export default async function FeedPage({
       ) : !session?.user ? (
         <Panel className="mb-6">
           <p className="text-[1.05rem] text-[var(--muted)]">
-            <Link href="/settings" className="font-medium underline">
+            <Link href="/signin" className="font-medium underline">
               Sign in
             </Link>{" "}
             to post updates. Browsing the feed works without an account.
           </p>
         </Panel>
       ) : (
-        <Panel className="mb-6">
+        <Panel well className="mb-6">
           <form action={createPostAction} className="grid gap-3">
             <textarea
               name="body"

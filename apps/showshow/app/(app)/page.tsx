@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { getSessionUser } from "@/lib/session-data";
-import { getApplicationsForArtist, getArtistIdForUser, getFeed } from "@/lib/store";
-import { listAlerts } from "@/lib/store";
+import { getApplicationsForArtist, getArtistIdForUser, getFeed, listAlerts } from "@/lib/store";
 
 export default async function HomePage() {
   const user = await getSessionUser();
-  const artistId = user.roles.includes("artist") ? await getArtistIdForUser(user.id) : null;
+  const artistId = user?.roles.includes("artist") ? await getArtistIdForUser(user.id) : null;
   const apps = artistId ? await getApplicationsForArtist(artistId) : [];
   const alerts = await listAlerts(artistId);
   const feed = await getFeed();
@@ -18,49 +16,70 @@ export default async function HomePage() {
   const showChanges = alerts.filter((a) => a.kind === "operational").slice(0, 3);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-stretch">
-      <section className="ss-panel flex flex-col justify-between gap-8 !p-6 md:!p-10">
-        <div>
-          <p className="font-display text-[3.25rem] leading-none text-[var(--ink)] md:text-[4.5rem]">
-            Show<span className="text-[var(--accent)]">Show</span>
-          </p>
-          <h1 className="mt-5 max-w-[18ch] font-display text-[1.75rem] leading-tight md:text-[2.25rem]">
-            Welcome back, {user.name.split(" ")[0]}.
-          </h1>
-          <p className="ss-prose mt-4 text-[1.2rem] text-[var(--muted)]">
-            {artistId
-              ? `You have ${upcomingApps.length} active application${upcomingApps.length === 1 ? "" : "s"} and ${alerts.length} alert${alerts.length === 1 ? "" : "s"}.`
-              : "Browse shows, follow artists, and plan your fair season."}
-          </p>
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Link href="/shows" className="ss-btn ss-btn-primary">
-            Browse shows
-          </Link>
-          {artistId ? (
-            <Link href="/applications" className="ss-btn ss-btn-secondary">
-              Applications
-            </Link>
+    <div className="grid gap-12 lg:grid-cols-[1.4fr_0.8fr] lg:gap-16">
+      <section>
+        <p className="font-meta uppercase tracking-[0.14em] text-[var(--muted)]">Art fair sourcebook</p>
+        <h1 className="font-display mt-3 text-[3.4rem] leading-[0.88] text-[var(--ink)] md:text-[5.25rem]">
+          ShowShow
+        </h1>
+        <span className="ss-rule !w-24" aria-hidden />
+        <p className="mt-6 max-w-[22ch] font-display text-[1.85rem] leading-tight md:text-[2.15rem]">
+          {user ? `Welcome back, ${user.name.split(" ")[0]}.` : "Find the next show. Know if it paid."}
+        </p>
+        <p className="ss-prose mt-4 text-[1.2rem] text-[var(--muted)]">
+          {artistId
+            ? `You have ${upcomingApps.length} active application${upcomingApps.length === 1 ? "" : "s"} and ${alerts.length} alert${alerts.length === 1 ? "" : "s"}.`
+            : user
+              ? "Browse shows, follow artists, and plan your fair season."
+              : "Dates and fees from official show sites. Application tracking and private ROI logs for exhibiting artists. A weekend map for people at the fair."}
+        </p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          {user ? (
+            <>
+              <Link href="/shows" className="ss-btn ss-btn-primary">
+                Browse shows
+              </Link>
+              {artistId ? (
+                <Link href="/applications" className="ss-btn ss-btn-secondary">
+                  Applications
+                </Link>
+              ) : (
+                <Link href="/feed" className="ss-btn ss-btn-secondary">
+                  Feed
+                </Link>
+              )}
+              <Link href="/install" className="ss-btn ss-btn-ghost">
+                Add to phone
+              </Link>
+            </>
           ) : (
-            <Link href="/feed" className="ss-btn ss-btn-secondary">
-              Feed
-            </Link>
+            <>
+              <Link href="/join" className="ss-btn ss-btn-primary">
+                Create account
+              </Link>
+              <Link href="/shows" className="ss-btn ss-btn-secondary">
+                Browse shows
+              </Link>
+              <Link href="/install" className="ss-btn ss-btn-ghost">
+                Add to phone
+              </Link>
+            </>
           )}
         </div>
       </section>
 
-      <aside className="ss-panel grid content-start gap-5 !p-6">
+      <aside className="space-y-8 lg:border-l lg:border-[var(--line)] lg:pl-10">
         {artistId && deadlines.length ? (
           <div>
-            <h2 className="font-display text-[1.35rem]">Upcoming deadlines</h2>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
+            <p className="font-meta uppercase text-[var(--muted)]">Deadlines</p>
+            <ul className="mt-3 divide-y divide-[var(--line)]">
               {deadlines.map((row) => (
-                <li key={row.id} className="border-b border-[var(--line)] pb-2">
-                  <Link href={row.href} className="font-medium hover:text-[var(--field)]">
+                <li key={row.id} className="py-3">
+                  <Link href={row.href} className="font-medium">
                     {row.show.name}
                   </Link>
                   {row.dueAt ? (
-                    <p className="text-sm text-[var(--muted)]">{formatDate(row.dueAt)}</p>
+                    <p className="font-meta mt-1 text-[var(--muted)]">{formatDate(row.dueAt)}</p>
                   ) : null}
                 </li>
               ))}
@@ -73,11 +92,11 @@ export default async function HomePage() {
 
         {showChanges.length ? (
           <div>
-            <h2 className="font-display text-[1.35rem]">Show updates</h2>
-            <ul className="mt-3 space-y-2 text-sm">
+            <p className="font-meta uppercase text-[var(--muted)]">Show updates</p>
+            <ul className="mt-3 divide-y divide-[var(--line)]">
               {showChanges.map((row) => (
-                <li key={row.id}>
-                  <Badge tone="warn">{row.alertKind}</Badge>
+                <li key={row.id} className="py-3">
+                  <p className="font-meta text-[var(--warn)]">{row.alertKind}</p>
                   <p className="mt-1 font-medium">{row.title}</p>
                 </li>
               ))}
@@ -87,13 +106,11 @@ export default async function HomePage() {
 
         {feed.length ? (
           <div>
-            <h2 className="font-display text-[1.35rem]">From the feed</h2>
-            <ul className="mt-3 space-y-2 text-sm text-[var(--muted)]">
+            <p className="font-meta uppercase text-[var(--muted)]">From the feed</p>
+            <ul className="mt-3 divide-y divide-[var(--line)]">
               {feed.slice(0, 3).map(({ post, artist, author }) => (
-                <li key={post.id} className="line-clamp-2">
-                  <strong className="text-[var(--ink)]">
-                    {artist?.displayName ?? author.name}:
-                  </strong>{" "}
+                <li key={post.id} className="line-clamp-3 py-3 text-[1.05rem] text-[var(--muted)]">
+                  <strong className="text-[var(--ink)]">{artist?.displayName ?? author.name}:</strong>{" "}
                   {post.body}
                 </li>
               ))}
@@ -104,41 +121,32 @@ export default async function HomePage() {
           </div>
         ) : null}
 
-        {!deadlines.length && !showChanges.length && !feed.length ? (
+        {!user ? (
           <div>
-            <h2 className="font-display text-[1.35rem]">Get started</h2>
-            <ul className="mt-3 space-y-2 text-[1.05rem]">
-              <li>
-                <Link href="/shows/ranked" className="font-medium hover:text-[var(--field)]">
-                  Ranked shows
-                </Link>{" "}
-                — ROI signals from artists
+            <p className="font-meta uppercase text-[var(--muted)]">Who it is for</p>
+            <ul className="mt-3 divide-y divide-[var(--line)] text-[1.05rem]">
+              <li className="py-3">
+                <strong>Artists</strong> — track applications and whether a booth paid.
               </li>
-              <li>
-                <Link href="/routes" className="font-medium hover:text-[var(--field)]">
-                  Route planner
-                </Link>{" "}
-                — multi-show circuits
+              <li className="py-3">
+                <strong>Directors</strong> — claim a fair, post updates, run a waitlist.
               </li>
-              <li>
-                <Link href="/settings" className="font-medium hover:text-[var(--field)]">
-                  Settings
-                </Link>{" "}
-                — account & theme
+              <li className="py-3">
+                <strong>Showgoers</strong> — follow artists and open the weekend map at the fair.
               </li>
             </ul>
           </div>
         ) : null}
 
-        <p className="text-base text-[var(--muted)]">
+        <p className="font-meta text-[var(--muted)]">
           <Link href="/orders" className="underline">
             Orders
           </Link>
           {" · "}
-          <Link href="/settings" className="underline">
-            Settings
+          <Link href={user ? "/settings" : "/signin"} className="underline">
+            {user ? "Account" : "Sign in"}
           </Link>
-          {user.roles.includes("admin") ? (
+          {user?.roles.includes("admin") ? (
             <>
               {" · "}
               <Link href="/admin/directors" className="underline">

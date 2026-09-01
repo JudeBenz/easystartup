@@ -7,14 +7,11 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Art fair directory, applications, and ROI for exhibiting artists.",
     start_url: "/",
     display: "standalone",
-    background_color: "#1a2e28",
-    theme_color: "#c45c3e",
+    theme_color: "#b54a2a",
+    background_color: "#f2f6f5",
     icons: [
-      {
-        src: "/icon",
-        sizes: "any",
-        type: "image/png",
-      },
+      { src: "/icon", sizes: "32x32", type: "image/png" },
+      { src: "/apple-icon", sizes: "180x180", type: "image/png" },
     ],
   };
 }

@@ -16,7 +16,7 @@ export default async function MapPage({
   const sp = await searchParams;
   const radius = Number(sp.radius || 500);
   const user = await getSessionUser();
-  const home = user.homeBase ?? { lat: 39.8283, lng: -98.5795, label: "US center" };
+  const home = user?.homeBase ?? { lat: 39.8283, lng: -98.5795, label: "US center" };
   const all = await listShows();
 
   const pins: MapShowPin[] = all

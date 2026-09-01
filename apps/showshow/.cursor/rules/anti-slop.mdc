@@ -1,0 +1,9 @@
+---
+description: ShowShow UI must follow the printed field-catalog system, not AI-default SaaS chrome.
+globs: apps/showshow/**/*.{css,tsx,ts}
+alwaysApply: false
+---
+
+Before changing ShowShow layout, CSS, or components, read `apps/showshow/DESIGN.md`.
+
+Do not add Inter/Geist/purple gradients/rounded-2xl cards/three-up icon grids/glass/blob decorations. Separate blocks with space and hairline rules. Keep 18px body type and 48px tap targets. Put dates and fees in `.font-meta`.

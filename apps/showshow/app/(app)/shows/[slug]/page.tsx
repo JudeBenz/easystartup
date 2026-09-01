@@ -48,26 +48,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
   return (
     <div className="ss-show-page space-y-0">
       {/* Hero — one composition, brand-adjacent show identity */}
-      <section className="ss-show-hero relative -mx-4 -mt-6 overflow-hidden border-b border-[var(--line)] bg-[var(--ink)] text-[var(--paper)] md:-mx-6 md:-mt-8">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-90"
-          aria-hidden
-          style={{
-            background: `
-              radial-gradient(ellipse 80% 60% at 85% 20%, color-mix(in oklab, var(--accent) 55%, transparent), transparent 55%),
-              radial-gradient(ellipse 70% 50% at 10% 90%, color-mix(in oklab, var(--good) 45%, transparent), transparent 50%),
-              linear-gradient(145deg, #1a1f1e 0%, #24302e 100%)
-            `,
-          }}
-        />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.1]"
-          aria-hidden
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(-18deg, transparent, transparent 18px, #fff 18px, #fff 19px)",
-          }}
-        />
+      <section className="ss-show-hero relative -mx-4 -mt-6 border-b border-[var(--line)] bg-[var(--ink)] text-[var(--paper)] md:-mx-6 md:-mt-8">
         <div className="relative grid gap-8 px-4 py-10 md:grid-cols-[1.45fr_0.75fr] md:px-6 md:py-14">
           <div className="ss-show-hero-copy">
             <p className="text-[1.05rem] font-bold tracking-wide text-[color-mix(in_oklab,var(--paper)_75%,transparent)]">
@@ -135,7 +116,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
       </section>
 
       {roiSignal ? (
-        <section aria-label="Peer ROI signal" className="rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface)] p-5">
+        <section aria-label="Peer ROI signal" className="border-b border-[var(--line)] py-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-base font-bold text-[var(--muted)]">Peer ROI (opted-in artists only)</p>
@@ -165,8 +146,8 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
       ) : null}
 
       {/* Ticket stub fact strip */}
-      <section aria-label="Key facts" className="ss-ticket-strip relative">
-        <div className="relative -mt-5 grid overflow-hidden rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface)] shadow-[0_12px_40px_-18px_rgba(26,31,30,0.35)] sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Key facts" className="ss-ticket-strip">
+        <div className="grid border-b border-[var(--line)] sm:grid-cols-2 lg:grid-cols-4">
           <TicketCell
             label="Where"
             value={current?.fullAddress ?? `${show.primaryCity}, ${show.primaryRegion}`}
@@ -223,7 +204,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                 </div>
               </div>
             ) : (
-              <p className="mt-5 max-w-[42ch] border-l-[3px] border-[var(--good)] pl-4 text-[1.25rem] leading-relaxed text-[var(--ink)]">
+              <p className="mt-5 max-w-[42ch] text-[1.25rem] leading-relaxed text-[var(--ink)]">
                 {agg
                   ? `Only ${agg.sampleSize} opted-in reports so far. We publish after 5.`
                   : "No first-party ROI reports yet. Log a season and opt in — this number only grows from artists who were actually there."}
@@ -283,7 +264,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
             <SectionTitle>Talk about this show</SectionTitle>
             <ul className="mt-6 space-y-6">
               {comments.map((c) => (
-                <li key={c.id} className="border-l-[3px] border-[var(--accent)] pl-4">
+                <li key={c.id} className="border-t border-[var(--line)] pt-4">
                   <p className="text-[1.2rem] leading-relaxed">{c.body}</p>
                   <p className="mt-1.5 text-base text-[var(--muted)]">
                     {formatDate(c.createdAt, "MMM d, yyyy · h:mm a")}
@@ -296,7 +277,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                 </li>
               ) : null}
             </ul>
-            {current ? (
+            {current && user ? (
               <form action={addCommentAction} className="mt-7 grid max-w-xl gap-3">
                 <input type="hidden" name="editionId" value={current.id} />
                 <input type="hidden" name="authorUserId" value={user.id} />
@@ -315,6 +296,13 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                   Post comment
                 </button>
               </form>
+            ) : current ? (
+              <p className="mt-7 text-[1.05rem]">
+                <Link href={`/signin?next=/shows/${show.slug}`} className="font-medium underline">
+                  Sign in
+                </Link>{" "}
+                to comment.
+              </p>
             ) : null}
           </section>
         </div>
@@ -427,7 +415,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[0.95rem] font-bold uppercase tracking-[0.08em] text-[color-mix(in_oklab,var(--paper)_55%,transparent)]">
+      <p className="font-meta uppercase text-[color-mix(in_oklab,var(--paper)_55%,transparent)]">
         {label}
       </p>
       <p className="mt-1 text-[1.3rem] font-bold capitalize leading-tight">{value}</p>
@@ -437,10 +425,8 @@ function HeroStat({ label, value }: { label: string; value: string }) {
 
 function TicketCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-[var(--line)] px-4 py-4 sm:border-r sm:[&:nth-child(2n)]:border-r-0 lg:border-r lg:[&:nth-child(2n)]:border-r lg:[&:last-child]:border-r-0">
-      <p className="text-[0.85rem] font-bold uppercase tracking-[0.07em] text-[var(--muted)]">
-        {label}
-      </p>
+    <div className="border-[var(--line)] px-0 py-4 sm:border-r sm:px-4 sm:first:pl-0 lg:[&:last-child]:border-r-0">
+      <p className="font-meta uppercase text-[var(--muted)]">{label}</p>
       <p className="mt-1 text-[1.05rem] font-bold leading-snug">{value}</p>
     </div>
   );

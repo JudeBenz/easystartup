@@ -33,13 +33,14 @@ import {
 } from "../lib/db/schema";
 
 /**
- * Import demo seed into Postgres.
- * Usage: DATABASE_URL=... pnpm --filter showshow db:seed
+ * Import official-site show facts into Postgres.
+ * Does not invent artists, posts, or ROI. Set SHOWSHOW_DEMO_PERSONAS=1 only for internal QA.
  */
 async function main() {
   const db = requirePostgres();
   const seed = await buildSeed();
-  const passwordHash = await hash("showshow", 10);
+  const keepDemoPasswords = process.env.SHOWSHOW_DEMO_PERSONAS === "1";
+  const passwordHash = keepDemoPasswords ? await hash("showshow", 10) : null;
 
   console.log("Seeding users…");
   for (const u of seed.users) {
@@ -462,7 +463,8 @@ async function main() {
         editionId: s.editionId,
         order: s.order,
         travelMilesFromPrev: s.travelMilesFromPrev ?? null,
-        travelHoursFromPrev: s.travelHoursFromPrev ?? null,
+        travelHoursFromPrev:
+          s.travelHoursFromPrev == null ? null : Math.round(s.travelHoursFromPrev),
       })
       .onConflictDoNothing();
   }

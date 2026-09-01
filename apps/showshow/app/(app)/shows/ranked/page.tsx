@@ -17,7 +17,7 @@ export default async function RankedPage() {
       {!rows.length ? (
         <Panel>
           <p className="text-[1.05rem] text-[var(--muted)]">
-            No shows have met the sample-size threshold yet. Keep logging ROI.
+            No shows have enough opted-in artist ROI logs yet. Rankings stay blank until real exhibitors log numbers — we do not invent them.
           </p>
         </Panel>
       ) : (

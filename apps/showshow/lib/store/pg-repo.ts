@@ -1412,3 +1412,22 @@ export async function pgRegisterUser(input: {
   const userRow = await db.query.users.findFirst({ where: eq(users.id, userId) });
   return { user: mapUser(userRow!), artist };
 }
+
+export async function pgCompleteArtistOnboarding(input: {
+  userId: string;
+  city: string;
+  region: string;
+  tagline: string;
+  mediums: Medium[];
+}) {
+  const db = requirePostgres();
+  await db
+    .update(artists)
+    .set({
+      city: input.city.trim(),
+      region: input.region.trim(),
+      tagline: input.tagline.trim(),
+      mediums: input.mediums,
+    })
+    .where(eq(artists.userId, input.userId));
+}

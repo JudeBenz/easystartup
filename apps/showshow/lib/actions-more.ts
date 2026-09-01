@@ -60,25 +60,38 @@ export async function createPostAction(formData: FormData) {
 }
 
 export async function saveProductAction(formData: FormData) {
-  const artistId = String(formData.get("artistId"));
-  await requireArtistOwner(artistId);
-  const { isPostgresEnabled } = await import("@/lib/db/client");
-  if (!isPostgresEnabled()) throw new Error("Products require Postgres");
-  const { pgUpsertProduct } = await import("@/lib/store/pg-social");
-  const productId = String(formData.get("productId") || "") || undefined;
-  const slug = String(formData.get("artistSlug"));
-  await pgUpsertProduct({
-    artistId,
-    productId,
-    title: String(formData.get("title")),
-    description: String(formData.get("description") || ""),
-    priceCents: Math.max(100, Number(formData.get("priceCents") || 0)),
-    inventory: Math.max(0, Number(formData.get("inventory") || 0)),
-    medium: String(formData.get("medium") || "other"),
-    active: formData.get("active") !== "off",
-  });
-  revalidatePath(`/artists/${slug}/store`);
-  revalidatePath(`/artists/${slug}/store/manage`);
+  const slug = String(formData.get("artistSlug") || "");
+  try {
+    const artistId = String(formData.get("artistId"));
+    await requireArtistOwner(artistId);
+    const { isPostgresEnabled } = await import("@/lib/db/client");
+    if (!isPostgresEnabled()) throw new Error("Products require Postgres");
+    const { pgUpsertProduct } = await import("@/lib/store/pg-social");
+    const productId = String(formData.get("productId") || "") || undefined;
+    const image = formData.get("image");
+    let imageUrl: string | undefined;
+    if (image instanceof File && image.size) {
+      const { uploadImageFile } = await import("@/lib/storage/uploads");
+      imageUrl = await uploadImageFile(image, "product", artistId);
+    }
+    await pgUpsertProduct({
+      artistId,
+      productId,
+      title: String(formData.get("title")),
+      description: String(formData.get("description") || ""),
+      priceCents: Math.max(100, Number(formData.get("priceCents") || 0)),
+      inventory: Math.max(0, Number(formData.get("inventory") || 0)),
+      medium: String(formData.get("medium") || "other"),
+      active: formData.get("active") !== "off",
+      imageUrl,
+    });
+    revalidatePath(`/artists/${slug}/store`);
+    revalidatePath(`/artists/${slug}/store/manage`);
+  } catch (err) {
+    unstable_rethrow(err);
+    const msg = err instanceof Error ? err.message : "Could not save that product.";
+    redirect(flashUrl(slug ? `/artists/${slug}/store/manage` : "/settings", { error: msg }));
+  }
 }
 
 export async function saveSponsorshipTierAction(formData: FormData) {
@@ -120,4 +133,31 @@ export async function verifyDirectorAction(formData: FormData) {
   const directorId = String(formData.get("directorId"));
   await pgVerifyDirector(directorId, admin.id);
   revalidatePath("/admin/directors");
+}
+
+export async function saveAvatarAction(formData: FormData) {
+  const user = await requireSessionUser();
+  const image = formData.get("image");
+  if (!(image instanceof File) || !image.size) {
+    redirect(flashUrl("/settings", { error: "Choose a photo first." }));
+  }
+  try {
+    const { uploadImageFile } = await import("@/lib/storage/uploads");
+    const key = await uploadImageFile(image, "avatar", user.id);
+    if (!key) {
+      redirect(flashUrl("/settings", { error: "Could not save that photo." }));
+    }
+    const { isPostgresEnabled } = await import("@/lib/db/client");
+    if (!isPostgresEnabled()) {
+      redirect(flashUrl("/settings", { error: "Photos require Postgres." }));
+    }
+    const { pgSetUserImage } = await import("@/lib/store/pg-users");
+    await pgSetUserImage(user.id, key);
+    revalidatePath("/settings");
+    redirect("/settings?saved=1");
+  } catch (err) {
+    unstable_rethrow(err);
+    const msg = err instanceof Error ? err.message : "Could not save that photo.";
+    redirect(flashUrl("/settings", { error: msg }));
+  }
 }

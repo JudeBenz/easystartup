@@ -10,6 +10,7 @@ function mapUser(row: typeof users.$inferSelect): User {
     email: row.email,
     roles: (row.roles as UserRole[]) ?? [],
     createdAt: row.createdAt.toISOString(),
+    avatarUrl: row.image ?? undefined,
     homeBase:
       row.homeLat && row.homeLng
         ? {
@@ -45,4 +46,13 @@ export async function pgGetArtistIdForUser(
     where: eq(artists.userId, userId),
   });
   return row?.id ?? null;
+}
+
+export async function pgSetUserImage(userId: string, imageKey: string) {
+  if (!isPostgresEnabled()) return;
+  const db = getPostgres()!;
+  await db
+    .update(users)
+    .set({ image: imageKey, updatedAt: new Date() })
+    .where(eq(users.id, userId));
 }

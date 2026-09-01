@@ -34,6 +34,11 @@ export default async function ShowsCalendarPage() {
         <Panel>
           <h2 className="font-display text-lg font-bold">Show dates</h2>
           <div className="mt-4 space-y-5">
+            {!months.length ? (
+              <p className="text-[1.05rem] text-[var(--muted)]">
+                No dated editions in the directory yet.
+              </p>
+            ) : null}
             {months.map(([month, list]) => (
               <div key={month}>
                 <p className="text-base font-bold text-[var(--good)]">
@@ -60,6 +65,11 @@ export default async function ShowsCalendarPage() {
         <Panel>
           <h2 className="font-display text-lg font-bold">Application deadlines</h2>
           <ul className="mt-4 space-y-2">
+            {!deadlines.length ? (
+              <li className="text-[1.05rem] text-[var(--muted)]">
+                No application deadlines listed from official sites yet.
+              </li>
+            ) : null}
             {deadlines.map(({ show, edition, deadline }) => (
               <li key={edition.id} className="flex items-center justify-between gap-3 text-[1.05rem]">
                 <Link href={`/shows/${show.slug}`} className="font-medium hover:text-[var(--field)]">

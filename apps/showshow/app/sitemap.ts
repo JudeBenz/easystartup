@@ -12,6 +12,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/artists",
     "/feed",
     "/routes",
+    "/join",
+    "/signin",
+    "/install",
     "/privacy",
     "/terms",
   ].map((path) => ({
@@ -23,14 +26,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (!isPostgresEnabled()) return staticRoutes;
 
-  const { listShows } = await import("@/lib/store");
-  const shows = await listShows();
-  const showUrls = shows.map((s) => ({
-    url: `${base}/shows/${s.show.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
-
-  return [...staticRoutes, ...showUrls];
+  try {
+    const { listShows } = await import("@/lib/store");
+    const shows = await listShows();
+    const showUrls = shows.map((s) => ({
+      url: `${base}/shows/${s.show.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+    return [...staticRoutes, ...showUrls];
+  } catch {
+    // Empty or unmigrated database must not fail `next build` (Vercel).
+    return staticRoutes;
+  }
 }

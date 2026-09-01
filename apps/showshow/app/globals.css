@@ -76,10 +76,11 @@
 }
 
 :root {
-  --radius-panel: 10px;
-  --radius-control: 6px;
+  --radius-panel: 2px;
+  --radius-control: 2px;
   --tap: 48px;
   --shadow: none;
+  --rule: 4px;
   --background: var(--paper);
   --foreground: var(--ink);
   /* legacy aliases used in pages */
@@ -105,6 +106,7 @@
   --color-warn: var(--warn);
   --font-display: var(--font-display);
   --font-sans: var(--font-body);
+  --font-mono: var(--font-meta);
 }
 
 * {
@@ -126,7 +128,7 @@ body {
   background: var(--paper);
   font-family: var(--font-body), "Atkinson Hyperlegible", ui-sans-serif, sans-serif;
   font-size: 1.125rem;
-  line-height: 1.6;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -169,11 +171,36 @@ a:hover {
 
 .font-display {
   font-family: var(--font-display), "Bebas Neue", Impact, sans-serif;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
+.font-meta {
+  font-family: var(--font-meta), ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 500;
   letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ss-rule {
+  display: block;
+  height: var(--rule);
+  width: 4.5rem;
+  background: var(--accent);
+  margin: 0.75rem 0 0;
 }
 
 .ss-panel {
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  padding: 1.25rem 0;
+}
+
+.ss-well {
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
   background: var(--surface);
@@ -181,7 +208,7 @@ a:hover {
 }
 
 @media (min-width: 768px) {
-  .ss-panel {
+  .ss-well {
     padding: 1.5rem;
   }
 }
@@ -217,19 +244,24 @@ a:hover {
 }
 
 .ss-btn-secondary {
-  background: var(--surface);
-  border-color: var(--line);
+  background: transparent;
+  border-color: var(--ink);
   color: var(--ink);
 }
 
 .ss-btn-secondary:hover {
-  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .ss-btn-ghost {
   background: transparent;
   border-color: var(--line);
   color: var(--ink);
+}
+
+.ss-btn-ghost:hover {
+  border-color: var(--ink);
 }
 
 .ss-input,
@@ -268,31 +300,34 @@ a:hover {
 .ss-chip {
   display: inline-flex;
   align-items: center;
-  min-height: 2rem;
-  border-radius: 999px;
-  padding: 0.2rem 0.75rem;
-  font-size: 0.95rem;
-  font-weight: 700;
+  min-height: 1.75rem;
+  border-radius: var(--radius-control);
+  padding: 0.15rem 0.5rem;
+  font-family: var(--font-meta), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   border: 1px solid var(--line);
-  background: var(--paper);
+  background: transparent;
   color: var(--ink);
 }
 
 .ss-chip-good {
-  border-color: color-mix(in oklab, var(--good) 35%, var(--line));
-  background: color-mix(in oklab, var(--good) 10%, white);
+  border-color: var(--good);
+  background: transparent;
   color: var(--good);
 }
 
 .ss-chip-accent {
-  border-color: color-mix(in oklab, var(--accent) 35%, var(--line));
-  background: color-mix(in oklab, var(--accent) 10%, white);
+  border-color: var(--accent);
+  background: transparent;
   color: var(--accent-deep);
 }
 
 .ss-chip-warn {
-  border-color: color-mix(in oklab, var(--warn) 35%, var(--line));
-  background: color-mix(in oklab, var(--warn) 12%, white);
+  border-color: var(--warn);
+  background: transparent;
   color: var(--warn);
 }
 
@@ -306,28 +341,9 @@ a:hover {
   border: none !important;
 }
 
-/* Show detail — presence without card stacks */
-@keyframes ss-show-rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.ss-show-hero-copy {
-  animation: ss-show-rise 0.55s ease-out both;
-}
-.ss-show-hero-stats {
-  animation: ss-show-rise 0.55s ease-out 0.12s both;
-}
-.ss-ticket-strip {
-  animation: ss-show-rise 0.5s ease-out 0.18s both;
-}
-.ss-show-block {
-  animation: ss-show-rise 0.45s ease-out both;
+/* Show detail — catalog nameplate, no gradient orbs */
+.ss-show-hero {
+  background: var(--ink);
 }
 
 /* Comfortable reading measure */

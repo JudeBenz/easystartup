@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader, Panel, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { getSessionArtistId } from "@/lib/session-data";
@@ -11,7 +12,12 @@ export default async function PersonalCalendarPage() {
   if (!artistId) {
     return (
       <div>
-        <PageHeader title="Personal calendar" description="Switch to an artist persona." />
+        <EmptyState
+          title="Artist profile required"
+          description="Create an artist account to lay out booked and applied shows for the year."
+          action={{ href: "/join?role=artist", label: "Create artist account" }}
+          secondary={{ href: "/shows/calendar", label: "Show calendar" }}
+        />
       </div>
     );
   }
@@ -39,7 +45,14 @@ export default async function PersonalCalendarPage() {
             </div>
           </Panel>
         ))}
-        {!rows.length ? <Panel><p className="text-[1.05rem] text-[var(--muted)]">No bookings yet — accept a show or mark applied.</p></Panel> : null}
+        {!rows.length ? (
+          <EmptyState
+            title="No shows on your season yet"
+            description="Accept a booth or mark a show as applied and it will show up here."
+            action={{ href: "/shows", label: "Browse shows" }}
+            secondary={{ href: "/applications", label: "Application tracker" }}
+          />
+        ) : null}
       </div>
     </div>
   );

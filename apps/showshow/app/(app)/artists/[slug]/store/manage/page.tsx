@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { FormBanner } from "@/components/form-banner";
+import { StoredImage } from "@/components/stored-image";
 import { PageHeader, Panel } from "@/components/ui";
 import { saveProductAction, saveSponsorshipTierAction } from "@/lib/actions-more";
-import { requireSessionUser } from "@/lib/auth/guards";
+import { getSessionUser } from "@/lib/session-data";
 import { getArtist } from "@/lib/store";
 import { isPostgresEnabled } from "@/lib/db/client";
 import { MEDIUM_LABELS } from "@/lib/format";
@@ -13,11 +15,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: data ? `Manage ${data.artist.displayName} store` : "Manage store" };
 }
 
-export default async function StoreManagePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function StoreManagePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { slug } = await params;
+  const sp = await searchParams;
   if (!isPostgresEnabled()) redirect(`/artists/${slug}/store`);
 
-  const user = await requireSessionUser();
+  const user = await getSessionUser();
+  if (!user) redirect(`/signin?next=/artists/${slug}/store/manage`);
   const data = await getArtist(slug);
   if (!data) notFound();
   if (data.artist.userId !== user.id && !user.roles.includes("admin")) {
@@ -37,17 +47,19 @@ export default async function StoreManagePage({ params }: { params: Promise<{ sl
           </Link>
         }
       />
+      <FormBanner searchParams={sp} />
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <Panel>
+        <Panel well>
           <h2 className="font-display text-lg font-bold">Add product</h2>
-          <form action={saveProductAction} className="mt-4 grid gap-3">
+          <form action={saveProductAction} encType="multipart/form-data" className="mt-4 grid gap-3">
             <input type="hidden" name="artistId" value={artist.id} />
             <input type="hidden" name="artistSlug" value={artist.slug} />
             <input name="title" required placeholder="Title" className="ss-input" />
             <textarea name="description" rows={2} placeholder="Description" className="ss-input" />
             <input name="priceCents" type="number" min={100} required placeholder="Price (cents)" className="ss-input" />
             <input name="inventory" type="number" min={0} defaultValue={5} className="ss-input" />
+            <input type="file" name="image" accept="image/jpeg,image/png,image/webp" className="ss-input" />
             <select name="medium" className="ss-select">
               {Object.entries(MEDIUM_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>
@@ -61,14 +73,21 @@ export default async function StoreManagePage({ params }: { params: Promise<{ sl
           </form>
           <ul className="mt-6 space-y-2 text-sm">
             {products.map((p) => (
-              <li key={p.id}>
-                {p.title} · {p.inventory} in stock
+              <li key={p.id} className="flex items-center gap-3">
+                <StoredImage
+                  objectKey={p.imageUrl}
+                  alt=""
+                  className="h-12 w-12 shrink-0 rounded object-cover"
+                />
+                <span>
+                  {p.title} · {p.inventory} in stock
+                </span>
               </li>
             ))}
           </ul>
         </Panel>
 
-        <Panel>
+        <Panel well>
           <h2 className="font-display text-lg font-bold">Add sponsorship tier</h2>
           <form action={saveSponsorshipTierAction} className="mt-4 grid gap-3">
             <input type="hidden" name="artistId" value={artist.id} />

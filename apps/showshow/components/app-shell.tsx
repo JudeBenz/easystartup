@@ -6,54 +6,62 @@ import { isDemoPersonasEnabled } from "@/lib/demo-mode";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
-  const users = await listUsers();
-  const role = user.roles[0] ?? "guest";
   const demo = isDemoPersonasEnabled();
+  const role = user?.roles[0] ?? "guest";
 
-  const personaForm = demo ? (
-    <form action={switchUserAction} className="grid gap-3">
-      <label className="ss-label" htmlFor="persona">
-        Choose a demo person
-        <select
-          id="persona"
-          name="userId"
-          defaultValue={user.id}
-          className="ss-select"
-        >
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name} ({u.roles[0]})
-            </option>
-          ))}
-        </select>
-      </label>
-      <button type="submit" className="ss-btn ss-btn-primary w-full sm:w-auto">
-        Switch person
-      </button>
-    </form>
-  ) : (
+  const accountPanel = demo ? (
+    <>
+      <form action={switchUserAction} className="grid gap-3">
+        <label className="ss-label" htmlFor="persona">
+          Internal demo person
+          <select
+            id="persona"
+            name="userId"
+            defaultValue={user?.id}
+            className="ss-select"
+          >
+            {(await listUsers()).map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name} ({u.roles[0]})
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="submit" className="ss-btn ss-btn-primary w-full sm:w-auto">
+          Switch person
+        </button>
+      </form>
+      <form action={resetDemoAction}>
+        <button type="submit" className="ss-btn ss-btn-secondary w-full sm:w-auto">
+          Reset demo data
+        </button>
+      </form>
+    </>
+  ) : user ? (
     <p className="text-[1.05rem] text-[var(--muted)]">
-      Demo personas are off. Sign in from Settings.
+      Signed in as {user.name}.{" "}
+      <Link href="/settings" className="font-medium underline">
+        Account
+      </Link>
     </p>
-  );
-
-  const resetForm = demo ? (
-    <form action={resetDemoAction}>
-      <button type="submit" className="ss-btn ss-btn-secondary w-full sm:w-auto">
-        Reset demo data
-      </button>
-    </form>
   ) : (
-    <span />
+    <div className="flex flex-col gap-3">
+      <Link href="/signin" className="ss-btn ss-btn-secondary w-full">
+        Sign in
+      </Link>
+      <Link href="/join" className="ss-btn ss-btn-primary w-full">
+        Create account
+      </Link>
+    </div>
   );
 
   return (
     <div className="min-h-screen">
       <SiteNav
-        userLabel={`${user.name.split(" ")[0]} · ${role}`}
-        roles={user.roles}
-        personaForm={personaForm}
-        resetForm={resetForm}
+        userLabel={user ? `${user.name.split(" ")[0]} · ${role}` : ""}
+        roles={user?.roles ?? []}
+        signedIn={Boolean(user)}
+        accountPanel={accountPanel}
       />
       <main
         id="main-content"
@@ -61,7 +69,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
-      <footer className="mx-auto hidden max-w-6xl px-6 pb-8 text-base text-[var(--muted)] lg:block">
+      <footer className="mx-auto hidden max-w-6xl border-t border-[var(--line)] px-6 py-8 font-meta text-[var(--muted)] lg:block">
         Facts from official show sites. Rankings come from artist reports, not guidebooks.{" "}
         <Link href="/privacy" className="underline">
           Privacy

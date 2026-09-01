@@ -123,7 +123,46 @@ export async function buildSeed(): Promise<DemoData> {
   }
 
   const shows = Array.from(showsMap.values());
-  // Promote a couple shows
+
+  const catalogOnly: DemoData = {
+    users: [],
+    artists: [],
+    showgoers: [],
+    directors: [],
+    shows,
+    editions,
+    socialLinks,
+    externalRefs,
+    provenance,
+    roiReports: [],
+    roiBreakdowns: [],
+    aggregates: [],
+    applications: [],
+    routes: [],
+    routeStops: [],
+    bookings: [],
+    posts: [],
+    comments: [],
+    announcements: [],
+    waitlist: [],
+    boothOffers: [],
+    boothRequests: [],
+    juryFeedback: [],
+    alerts: [],
+    weather: [],
+    sponsorshipTiers: [],
+    subscriptions: [],
+    products: [],
+    orders: [],
+    promotions: [],
+    follows: [],
+  };
+
+  // Production catalog is official-site facts only. Invented people, posts, ROI, weather, and routes stay off unless explicitly enabled for internal QA.
+  if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1") {
+    return catalogOnly;
+  }
+
   const promoted = shows.find((s) => s.slug === "cherry-creek-arts-festival");
   if (promoted) promoted.promotedUntil = "2026-12-31";
 

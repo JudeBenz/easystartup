@@ -27,7 +27,7 @@ async function main() {
 
   const row = await db.query.users.findFirst({ where: eq(users.email, adminEmail) });
   if (!row) {
-    console.error(`No user with email ${adminEmail}. Create an account on /settings first, then re-run.`);
+    console.error(`No user with email ${adminEmail}. Create an account on /join first, then re-run.`);
     process.exit(1);
   }
 

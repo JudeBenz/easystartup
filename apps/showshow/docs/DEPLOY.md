@@ -27,6 +27,9 @@ The monorepo root (`easystartup`) is a separate Next app. ShowShow should be its
 | `EMAIL_FROM` | e.g. `ShowShow <alerts@yourdomain.com>` |
 | `CRON_SECRET` | Protects **both** cron routes (see below) |
 | `SHOWSHOW_DEMO_PERSONAS` | Set `0` or omit in production |
+| `NEXT_PUBLIC_SENTRY_DSN` | Optional — error/performance tracing (no-op when unset) |
+| `SENTRY_ORG` / `SENTRY_PROJECT` / `SENTRY_AUTH_TOKEN` | Optional — source map upload on CI |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_ENDPOINT_URL_S3` / `AWS_REGION` | Neon Object Storage (`uploads` bucket). Copy from `apps/showshow/.env.local` after `neon link`. Without these, jury/product/avatar uploads stay disabled. |
 
 ### Stripe webhook
 
@@ -39,7 +42,7 @@ Prefer versioned SQL in `apps/showshow/drizzle/` for production:
 
 ```bash
 pnpm --filter showshow db:push   # dev / first boot
-pnpm --filter showshow db:seed   # optional demo data
+pnpm --filter showshow db:seed   # official-site show catalog only; omit SHOWSHOW_DEMO_PERSONAS
 ```
 
 Migrations `0000`–`0002` cover core schema, aggregates, and social graph.

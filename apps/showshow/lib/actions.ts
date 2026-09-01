@@ -27,7 +27,7 @@ import {
 import { flashUrl } from "@/lib/flash";
 
 export async function switchUserAction(formData: FormData) {
-  if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1" && process.env.DATABASE_URL?.trim()) {
+  if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1") {
     throw new Error("Demo personas disabled");
   }
   const userId = String(formData.get("userId") || "user_aria");
@@ -44,7 +44,7 @@ export async function setThemeAction(formData: FormData) {
 }
 
 export async function resetDemoAction() {
-  if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1" && process.env.DATABASE_URL?.trim()) {
+  if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1") {
     throw new Error("Demo reset disabled");
   }
   await resetDb();
@@ -153,14 +153,29 @@ export async function openWaitlistAction(formData: FormData) {
 }
 
 export async function createJuryFeedbackAction(formData: FormData) {
-  const { artistId } = await requireArtistId();
-  await createJuryFeedback({
-    artistId,
-    editionId: String(formData.get("editionId")),
-    outcome: String(formData.get("outcome")) as "accepted" | "waitlisted" | "declined",
-    notes: String(formData.get("notes") || "") || undefined,
-  });
-  revalidatePath("/jury");
+  try {
+    const { artistId } = await requireArtistId();
+    const image = formData.get("image");
+    let imageUrls: string[] | undefined;
+    if (image instanceof File && image.size) {
+      const { uploadImageFile } = await import("@/lib/storage/uploads");
+      const key = await uploadImageFile(image, "jury", artistId);
+      if (key) imageUrls = [key];
+    }
+    await createJuryFeedback({
+      artistId,
+      editionId: String(formData.get("editionId")),
+      outcome: String(formData.get("outcome")) as "accepted" | "waitlisted" | "declined",
+      notes: String(formData.get("notes") || "") || undefined,
+      imageUrls,
+    });
+    revalidatePath("/jury");
+  } catch (err) {
+    const { redirect, unstable_rethrow } = await import("next/navigation");
+    unstable_rethrow(err);
+    const msg = err instanceof Error ? err.message : "Could not save jury note.";
+    redirect(flashUrl("/jury", { error: msg }));
+  }
 }
 
 export async function createBoothOfferAction(formData: FormData) {
@@ -189,7 +204,6 @@ export async function checkoutProductAction(formData: FormData) {
   const { isPostgresEnabled } = await import("@/lib/db/client");
   const { isStripeConfigured } = await import("@/lib/payments/stripe");
   const { createProductCheckout } = await import("@/lib/payments/ledger");
-  const { getSessionUser } = await import("@/lib/session-data");
   const { eq } = await import("drizzle-orm");
   const { requirePostgres } = await import("@/lib/db/client");
   const { products, artists, orders } = await import("@/lib/db/schema");
@@ -203,7 +217,7 @@ export async function checkoutProductAction(formData: FormData) {
 
   const productId = String(formData.get("productId"));
   const quantity = Math.max(1, Number(formData.get("quantity") || 1));
-  const user = await getSessionUser();
+  const user = await requireSessionUser();
   const db = requirePostgres();
   const product = await db
     .select()
@@ -281,7 +295,7 @@ export async function checkoutSponsorshipAction(formData: FormData) {
   const { isPostgresEnabled, requirePostgres } = await import("@/lib/db/client");
   const { isStripeConfigured } = await import("@/lib/payments/stripe");
   const { createSponsorshipCheckout } = await import("@/lib/payments/ledger");
-  const { getSessionUser } = await import("@/lib/session-data");
+  const { requireSessionUser } = await import("@/lib/auth/guards");
   const { artists, patronageSubscriptions, sponsorshipTiers } = await import(
     "@/lib/db/schema"
   );
@@ -291,7 +305,7 @@ export async function checkoutSponsorshipAction(formData: FormData) {
   }
 
   const tierId = String(formData.get("tierId"));
-  const user = await getSessionUser();
+  const user = await requireSessionUser();
   const db = requirePostgres();
   const tier = await db
     .select()
@@ -343,7 +357,7 @@ export async function checkoutPromotionAction(formData: FormData) {
   const { isPostgresEnabled, requirePostgres } = await import("@/lib/db/client");
   const { isStripeConfigured } = await import("@/lib/payments/stripe");
   const { createPromotionCheckout } = await import("@/lib/payments/ledger");
-  const { getSessionUser } = await import("@/lib/session-data");
+  const { requireSessionUser } = await import("@/lib/auth/guards");
   const { promotions, shows } = await import("@/lib/db/schema");
 
   if (!isPostgresEnabled() || !isStripeConfigured()) {
@@ -353,7 +367,7 @@ export async function checkoutPromotionAction(formData: FormData) {
   const showId = String(formData.get("showId"));
   const budgetCents = Math.max(2500, Number(formData.get("budgetCents") || 5000));
   const days = Math.min(30, Math.max(7, Number(formData.get("days") || 14)));
-  const user = await getSessionUser();
+  const user = await requireSessionUser();
   const db = requirePostgres();
   const show = await db
     .select()
@@ -399,17 +413,17 @@ export async function signInAction(formData: FormData) {
     .trim()
     .toLowerCase();
   const password = String(formData.get("password") || "");
-  const next = String(formData.get("next") || "/settings");
+  const next = String(formData.get("next") || "/");
 
   if (!email || !password) {
-    redirect(flashUrl("/settings", { error: "Email and password are required.", next }));
+    redirect(flashUrl("/signin", { error: "Email and password are required.", next }));
   }
 
   try {
     await signIn("credentials", { email, password, redirectTo: next });
   } catch (err) {
     if (err instanceof AuthError) {
-      redirect(flashUrl("/settings", { error: "Invalid email or password.", next }));
+      redirect(flashUrl("/signin", { error: "Invalid email or password.", next }));
     }
     throw err;
   }
@@ -422,7 +436,7 @@ export async function registerAccountAction(formData: FormData) {
   const { pgRegisterUser } = await import("@/lib/store/pg-repo");
 
   if (!isPostgresEnabled()) {
-    redirect(flashUrl("/settings", { error: "Signup requires DATABASE_URL (Postgres)." }));
+    redirect(flashUrl("/join", { error: "Creating an account requires the production database." }));
   }
 
   const name = String(formData.get("name") || "").trim();
@@ -440,7 +454,7 @@ export async function registerAccountAction(formData: FormData) {
 
   if (!name || !email || password.length < 8) {
     redirect(
-      flashUrl("/settings", {
+      flashUrl("/join", {
         error: "Name, email, and password (8+ characters) are required.",
       }),
     );
@@ -455,13 +469,13 @@ export async function registerAccountAction(formData: FormData) {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Could not create account.";
-    redirect(flashUrl("/settings", { error: msg }));
+    redirect(flashUrl("/join", { error: msg }));
   }
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/settings" });
+    await signIn("credentials", { email, password, redirectTo: "/onboarding" });
   } catch {
-    redirect(flashUrl("/settings", { success: "Account created. Sign in with your email." }));
+    redirect(flashUrl("/signin", { success: "Account created. Sign in with your email." }));
   }
 }
 
@@ -510,5 +524,36 @@ export async function resetPasswordAction(formData: FormData) {
     const msg = err instanceof Error ? err.message : "Could not reset password.";
     redirect(flashUrl("/reset-password", { error: msg, email, token }));
   }
-  redirect("/settings?reset=1");
+  redirect("/signin?reset=1");
+}
+
+export async function completeOnboardingAction(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { isPostgresEnabled } = await import("@/lib/db/client");
+  const user = await requireSessionUser();
+
+  if (!isPostgresEnabled()) {
+    redirect("/");
+  }
+
+  const city = String(formData.get("city") || "").trim();
+  const region = String(formData.get("region") || "").trim();
+  const tagline = String(formData.get("tagline") || "").trim();
+  const mediums = formData
+    .getAll("mediums")
+    .map((v) => String(v))
+    .filter(Boolean) as Medium[];
+
+  if (user.roles.includes("artist")) {
+    const { pgCompleteArtistOnboarding } = await import("@/lib/store/pg-repo");
+    await pgCompleteArtistOnboarding({
+      userId: user.id,
+      city,
+      region,
+      tagline,
+      mediums: mediums.length ? mediums : ["other"],
+    });
+  }
+
+  redirect("/");
 }

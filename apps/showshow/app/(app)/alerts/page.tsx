@@ -63,7 +63,10 @@ export default async function AlertsPage() {
       ) : (
         <Panel className="mb-8">
           <p className="text-[1.05rem] text-[var(--muted)]">
-            Switch to an artist persona to see personal deadline reminders.
+            <Link href="/join?role=artist" className="font-medium underline">
+              Create an artist account
+            </Link>{" "}
+            to see personal deadline reminders.
           </p>
         </Panel>
       )}

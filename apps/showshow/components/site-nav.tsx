@@ -8,31 +8,40 @@ import type { UserRole } from "@/types/domain";
 
 export type NavItem = { href: string; label: string; short?: string; roles?: UserRole[] };
 
-const PRIMARY: NavItem[] = [
+const DIRECTORY: NavItem[] = [
   { href: "/shows", label: "Shows", short: "Shows" },
-  { href: "/calendar", label: "My season", short: "Season", roles: ["artist"] },
-  { href: "/applications", label: "Apps", short: "Apps", roles: ["artist"] },
-  { href: "/roi", label: "ROI", short: "ROI", roles: ["artist"] },
+  { href: "/shows/map", label: "Map", short: "Map" },
+  { href: "/shows/calendar", label: "Show calendar" },
+  { href: "/shows/ranked", label: "Our rankings" },
+  { href: "/artists", label: "Artists", short: "Artists" },
+  { href: "/routes", label: "Routes" },
   { href: "/feed", label: "Feed", short: "Feed" },
 ];
 
-const MORE: NavItem[] = [
-  { href: "/shows/calendar", label: "Show calendar" },
-  { href: "/shows/map", label: "Map" },
-  { href: "/shows/ranked", label: "Our rankings" },
-  { href: "/applications", label: "Applications", roles: ["artist"] },
-  { href: "/routes", label: "Routes" },
+const SEASON: NavItem[] = [
+  { href: "/calendar", label: "My season", short: "Season", roles: ["artist"] },
+  { href: "/applications", label: "Applications", short: "Apps", roles: ["artist"] },
+  { href: "/roi", label: "ROI", short: "ROI", roles: ["artist"] },
   { href: "/jury", label: "Jury feedback", roles: ["artist"] },
   { href: "/booth-sit", label: "Booth-sit", roles: ["artist"] },
+];
+
+const ACCOUNT: NavItem[] = [
   { href: "/alerts", label: "Alerts" },
-  { href: "/artists", label: "Artists" },
-  { href: "/director", label: "Director desk", roles: ["director", "admin"] },
   { href: "/orders", label: "Orders" },
-  { href: "/settings", label: "Settings" },
+  { href: "/settings", label: "Account" },
+  { href: "/install", label: "Add to phone" },
+  { href: "/director", label: "Director desk", short: "Desk", roles: ["director", "admin"] },
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/shows") return pathname === "/shows" || pathname.startsWith("/shows/");
+  if (href === "/shows") {
+    if (pathname === "/shows") return true;
+    if (!pathname.startsWith("/shows/")) return false;
+    return !["/shows/map", "/shows/calendar", "/shows/ranked"].some(
+      (p) => pathname === p || pathname.startsWith(`${p}/`),
+    );
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -41,30 +50,55 @@ function visible(item: NavItem, roles: UserRole[]) {
   return item.roles.some((r) => roles.includes(r));
 }
 
+function primaryFor(roles: UserRole[]): NavItem[] {
+  if (roles.includes("artist")) {
+    return [
+      { href: "/shows", label: "Shows", short: "Shows" },
+      { href: "/calendar", label: "My season", short: "Season" },
+      { href: "/applications", label: "Applications", short: "Apps" },
+      { href: "/roi", label: "ROI", short: "ROI" },
+    ];
+  }
+  if (roles.includes("director")) {
+    return [
+      { href: "/shows", label: "Shows", short: "Shows" },
+      { href: "/shows/map", label: "Map", short: "Map" },
+      { href: "/director", label: "Director desk", short: "Desk" },
+      { href: "/feed", label: "Feed", short: "Feed" },
+    ];
+  }
+  return [
+    { href: "/shows", label: "Shows", short: "Shows" },
+    { href: "/shows/map", label: "Map", short: "Map" },
+    { href: "/feed", label: "Feed", short: "Feed" },
+    { href: "/artists", label: "Artists", short: "Artists" },
+  ];
+}
+
 export function SiteNav({
   userLabel,
   roles,
-  personaForm,
-  resetForm,
+  signedIn,
+  accountPanel,
 }: {
   userLabel: string;
   roles: UserRole[];
-  personaForm: React.ReactNode;
-  resetForm: React.ReactNode;
+  signedIn: boolean;
+  accountPanel: React.ReactNode;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const primary = useMemo(() => {
-    const filtered = PRIMARY.filter((i) => visible(i, roles));
-    if (roles.includes("director") && !filtered.some((i) => i.href === "/director")) {
-      filtered.push({ href: "/director", label: "Director", short: "Desk", roles: ["director"] });
-    }
-    // Keep bottom nav to 4 links + Menu on phones
-    return filtered.slice(0, 4);
-  }, [roles]);
-
-  const more = useMemo(() => MORE.filter((i) => visible(i, roles)), [roles]);
+  const primary = useMemo(() => primaryFor(roles), [roles]);
+  const groups = useMemo(
+    () =>
+      [
+        { label: "Directory", items: DIRECTORY.filter((i) => visible(i, roles)) },
+        { label: "Your season", items: SEASON.filter((i) => visible(i, roles)) },
+        { label: "Account", items: ACCOUNT.filter((i) => visible(i, roles)) },
+      ].filter((g) => g.items.length),
+    [roles],
+  );
 
   return (
     <>
@@ -72,28 +106,25 @@ export function SiteNav({
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--surface)] pt-[env(safe-area-inset-top)]">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-6">
-          <Link
-            href="/"
-            className="font-display shrink-0 text-[1.75rem] leading-none text-[var(--ink)] no-underline md:text-[2rem]"
-          >
-            Show<span className="text-[var(--accent)]">Show</span>
+      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)] pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex max-w-6xl items-end gap-3 px-4 py-3 md:px-6">
+          <Link href="/" className="shrink-0 no-underline">
+            <span className="font-display block text-[1.85rem] leading-none text-[var(--ink)] md:text-[2.15rem]">
+              ShowShow
+            </span>
+            <span className="ss-rule !mt-1 !w-10" aria-hidden />
           </Link>
 
-          <nav
-            aria-label="Main"
-            className="ml-4 hidden flex-1 items-center gap-1 lg:flex"
-          >
+          <nav aria-label="Main" className="ml-6 hidden flex-1 items-center gap-1 lg:flex">
             {primary.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "inline-flex min-h-[48px] items-center rounded-[var(--radius-control)] px-3 text-base font-bold no-underline",
+                  "inline-flex min-h-[48px] items-center border-b-4 px-3 text-[1.05rem] font-bold no-underline",
                   isActive(pathname, item.href)
-                    ? "bg-[var(--ink)] text-white"
-                    : "text-[var(--ink)] hover:bg-[var(--paper)]",
+                    ? "border-[var(--accent)] text-[var(--ink)]"
+                    : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]",
                 )}
               >
                 {item.label}
@@ -101,17 +132,28 @@ export function SiteNav({
             ))}
             <button
               type="button"
-              className="ss-btn ss-btn-ghost ml-1 min-h-[48px] px-3 text-base"
+              className="ml-2 inline-flex min-h-[48px] items-center border-b-4 border-transparent px-3 text-[1.05rem] font-bold text-[var(--muted)] hover:text-[var(--ink)]"
               aria-expanded={open}
               aria-controls="more-menu"
               onClick={() => setOpen((v) => !v)}
             >
-              More
+              Menu
             </button>
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
-            <p className="hidden text-base text-[var(--muted)] sm:block">{userLabel}</p>
+          <div className="ml-auto flex items-center gap-2 pb-1">
+            {signedIn ? (
+              <p className="hidden font-meta text-[var(--muted)] sm:block">{userLabel}</p>
+            ) : (
+              <div className="hidden items-center gap-2 sm:flex">
+                <Link href="/signin" className="ss-btn ss-btn-ghost min-h-[48px] px-3">
+                  Sign in
+                </Link>
+                <Link href="/join" className="ss-btn ss-btn-primary min-h-[48px] px-3">
+                  Join
+                </Link>
+              </div>
+            )}
             <button
               type="button"
               className="ss-btn ss-btn-secondary min-h-[48px] lg:hidden"
@@ -125,38 +167,36 @@ export function SiteNav({
         </div>
 
         {open ? (
-          <div
-            id="more-menu"
-            className="border-t border-[var(--line)] bg-[var(--surface)]"
-          >
-            <div className="mx-auto grid max-w-6xl gap-6 px-4 py-5 md:grid-cols-[1.2fr_0.8fr] md:px-6">
-              <div>
-                <p className="mb-3 text-base font-bold text-[var(--muted)]">All pages</p>
-                <ul className="grid gap-2 sm:grid-cols-2">
-                  {[...primary, ...more].map((item) => (
-                    <li key={`more-${item.href}`}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          "flex min-h-[var(--tap)] items-center rounded-[var(--radius-control)] border px-4 text-lg font-bold no-underline",
-                          isActive(pathname, item.href)
-                            ? "border-[var(--ink)] bg-[var(--ink)] text-white"
-                            : "border-[var(--line)] bg-[var(--paper)] text-[var(--ink)]",
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+          <div id="more-menu" className="border-t border-[var(--line)] bg-[var(--paper)]">
+            <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 md:grid-cols-[1.4fr_0.8fr] md:px-6">
+              <div className="grid gap-8 sm:grid-cols-2">
+                {groups.map((group) => (
+                  <div key={group.label}>
+                    <p className="font-meta mb-2 uppercase text-[var(--muted)]">{group.label}</p>
+                    <ul className="space-y-1">
+                      {group.items.map((item) => (
+                        <li key={`${group.label}-${item.href}`}>
+                          <Link
+                            href={item.href}
+                            onClick={() => setOpen(false)}
+                            className={cn(
+                              "flex min-h-[var(--tap)] items-center text-lg no-underline",
+                              isActive(pathname, item.href)
+                                ? "font-bold text-[var(--accent)]"
+                                : "text-[var(--ink)] hover:underline",
+                            )}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="mb-2 text-base font-bold text-[var(--muted)]">Who am I?</p>
-                  {personaForm}
-                </div>
-                <div>{resetForm}</div>
+              <div className="space-y-4 border-t border-[var(--line)] pt-4 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+                <p className="font-meta mb-2 uppercase text-[var(--muted)]">You</p>
+                {accountPanel}
                 <button
                   type="button"
                   className="ss-btn ss-btn-ghost w-full min-h-[48px]"
@@ -172,7 +212,7 @@ export function SiteNav({
 
       <nav
         aria-label="Primary"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-[var(--surface)] pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-[var(--paper)] pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         <ul className="mx-auto grid max-w-6xl grid-cols-5">
           {primary.map((item) => (

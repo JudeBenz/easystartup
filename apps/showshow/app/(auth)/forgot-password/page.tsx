@@ -22,18 +22,18 @@ export default async function ForgotPasswordPage({
       />
 
       {!pg ? (
-        <Panel>
+        <Panel well>
           <p className="text-[1.05rem] text-[var(--muted)]">
             Password reset is available in Postgres mode. Set <code>DATABASE_URL</code> first.
           </p>
           <p className="mt-3">
-            <Link href="/settings" className="font-medium hover:text-[var(--field)]">
-              Back to settings
+            <Link href="/signin" className="font-medium hover:text-[var(--field)]">
+              Back to sign in
             </Link>
           </p>
         </Panel>
       ) : params.sent ? (
-        <Panel>
+        <Panel well>
           <p className="text-[1.05rem]">
             If an account exists for that email, a reset link has been sent.
           </p>
@@ -46,13 +46,13 @@ export default async function ForgotPasswordPage({
             </p>
           ) : null}
           <p className="mt-4">
-            <Link href="/settings" className="font-medium hover:text-[var(--field)]">
+            <Link href="/signin" className="font-medium hover:text-[var(--field)]">
               Back to sign in
             </Link>
           </p>
         </Panel>
       ) : (
-        <Panel className="max-w-lg">
+        <Panel well className="max-w-lg">
           <form action={requestPasswordResetAction} className="grid gap-3">
             <input
               name="email"
@@ -66,8 +66,8 @@ export default async function ForgotPasswordPage({
             </button>
           </form>
           <p className="mt-4 text-sm">
-            <Link href="/settings" className="font-medium hover:text-[var(--field)]">
-              Back to settings
+            <Link href="/signin" className="font-medium hover:text-[var(--field)]">
+              Back to sign in
             </Link>
           </p>
         </Panel>

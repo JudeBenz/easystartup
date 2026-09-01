@@ -22,10 +22,15 @@ export default async function BoothSitPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Panel>
+        <Panel well>
           <h2 className="font-display text-lg font-bold">Offer coverage</h2>
           {!artistId ? (
-            <p className="mt-3 text-[1.05rem] text-[var(--muted)]">Switch to an artist persona.</p>
+            <p className="mt-3 text-[1.05rem] text-[var(--muted)]">
+              <Link href="/join?role=artist" className="font-medium underline">
+                Create an artist account
+              </Link>{" "}
+              to offer or request coverage.
+            </p>
           ) : (
             <form action={createBoothOfferAction} className="mt-4 grid gap-3 text-sm">
               <input type="hidden" name="artistId" value={artistId} />
@@ -76,7 +81,12 @@ export default async function BoothSitPage() {
         <Panel>
           <h2 className="font-display text-lg font-bold">Need coverage</h2>
           {!artistId ? (
-            <p className="mt-3 text-[1.05rem] text-[var(--muted)]">Switch to an artist persona.</p>
+            <p className="mt-3 text-[1.05rem] text-[var(--muted)]">
+              <Link href="/join?role=artist" className="font-medium underline">
+                Create an artist account
+              </Link>{" "}
+              to offer or request coverage.
+            </p>
           ) : (
             <form action={createBoothRequestAction} className="mt-4 grid gap-3 text-sm">
               <input type="hidden" name="artistId" value={artistId} />

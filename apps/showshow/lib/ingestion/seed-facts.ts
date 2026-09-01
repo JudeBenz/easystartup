@@ -3,6 +3,20 @@ import verifiedCaptures from "@/data/verified-captures.json";
 import type { NormalizedEditionFact } from "@/lib/ingestion/schema";
 
 type PriorityShow = (typeof priority100)[number];
+const JURY_PROCESS = ["blind", "panel", "invitation", "open", "unknown"] as const;
+type JuryProcess = (typeof JURY_PROCESS)[number];
+
+function coerceJuryProcess(raw: unknown): JuryProcess {
+  if (typeof raw !== "string") return "unknown";
+  const value = raw.trim().toLowerCase();
+  if ((JURY_PROCESS as readonly string[]).includes(value)) return value as JuryProcess;
+  if (value.includes("blind")) return "blind";
+  if (value.includes("invitation") || value.includes("invite")) return "invitation";
+  if (/\bopen\b/.test(value)) return "open";
+  if (value.includes("panel") || value.includes("jur")) return "panel";
+  return "unknown";
+}
+
 type Capture = {
   startDate?: string | null;
   endDate?: string | null;
@@ -10,7 +24,7 @@ type Capture = {
   boothFeeMin?: number | null;
   boothFeeMax?: number | null;
   applicationFee?: number | null;
-  juryProcess?: NormalizedEditionFact["juryProcess"] | null;
+  juryProcess?: string | null;
   venueName?: string | null;
   fullAddress?: string | null;
   attendance?: number | null;
@@ -76,14 +90,14 @@ function factFromPriority(
   if (capture?.startDate) year = Number(capture.startDate.slice(0, 4));
   const approx = weekendInMonth(year, month);
 
-  // Inactive / unverifiable shows: keep directory identity, blank commercial facts
   const inactive = Boolean(capture?.inactive);
   const startDate = capture?.startDate ?? (inactive ? `${year}-01-01` : approx.start);
   const endDate = capture?.endDate ?? (inactive ? `${year}-01-01` : approx.end);
-  const applicationDeadline = inactive
-    ? undefined
-    : (capture?.applicationDeadline ?? approx.deadline);
+  const applicationDeadline = inactive ? undefined : (capture?.applicationDeadline ?? undefined);
   const sourceUrl = capture?.sourceUrl ?? show.officialWebsiteUrl;
+
+  const inventedVenue = Boolean(capture?.venueName?.toLowerCase().includes("festival grounds"));
+  const venueName = inventedVenue ? show.city : (capture?.venueName ?? show.city);
 
   return {
     showSlug: show.slug,
@@ -97,13 +111,13 @@ function factFromPriority(
     startDate,
     endDate,
     applicationDeadline,
-    venueName: capture?.venueName ?? `${show.city} festival grounds`,
+    venueName,
     fullAddress: capture?.fullAddress ?? `${show.city}, ${show.region}`,
     boothFeeMin: inactive ? undefined : (capture?.boothFeeMin ?? undefined),
     boothFeeMax: inactive ? undefined : (capture?.boothFeeMax ?? undefined),
     applicationFee: inactive ? undefined : (capture?.applicationFee ?? undefined),
     currency: "USD",
-    juryProcess: capture?.juryProcess ?? "unknown",
+    juryProcess: coerceJuryProcess(capture?.juryProcess),
     attendance: inactive ? undefined : (capture?.attendance ?? undefined),
     attendanceSourceUrl: !inactive && capture?.attendance ? sourceUrl : undefined,
     directorName: capture?.directorName ?? undefined,
@@ -138,9 +152,9 @@ export const SEED_PRIOR_YEAR_FACTS: Omit<NormalizedEditionFact, "adapterId" | "s
           String(f.year - 2),
         )
       : undefined,
-    boothFeeMin: f.boothFeeMin ? Math.round(f.boothFeeMin * 0.95) : undefined,
-    boothFeeMax: f.boothFeeMax ? Math.round(f.boothFeeMax * 0.95) : undefined,
-    attendance: f.attendance ? Math.round(f.attendance * 0.95) : undefined,
+    boothFeeMin: undefined,
+    boothFeeMax: undefined,
+    attendance: undefined,
   }));
 
 export const ALL_SEED_FACTS = [...SEED_OFFICIAL_FACTS, ...SEED_PRIOR_YEAR_FACTS];

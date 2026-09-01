@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageHeader, Panel, Badge, SelfReportedNote } from "@/components/ui";
+import { PageHeader, Badge, SelfReportedNote } from "@/components/ui";
 import { formatDate, formatMoney } from "@/lib/format";
 import { listShows } from "@/lib/store";
 
@@ -17,67 +17,71 @@ export default async function ShowsPage() {
         title="Art fair directory"
         description="Dates, fees, and addresses from each show's own website. No copied rankings."
         actions={
-          <>
-            <Link className="ss-btn ss-btn-secondary" href="/shows/calendar">
+          <p className="font-meta flex flex-wrap gap-x-4 gap-y-2 text-[1.05rem]">
+            <Link href="/shows/calendar" className="inline-flex min-h-[48px] items-center underline-offset-4 hover:underline">
               Calendar
             </Link>
-            <Link className="ss-btn ss-btn-ghost" href="/shows/map">
+            <Link href="/shows/map" className="inline-flex min-h-[48px] items-center underline-offset-4 hover:underline">
               Map
             </Link>
-            <Link className="ss-btn ss-btn-ghost" href="/shows/ranked">
+            <Link href="/shows/ranked" className="inline-flex min-h-[48px] items-center underline-offset-4 hover:underline">
               Our rankings
             </Link>
-          </>
+          </p>
         }
       />
-      <div className="grid gap-3">
+      <div className="border-t border-[var(--line)]">
+        {!current.length ? (
+          <p className="py-8 text-[1.125rem] text-[var(--muted)]">
+            No upcoming fairs in the directory yet. Check back after the next official-site update.
+          </p>
+        ) : null}
         {current.map(({ show, current: edition, aggregate, promoted }) => (
-          <Panel key={show.id} className="!p-0">
-            <Link
-              href={`/shows/${show.slug}`}
-              className="block p-5 no-underline transition hover:bg-[var(--paper)] md:p-6"
-            >
-              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-display text-[1.5rem] leading-tight md:text-[1.75rem]">
-                      {show.name}
-                    </h2>
-                    {promoted ? <Badge tone="signal">Promoted</Badge> : null}
-                  </div>
-                  <p className="mt-1 text-[1.125rem] text-[var(--muted)]">
-                    {show.primaryCity}, {show.primaryRegion}
-                    {edition
-                      ? ` · ${formatDate(edition.startDate)} – ${formatDate(edition.endDate)}`
-                      : null}
-                  </p>
+          <Link
+            key={show.id}
+            href={`/shows/${show.slug}`}
+            className="block border-b border-[var(--line)] py-5 no-underline hover:bg-[color-mix(in_oklab,var(--surface)_70%,transparent)] md:py-6"
+          >
+            <div className="flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <h2 className="font-display text-[1.65rem] leading-none md:text-[1.9rem]">
+                    {show.name}
+                  </h2>
+                  {promoted ? <Badge tone="signal">Promoted</Badge> : null}
                 </div>
-                <div className="md:text-right">
-                  {edition?.boothFeeMin != null ? (
-                    <p className="text-[1.25rem] font-bold">
-                      Booth {formatMoney(edition.boothFeeMin)}
-                      {edition.boothFeeMax && edition.boothFeeMax !== edition.boothFeeMin
-                        ? `–${formatMoney(edition.boothFeeMax)}`
-                        : ""}
-                    </p>
-                  ) : null}
-                  {edition?.applicationDeadline ? (
-                    <p className="text-[1.05rem] text-[var(--muted)]">
-                      Apply by {formatDate(edition.applicationDeadline)}
-                    </p>
-                  ) : null}
-                </div>
+                <p className="font-meta mt-2 text-[var(--muted)]">
+                  {show.primaryCity}, {show.primaryRegion}
+                  {edition
+                    ? ` · ${formatDate(edition.startDate)} – ${formatDate(edition.endDate)}`
+                    : null}
+                </p>
               </div>
-              {aggregate?.minNMet ? (
-                <div className="mt-4 border-t border-[var(--line)] pt-3">
-                  <p className="text-[1.125rem] font-bold">
-                    Median net {formatMoney(aggregate.medianNet ?? 0)}
+              <div className="md:text-right">
+                {edition?.boothFeeMin != null ? (
+                  <p className="font-meta text-[1.05rem] font-semibold">
+                    Booth {formatMoney(edition.boothFeeMin)}
+                    {edition.boothFeeMax && edition.boothFeeMax !== edition.boothFeeMin
+                      ? `–${formatMoney(edition.boothFeeMax)}`
+                      : ""}
                   </p>
-                  <SelfReportedNote sampleSize={aggregate.sampleSize} />
-                </div>
-              ) : null}
-            </Link>
-          </Panel>
+                ) : null}
+                {edition?.applicationDeadline ? (
+                  <p className="font-meta mt-1 text-[var(--muted)]">
+                    Apply by {formatDate(edition.applicationDeadline)}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            {aggregate?.minNMet ? (
+              <div className="mt-3">
+                <p className="text-[1.05rem]">
+                  Median net {formatMoney(aggregate.medianNet ?? 0)}
+                </p>
+                <SelfReportedNote sampleSize={aggregate.sampleSize} />
+              </div>
+            ) : null}
+          </Link>
         ))}
       </div>
     </div>

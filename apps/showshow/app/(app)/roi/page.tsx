@@ -4,7 +4,6 @@ import { formatDate, formatMoney, MEDIUM_LABELS } from "@/lib/format";
 import { getSessionArtistId } from "@/lib/session-data";
 import { getEditionOptions, getRoiForArtist, getShowRoiSignal, listShows } from "@/lib/store";
 import { saveRoiAction } from "@/lib/actions";
-import { isPostgresEnabled } from "@/lib/db/client";
 
 export const metadata = { title: "ROI tracker" };
 
@@ -12,7 +11,6 @@ export default async function RoiPage() {
   const artistId = await getSessionArtistId();
 
   if (!artistId) {
-    const pg = isPostgresEnabled();
     return (
       <div>
         <PageHeader
@@ -21,16 +19,8 @@ export default async function RoiPage() {
         />
         <EmptyState
           title="Artist profile required"
-          description={
-            pg
-              ? "Log booth fees, travel, and sales per show. Only you see raw numbers unless you opt into aggregates."
-              : "Switch to an artist demo persona from the menu to try the ROI tracker."
-          }
-          action={
-            pg
-              ? { href: "/settings", label: "Create artist account" }
-              : { href: "/settings", label: "Open settings" }
-          }
+          description="Log booth fees, travel, and sales per show. Only you see raw numbers unless you opt into aggregates."
+          action={{ href: "/join?role=artist", label: "Create artist account" }}
           secondary={{ href: "/shows/ranked", label: "See ranked shows" }}
         />
       </div>
@@ -64,7 +54,7 @@ export default async function RoiPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <Panel>
+        <Panel well>
           <h2 className="font-display text-[1.5rem]">Log a show</h2>
           <form action={saveRoiAction} className="mt-5 grid gap-4">
             <input type="hidden" name="artistId" value={artistId} />
@@ -198,9 +188,10 @@ export default async function RoiPage() {
             );
           })}
           {!rows.length ? (
-            <Panel>
-              <p className="text-[1.125rem] text-[var(--muted)]">No logs yet.</p>
-            </Panel>
+            <EmptyState
+              title="No private logs yet"
+              description="After a weekend, log booth fee, travel, and sales. Numbers stay yours unless you opt into anonymous rankings."
+            />
           ) : null}
         </div>
       </div>

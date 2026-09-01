@@ -9,13 +9,13 @@ import type { UserRole } from "@/types/domain";
 
 /**
  * Auth.js (next-auth v5) — production sessions when AUTH_SECRET is set.
- * Demo personas remain available when SHOWSHOW_DEMO_PERSONAS=1 or Postgres is off.
+ * Demo personas remain available only when SHOWSHOW_DEMO_PERSONAS=1.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   session: { strategy: "jwt" },
   pages: {
-    signIn: "/settings",
+    signIn: "/signin",
   },
   providers: [
     Credentials({
@@ -62,7 +62,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         userId: { label: "User ID", type: "text" },
       },
       async authorize(credentials) {
-        if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1" && isPostgresEnabled()) {
+        if (process.env.SHOWSHOW_DEMO_PERSONAS !== "1") {
           return null;
         }
         const userId = String(credentials?.userId || "");

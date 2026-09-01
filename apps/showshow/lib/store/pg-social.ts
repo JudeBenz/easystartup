@@ -349,6 +349,7 @@ export async function pgUpsertProduct(input: {
   inventory: number;
   medium: string;
   active?: boolean;
+  imageUrl?: string;
 }) {
   const db = requirePostgres();
   if (input.productId) {
@@ -361,6 +362,7 @@ export async function pgUpsertProduct(input: {
         inventory: input.inventory,
         medium: input.medium,
         active: input.active ?? true,
+        ...(input.imageUrl ? { imageUrl: input.imageUrl } : {}),
       })
       .where(and(eq(products.id, input.productId), eq(products.artistId, input.artistId)));
     return input.productId;
@@ -375,6 +377,7 @@ export async function pgUpsertProduct(input: {
     inventory: input.inventory,
     medium: input.medium,
     active: true,
+    imageUrl: input.imageUrl ?? null,
   });
   return id;
 }

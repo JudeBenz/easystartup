@@ -1,41 +1,67 @@
-# DESIGN.md
+# ShowShow visual system
 
-## Visual thesis
-Printed fair catalog meets park-service signage: cool paper, near-black ink, one crimson ribbon accent, condensed display type, hyperlegible body type. No glow, no glass, no nested cards.
+One committed direction. Read this before changing CSS, layout, or components.
 
-## Palette
-Default theme: **Rust & turquoise**. Users can switch in Settings (`ss_theme` cookie).
+## Direction: printed field catalog
 
-| Token | Rust & turquoise | Use |
-|---|---|---|
-| paper | `#F2F6F5` | Page background |
-| surface | `#FFFFFF` | Panels, inputs |
-| ink | `#1A1F1E` | Primary text |
-| muted | `#3F4A48` | Secondary text |
-| line | `#C5D0CD` | Borders |
-| accent | `#B54A2A` | Primary actions (rust) |
-| good | `#0F7F7B` | Success / secondary brand (turquoise) |
+ShowShow is a fair **sourcebook** used outdoors on a phone, often by artists 50–80. It should feel like a marked-up guidebook: nameplate, hairline rules, fees in a row, not a SaaS landing page.
 
-Other presets: Fair catalog, Spruce & copper, Indigo & sand, Midnight sea.
+**Type:** Big Shoulders (masthead / show names) + Atkinson Hyperlegible (body, large) + IBM Plex Mono (dates, fees, IDs).
 
-## Type
-- Display: **Big Shoulders Text** — brand, page titles
-- Body/UI: **Atkinson Hyperlegible** — everything interactive and readable
-- Body size: 18px / line-height 1.6
-- Minimum functional text: 16px
-- Title steps: 28 / 36 / 48 (not a long sentence at 72px)
+**Palette:** tinted paper, ink, rust accent, field teal. Three hues. Never purple, never indigo-to-pink gradients, never neon glow.
 
-## Shape
-- Panel radius: 10px
-- Control radius: 6px
-- Pills: only for true status chips
-- Borders over diffuse shadows
+**Layout:** flush left. Directory rows, not card grids. Asymmetric 60/40 when a page needs two columns. No centered hero with a pill badge.
 
-## Touch & age-friendly
-- Tap targets ≥ 48px
-- Bottom primary nav on phone; grouped “More” menu for the rest
-- No hover-only affordances
-- High contrast; respect `prefers-reduced-motion`
+**Motion:** none by default. Instant states. Honor `prefers-reduced-motion`.
 
-## Surfaces
-Operate first: directory, ROI, applications. Landing hero is brand + one job + one CTA group.
+**Signature:** a 4px rust rule under the wordmark and page titles; mono metadata; ruled index rows.
+
+## Hard bans (AI slop)
+
+Do not introduce:
+
+- Inter, Geist, Poppins, Space Grotesk, Roboto as UI fonts
+- Purple / indigo / violet gradients, `bg-clip-text` rainbow headlines, floating orbs
+- `rounded-2xl` + `shadow-lg` on surfaces
+- A 1px gray box around every block (“cardocalypse”)
+- Colored left-border strips as decoration
+- Pill chips (`rounded-full`) on every status
+- Three equal feature cards with Lucide icons
+- Glassmorphism, blob SVGs, emoji as icons
+- Default Tailwind `blue-600` buttons
+- Copy like “Elevate your…”, “Welcome to your app”, lorem ipsum
+
+## Cards and panels
+
+Separate content in this order, stop when it reads:
+
+1. Whitespace
+2. A 3–5% background shift (`--paper-2` / `--surface`)
+3. A hairline rule (`1px solid var(--line)`), full width, not a rounded rectangle
+
+Use `.ss-well` only for forms that need a contained writing surface (join, sign-in, settings). Default `.ss-panel` is unboxed.
+
+## Type and tap
+
+- Body ≥ 18px (`1.125rem`). Line-height ~1.55.
+- Tap targets ≥ 48px.
+- Page titles use `.font-display`. Metadata (dates, money, IDs) use `.font-meta`.
+- Measure for prose: `.ss-prose` (~65ch). Directory lists can be full width.
+
+## Navigation
+
+Thumb bar (mobile) is job-based, max four destinations + Menu:
+
+- Guest / showgoer: Shows, Map, Feed, Artists
+- Artist: Shows, Season, Apps, ROI
+- Director: Shows, Map, Desk, Feed
+
+The Menu lists the rest in labeled groups (Directory / Your season / Account), not a grid of identical bordered tiles.
+
+## Contrast
+
+Ink on paper. Muted text must still read in sun. Do not drop `--muted` toward gray-on-gray. Dark theme (`midnight-sea`) is optional, never the default.
+
+## Prompting later work
+
+Do not say “make it modern / clean / beautiful.” Say: “Follow `apps/showshow/DESIGN.md`. Printed field catalog. Hairline rules, no cards, no gradients.”

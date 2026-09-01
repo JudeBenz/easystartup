@@ -18,14 +18,16 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const demoCookie =
+    process.env.SHOWSHOW_DEMO_PERSONAS === "1" && req.cookies.has("ss_user");
   const hasSession =
     req.cookies.has("authjs.session-token") ||
     req.cookies.has("__Secure-authjs.session-token") ||
-    req.cookies.has("ss_user");
+    demoCookie;
 
-  if (!hasSession && process.env.DATABASE_URL?.trim()) {
+  if (!hasSession) {
     const url = req.nextUrl.clone();
-    url.pathname = "/settings";
+    url.pathname = "/signin";
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
@@ -35,12 +37,18 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/applications",
     "/applications/:path*",
+    "/roi",
     "/roi/:path*",
+    "/director",
     "/director/:path*",
+    "/settings",
     "/settings/:path*",
+    "/orders",
     "/orders/:path*",
     "/admin/:path*",
+    "/onboarding",
     "/onboarding/:path*",
   ],
 };
