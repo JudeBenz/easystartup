@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { isPostgresEnabled } from "@/lib/db/client";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.AUTH_URL ?? "https://showshow.app";
+  const base = process.env.AUTH_URL ?? "https://showshow.vercel.app";
   const staticRoutes = [
     "",
     "/shows",

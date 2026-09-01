@@ -6,7 +6,7 @@ import { formatMoney } from "@/lib/format";
 import { isEmailConfigured, sendEmail } from "./resend";
 
 function appOrigin() {
-  return (process.env.AUTH_URL ?? "https://showshow.app").replace(/\/$/, "");
+  return (process.env.AUTH_URL ?? "https://showshow.vercel.app").replace(/\/$/, "");
 }
 
 export async function sendPurchaseReceipt(orderId: string) {
