@@ -27,8 +27,9 @@ export default function InstallPage() {
         </li>
       </ol>
       <p className="ss-prose mt-10 text-[1.05rem] text-[var(--muted)]">
-        A listing in Apple’s App Store is a separate Apple review process. It is not how you get
-        ShowShow on a phone this week. Use Add to Home Screen above.
+        The App Store app is a separate native project (shows, search, sign-in). It is not this website
+        wrapped in a browser. Until that build is on TestFlight, Add to Home Screen is how you keep the
+        public directory on your phone.
       </p>
     </div>
   );

@@ -1401,5 +1401,124 @@
     "juryProcess": "panel",
     "attendance": 20000,
     "notes": "Apps open Aug 1, 2026; live artist image jury Nov 7, 2026; notifications Nov 23; payment due Dec 19, 2026. ~200 juried fine artists. Sponsor page cites 20,000+ consumers. Booth fees not listed on public pages."
+  },
+  "allentown-art-festival": {
+    "sourceUrl": "https://www.allentownartfestival.com/",
+    "startDate": "2026-06-13",
+    "endDate": "2026-06-14",
+    "juryProcess": "panel",
+    "venueName": "Allentown Historic Preservation District",
+    "fullAddress": "Allentown district (Delaware, Franklin, Allen, and Virginia), Buffalo, NY; office 439 Delaware Avenue, Buffalo, NY 14202",
+    "directorEmail": "rita@allentownartfestival.com",
+    "directorPhone": "716-768-2000",
+    "captureConfidence": "high",
+    "notes": "69th festival Sat–Sun June 13–14, 2026, 11am–6pm. Official site lists office, mail PO Box, and rita@ contact. Juried street festival; booth fees not published on the homepage."
+  },
+  "artprize-grand-rapids": {
+    "sourceUrl": "https://www.artprize.org/",
+    "startDate": "2026-09-18",
+    "endDate": "2026-10-03",
+    "juryProcess": "open",
+    "venueName": "Downtown Grand Rapids venues",
+    "fullAddress": "Downtown Grand Rapids, MI",
+    "attendance": 900000,
+    "captureConfidence": "high",
+    "notes": "Official site: Sept. 18–Oct. 3, 2026 with preview week Sept. 12–17. Open international competition; more than 900,000 visitors cited on the official homepage. Booth fees are venue-specific and not a single published number."
+  },
+  "sawdust-art-festival": {
+    "sourceUrl": "https://sawdustartfestival.org/",
+    "startDate": "2026-06-26",
+    "endDate": "2026-09-06",
+    "juryProcess": "invitation",
+    "venueName": "935 Laguna Canyon Road",
+    "fullAddress": "935 Laguna Canyon Road, Laguna Beach, CA 92651",
+    "directorEmail": "admin@sawdustartfestival.org",
+    "directorPhone": "949-494-3030",
+    "captureConfidence": "high",
+    "notes": "Official site and ticket shop: open daily June 26–Sept. 6, 2026. Winter weekends listed separately Nov 20–Dec 20, 2026. Exhibitor model is Laguna-based artists, not a published national booth-fee schedule."
+  },
+  "cottonwood-art-festival-richardson": {
+    "sourceUrl": "https://cottonwoodartfestival.com/information/",
+    "startDate": "2026-10-03",
+    "endDate": "2026-10-04",
+    "juryProcess": "panel",
+    "venueName": "Cottonwood Park",
+    "fullAddress": "Cottonwood Park, 1321 W. Belt Line Rd., Richardson, TX 75080",
+    "captureConfidence": "high",
+    "notes": "Official information page lists Oct 3–4, 2026 (Sat 10–7, Sun 10–5) and May 1–2 for the following season. Booth and application fees are not published on that official page."
+  },
+  "manayunk-arts-festival": {
+    "sourceUrl": "https://manayunk.com/mnyk-events/manayunk-art-festival/",
+    "startDate": "2026-06-27",
+    "endDate": "2026-06-28",
+    "juryProcess": "panel",
+    "venueName": "Main Street, Manayunk",
+    "fullAddress": "Main Street, Manayunk, Philadelphia, PA 19127",
+    "captureConfidence": "high",
+    "notes": "Official Manayunk Development Corporation page: Sat June 27 11am–7pm and Sun June 28 11am–5pm, 2026. About 300 juried artists; free to the public. Booth fees not listed on the visitor page."
+  },
+  "tephra-ica-arts-festival": {
+    "sourceUrl": "https://www.tephraica.org/festival",
+    "startDate": "2026-05-16",
+    "endDate": "2026-05-17",
+    "juryProcess": "panel",
+    "venueName": "Reston Town Center",
+    "fullAddress": "Reston Town Center, Reston, VA",
+    "directorName": "Jonell Logan",
+    "captureConfidence": "high",
+    "notes": "Official festival page: May 16–17, 2026 (Sat 10–6, Sun 11–5), 200 juried artists, rain or shine. Formerly Northern Virginia Fine Arts Festival. Booth fees not listed on the public festival page."
+  },
+  "powderhorn-art-fair": {
+    "sourceUrl": "https://www.powderhornartfair.com/",
+    "startDate": "2026-08-01",
+    "endDate": "2026-08-02",
+    "juryProcess": "panel",
+    "venueName": "Powderhorn Park",
+    "fullAddress": "Powderhorn Park, Minneapolis, MN",
+    "directorEmail": "events@ppna.org",
+    "captureConfidence": "high",
+    "notes": "Official site: August 1–2, 2026, 10am–5pm. Juried work across 20 mediums. Booth fees not published on the homepage."
+  },
+  "festival-in-the-park-charlotte": {
+    "sourceUrl": "https://festivalinthepark.org/festival-in-the-park/",
+    "startDate": "2026-09-25",
+    "endDate": "2026-09-27",
+    "juryProcess": "panel",
+    "venueName": "Freedom Park",
+    "fullAddress": "Freedom Park, 1900 East Boulevard, Charlotte, NC 28203",
+    "directorPhone": "704-338-1060",
+    "captureConfidence": "high",
+    "notes": "Official page: 62nd annual, Fri Sept 25 4–9pm, Sat 26 10am–9pm, Sun 27 10am–5pm, 2026. FAQ cites ~180 artist exhibitors. Booth fees not listed on the public festival page."
+  },
+  "portland-fine-craft-show": {
+    "sourceUrl": "https://shopmainecraft.com/programs/portland-fine-craft-show",
+    "startDate": "2026-08-22",
+    "endDate": "2026-08-22",
+    "applicationDeadline": "2026-03-26",
+    "applicationFee": 35,
+    "juryProcess": "panel",
+    "venueName": "Lincoln Park",
+    "fullAddress": "Lincoln Park, 350 Congress St, Portland, ME 04101",
+    "captureConfidence": "high",
+    "notes": "Official Shop Maine Craft page: Saturday Aug 22, 2026, 10am–5pm, rain or shine. Applications Feb 26–Mar 26 2026; $30 members / $35 non-members. 2026 call is closed."
+  },
+  "festival-of-arts-laguna-beach": {
+    "sourceUrl": "https://www.foapom.com/",
+    "juryProcess": "panel",
+    "venueName": "Laguna Beach",
+    "fullAddress": "Laguna Beach, CA",
+    "captureConfidence": "medium",
+    "notes": "Official Festival of Arts / Pageant of the Masters site. 2026 daily hours were not captured from the festival landing page in this pass; summer season historically July–early September. Booth fees not taken from third-party recaps."
+  },
+  "artsplosure-raleigh": {
+    "sourceUrl": "https://www.artsplosure.org/exhibit",
+    "juryProcess": "panel",
+    "venueName": "Downtown Raleigh",
+    "fullAddress": "Downtown Raleigh, NC",
+    "directorName": "Nathan Price",
+    "directorEmail": "info@artsplosure.org",
+    "directorPhone": "919-832-8699",
+    "captureConfidence": "medium",
+    "notes": "Official exhibit page lists operations director Nathan Price (Nathan@artsplosure.org) and info@artsplosure.org / 919.832.8699. 2026 festival dates were not on that page at capture time."
   }
 }

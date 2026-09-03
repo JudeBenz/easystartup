@@ -11,8 +11,23 @@ const PROTECTED_PREFIXES = [
   "/onboarding",
 ];
 
+const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+};
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  if (pathname.startsWith("/api/v1")) {
+    if (req.method === "OPTIONS") {
+      return new NextResponse(null, { status: 204, headers: CORS });
+    }
+    const res = NextResponse.next();
+    for (const [key, value] of Object.entries(CORS)) res.headers.set(key, value);
+    return res;
+  }
 
   if (!PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return NextResponse.next();
@@ -37,6 +52,7 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/api/v1/:path*",
     "/applications",
     "/applications/:path*",
     "/roi",

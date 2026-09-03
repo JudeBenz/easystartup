@@ -11,7 +11,7 @@ export default async function ArtistsPage() {
 
   return (
     <div>
-      <PageHeader title="Artists" description="Portfolios, upcoming booths, stores, and sponsorships." />
+      <PageHeader title="Artists" description="Exhibiting artists who have created ShowShow profiles." />
       <div className="grid gap-4 sm:grid-cols-2">
         {!artists.length ? (
           <EmptyState

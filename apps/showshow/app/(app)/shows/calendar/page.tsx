@@ -5,8 +5,23 @@ import { listEditionsForCalendar } from "@/lib/store";
 
 export const metadata = { title: "Show calendar" };
 
-export default async function ShowsCalendarPage() {
-  const rows = await listEditionsForCalendar();
+export default async function ShowsCalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
+  const needle = q.toLowerCase();
+  const allRows = await listEditionsForCalendar();
+  const rows = needle
+    ? allRows.filter(
+        ({ show }) =>
+          show.name.toLowerCase().includes(needle) ||
+          show.primaryCity.toLowerCase().includes(needle) ||
+          show.primaryRegion.toLowerCase().includes(needle),
+      )
+    : allRows;
   const byMonth = new Map<string, typeof rows>();
   for (const row of rows) {
     const key = row.edition.startDate.slice(0, 7);
@@ -30,6 +45,26 @@ export default async function ShowsCalendarPage() {
         title="Calendar"
         description="Show dates and application deadlines as separate layers — never confuse load-in with jury day."
       />
+      <form action="/shows/calendar" method="get" className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <label className="ss-label min-w-0 flex-1">
+          Find a show
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            className="ss-input"
+            autoComplete="off"
+            enterKeyHint="search"
+            placeholder="Name, city, or state"
+          />
+        </label>
+        <button type="submit" className="ss-btn ss-btn-secondary">
+          Search
+        </button>
+      </form>
+      {q && !rows.length ? (
+        <p className="mb-6 text-[1.125rem] text-[var(--muted)]">No dated editions match “{q}”.</p>
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
           <h2 className="font-display text-lg font-bold">Show dates</h2>

@@ -43,7 +43,11 @@ export default async function MapPage({
     <div>
       <PageHeader
         title="Map"
-        description={`Shows near ${home.label}. Drag, zoom, and tap a pin for details.`}
+        description={
+          user?.homeBase
+            ? `Shows near ${home.label}. Drag, zoom, and tap a pin for details.`
+            : "Map is centered on the middle of the US until you join and set a home base. Drag, zoom, and tap a pin for details."
+        }
         actions={
           <div className="flex flex-wrap gap-2">
             {[250, 500, 1000, 2500].map((r) => (

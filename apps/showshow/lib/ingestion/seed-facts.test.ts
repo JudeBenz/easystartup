@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { assertNotAggregatorSource } from "./schema";
 import { SEED_OFFICIAL_FACTS, SEED_PRIOR_YEAR_FACTS } from "./seed-facts";
 
 describe("seed facts honesty", () => {
@@ -21,6 +22,16 @@ describe("seed facts honesty", () => {
       expect(f.boothFeeMin).toBeUndefined();
       expect(f.boothFeeMax).toBeUndefined();
       expect(f.attendance).toBeUndefined();
+    }
+  });
+
+  it("covers more than the original 100 and never uses blocked aggregators", () => {
+    expect(SEED_OFFICIAL_FACTS.length).toBeGreaterThanOrEqual(110);
+    const slugs = new Set(SEED_OFFICIAL_FACTS.map((f) => f.showSlug));
+    expect(slugs.size).toBe(SEED_OFFICIAL_FACTS.length);
+    for (const f of SEED_OFFICIAL_FACTS) {
+      expect(() => assertNotAggregatorSource(f.sourceUrl)).not.toThrow();
+      expect(() => assertNotAggregatorSource(f.officialWebsiteUrl)).not.toThrow();
     }
   });
 });

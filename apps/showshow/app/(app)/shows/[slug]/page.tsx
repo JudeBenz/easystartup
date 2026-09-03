@@ -78,16 +78,20 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
               <Link href={`/shows/${show.slug}/weekend`} className="ss-btn ss-btn-ghost-on-dark">
                 Weekend mode
               </Link>
-              {current?.applicationDeadline ? (
-                <a
-                  href={`${show.officialWebsiteUrl.replace(/\/$/, "")}/apply`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ss-btn ss-btn-ghost !border-[color-mix(in_oklab,var(--paper)_35%,transparent)] !text-[var(--paper)]"
-                >
-                  Apply by {formatDate(current.applicationDeadline)}
-                </a>
-              ) : null}
+              <a
+                href={
+                  provenance.find(
+                    (p) => p.field === "applicationDeadline" || p.field === "applicationFee",
+                  )?.sourceUrl ?? show.officialWebsiteUrl
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="ss-btn ss-btn-ghost !border-[color-mix(in_oklab,var(--paper)_35%,transparent)] !text-[var(--paper)]"
+              >
+                {current?.applicationDeadline
+                  ? `Apply by ${formatDate(current.applicationDeadline)}`
+                  : "Apply on official site"}
+              </a>
             </div>
           </div>
 
@@ -170,7 +174,11 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
           />
           <TicketCell
             label="Source facts"
-            value={`${provenance.length} fields from official capture`}
+            value={
+              provenance.length
+                ? `${provenance.length} fields from official capture`
+                : "Official website only — fees not published yet"
+            }
           />
         </div>
       </section>
@@ -364,8 +372,20 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                 </li>
               ))}
             </ul>
+            {provenance[0] ? (
+              <p className="mt-3 text-base">
+                <a
+                  href={provenance[0].sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-bold text-[var(--good)]"
+                >
+                  Page we captured facts from
+                </a>
+              </p>
+            ) : null}
             <p className="mt-3 text-base text-[var(--muted)]">
-              Aggregator links only. We never store their rankings or copy.
+              Facts come from official show sites. We never store aggregator rankings or copy.
             </p>
           </section>
 

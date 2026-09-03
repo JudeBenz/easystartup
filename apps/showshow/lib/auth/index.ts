@@ -75,11 +75,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       const t = token as typeof token & { roles?: UserRole[] };
-      if (user?.id) {
-        t.sub = user.id;
-        const profile = await resolveRoles(user.id);
-        t.roles = profile.roles;
-      } else if (t.sub && !t.roles) {
+      if (user?.id) t.sub = user.id;
+      if (t.sub) {
         const profile = await resolveRoles(t.sub);
         t.roles = profile.roles;
       }

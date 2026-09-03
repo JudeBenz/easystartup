@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHeader, Panel, Badge } from "@/components/ui";
+import { EmptyState } from "@/components/empty-state";
 import { FormBanner } from "@/components/form-banner";
 import { SubmitButton } from "@/components/submit-button";
 import { formatDate } from "@/lib/format";
@@ -89,9 +90,12 @@ export default async function FeedPage({
           </Panel>
         ))}
         {!posts.length ? (
-          <Panel>
-            <p className="text-[var(--muted)]">No posts yet. Be the first to share an update.</p>
-          </Panel>
+          <EmptyState
+            title="No posts yet"
+            description="The feed stays empty until exhibiting artists share an update. Browse the directory in the meantime."
+            action={{ href: "/shows", label: "Browse shows" }}
+            secondary={session?.user ? undefined : { href: "/join?role=artist", label: "Join as an artist" }}
+          />
         ) : null}
       </div>
     </div>

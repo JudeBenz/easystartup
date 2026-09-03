@@ -14,9 +14,10 @@ export default async function HomePage() {
   const alerts = await listAlerts(artistId);
   const feed = await getFeed();
   const shows = await listShows();
-  const upcoming = shows
-    .filter((r) => r.current && (r.current.status === "upcoming" || r.current.status === "active"))
-    .slice(0, 8);
+  const upcomingAll = shows.filter(
+    (r) => r.current && (r.current.status === "upcoming" || r.current.status === "active"),
+  );
+  const upcoming = upcomingAll.slice(0, 16);
   const deadlines = alerts.filter((a) => a.kind === "deadline").slice(0, 4);
   const showChanges = alerts.filter((a) => a.kind === "operational").slice(0, 3);
 
@@ -26,9 +27,25 @@ export default async function HomePage() {
         <div className="mb-4 flex items-baseline justify-between gap-4">
           <h1 className="font-display text-[1.75rem] leading-none md:text-[2rem]">Upcoming fairs</h1>
           <Link href="/shows" className="min-h-[48px] inline-flex items-center font-bold underline-offset-4 hover:underline">
-            All shows
+            All {upcomingAll.length} shows
           </Link>
         </div>
+        <form action="/shows" method="get" className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="ss-label min-w-0 flex-1">
+            Find a show
+            <input
+              type="search"
+              name="q"
+              className="ss-input"
+              autoComplete="off"
+              enterKeyHint="search"
+              placeholder="Name, city, or state"
+            />
+          </label>
+          <button type="submit" className="ss-btn ss-btn-secondary">
+            Search
+          </button>
+        </form>
         <div className="border-t border-[var(--line)]">
           {!upcoming.length ? (
             <p className="py-8 text-[1.125rem] text-[var(--muted)]">
