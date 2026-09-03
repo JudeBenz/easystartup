@@ -2,13 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "EasyStartUp",
-    short_name: "EasyStartUp",
-    description: "Field operations for growing teams",
-    start_url: "/home",
+    name: "Aruba Solo Cup GP",
+    short_name: "Solo Cup GP",
+    description: "Family RC Grand Prix — leaderboard, drivers, Race Control",
+    start_url: "/",
     display: "standalone",
-    background_color: "#F1F4F0",
-    theme_color: "#0C5A39",
+    orientation: "portrait-primary",
+    background_color: "#070d12",
+    theme_color: "#070d12",
     icons: [
       {
         src: "/icon",

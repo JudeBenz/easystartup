@@ -1,10 +1,5 @@
 import type { Config } from "tailwindcss";
 
-/**
- * EasyStartUp design system — light-money palette with deep-green header.
- * CSS vars are space-separated RGB triplets so Tailwind opacity modifiers work.
- * NAMES are intentionally stable; values changed in globals.css.
- */
 function rgb(varName: string) {
   return `rgb(var(${varName}) / <alpha-value>)`;
 }
@@ -19,90 +14,61 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1.5rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.25rem",
+        lg: "1.5rem",
+      },
       screens: { "2xl": "1280px" },
     },
     extend: {
       fontFamily: {
-        sans:    ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
-        mono:    ["var(--font-jetbrains-mono)", "ui-monospace", "monospace"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       colors: {
-        // shadcn semantic tokens
-        border:      rgb("--border"),
-        input:       rgb("--input"),
-        ring:        rgb("--ring"),
-        background:  rgb("--background"),
-        foreground:  rgb("--foreground"),
+        border: rgb("--border"),
+        input: rgb("--input"),
+        ring: rgb("--ring"),
+        background: rgb("--background"),
+        foreground: rgb("--foreground"),
         primary: {
-          DEFAULT:    rgb("--primary"),
+          DEFAULT: rgb("--primary"),
           foreground: rgb("--primary-foreground"),
         },
         secondary: {
-          DEFAULT:    rgb("--secondary"),
+          DEFAULT: rgb("--secondary"),
           foreground: rgb("--secondary-foreground"),
         },
         destructive: {
-          DEFAULT:    rgb("--destructive"),
+          DEFAULT: rgb("--destructive"),
           foreground: rgb("--destructive-foreground"),
         },
         muted: {
-          DEFAULT:    rgb("--muted"),
+          DEFAULT: rgb("--muted"),
           foreground: rgb("--muted-foreground"),
         },
         accent: {
-          DEFAULT:    rgb("--accent"),
+          DEFAULT: rgb("--accent"),
           foreground: rgb("--accent-foreground"),
         },
         popover: {
-          DEFAULT:    rgb("--popover"),
+          DEFAULT: rgb("--popover"),
           foreground: rgb("--popover-foreground"),
         },
         card: {
-          DEFAULT:    rgb("--card"),
+          DEFAULT: rgb("--card"),
           foreground: rgb("--card-foreground"),
         },
-
-        // ── EasyStartUp surface tokens ─────────────────────────────
-        paper:  rgb("--paper"),   // page bg (#F1F4F0)
-        panel:  rgb("--panel"),   // card/surface (#FFFFFF)
-        ink:    rgb("--ink"),     // primary text
-        soft:   rgb("--soft"),    // secondary text
-        faint:  rgb("--faint"),   // metadata / muted labels
-
-        rule:   rgb("--rule"),    // hairline borders
-        rule2:  rgb("--rule-2"),  // stronger dividers
-
-        // ── Signature green (named "navy" for backward compat) ─────
-        navy: {
-          DEFAULT: rgb("--navy"),
-          hover:   rgb("--navy-hover"),
-          tint:    rgb("--navy-tint"),
-        },
-        // Explicit green aliases for new code
-        green: {
-          DEFAULT: rgb("--green"),
-          deep:    rgb("--green-deep"),
-          tint:    rgb("--navy-tint"),
-          bg:      rgb("--green-bg"),
-        },
-
-        // ── Attention ─────────────────────────────────────────────
-        amber: {
-          DEFAULT: rgb("--amber"),
-          strong:  rgb("--amber-strong"),
-          bg:      rgb("--amber-bg"),
-          border:  rgb("--amber-border"),
-        },
-        gold: rgb("--gold"),
-
-        // ── Branded header ─────────────────────────────────────────
-        header: {
-          DEFAULT: rgb("--header"),
-          soft:    rgb("--header-soft"),
-          mint:    rgb("--header-mint"),
-          gold:    rgb("--header-gold"),
+        aruba: {
+          deep: "#070d12",
+          panel: "#0f1a22",
+          teal: "#2ec4b6",
+          sand: "#e6c58a",
+          cup: "#e11d2e",
+          gold: "#f5d76e",
+          gold2: "#ffe9a0",
         },
       },
       borderRadius: {
@@ -111,18 +77,37 @@ export default {
         sm: "3px",
       },
       keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to:   { height: "var(--radix-accordion-content-height)" },
+        shimmer: {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
         },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to:   { height: "0" },
+        "gold-pulse": {
+          "0%, 100%": { opacity: "0.55", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.03)" },
+        },
+        floaty: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
+        "ray-spin": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        "fade-up": {
+          from: { opacity: "0", transform: "translateY(12px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up":   "accordion-up 0.2s ease-out",
+        shimmer: "shimmer 3.5s linear infinite",
+        "gold-pulse": "gold-pulse 2.8s ease-in-out infinite",
+        floaty: "floaty 4s ease-in-out infinite",
+        "ray-spin": "ray-spin 28s linear infinite",
+        "fade-up": "fade-up 0.55s ease-out both",
+      },
+      backgroundImage: {
+        "sand-grid":
+          "radial-gradient(circle at 20% 20%, rgba(46,196,182,0.12), transparent 40%), radial-gradient(circle at 80% 0%, rgba(225,29,46,0.08), transparent 35%), linear-gradient(160deg, #070d12 0%, #0c1820 45%, #0a1419 100%)",
       },
     },
   },

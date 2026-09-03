@@ -1,30 +1,53 @@
-import type { Metadata } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
+import type { Metadata, Viewport } from "next";
+import { Bebas_Neue, Barlow, JetBrains_Mono } from "next/font/google";
+import { SiteNav } from "@/components/gp/site-nav";
+import { SiteFooter } from "@/components/gp/site-footer";
+import { MobileTabBar } from "@/components/gp/mobile-tab-bar";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const display = Bebas_Neue({
+  weight: "400",
+  variable: "--font-display",
   subsets: ["latin"],
   display: "swap",
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const body = Barlow({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "EasyStartUp",
+  title: "Aruba Solo Cup GP",
   description:
-    "Start your business up. Every day. Eventually without you. Procedurize a business once, train and certify anyone, run the operation on autopilot.",
+    "Family RC Grand Prix in Aruba. MJX Hyper GO 14303 Citroën C3 rally cars. $500 winner-take-all.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Solo Cup GP",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#070d12" },
+    { color: "#070d12" },
+  ],
 };
 
 export default function RootLayout({
@@ -35,10 +58,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        className={`${display.variable} ${body.variable} ${mono.variable} font-sans`}
       >
-        {children}
-        <Toaster position="bottom-right" />
+        <SiteNav />
+        <main className="gp-main min-h-[70vh]">{children}</main>
+        <SiteFooter />
+        <MobileTabBar />
       </body>
     </html>
   );
