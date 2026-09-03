@@ -30,6 +30,7 @@ export function showListItem(row: {
 export function showDetail(row: {
   show: Show;
   current?: ShowEdition | null;
+  editions?: ShowEdition[];
   provenance?: Pick<FactProvenance, "field" | "sourceUrl">[];
 }) {
   const { show, current, provenance = [] } = row;
@@ -49,6 +50,13 @@ export function showDetail(row: {
     directorPhone: current?.directorPhone ?? null,
     year: current?.year ?? null,
     status: current?.status ?? null,
+    editions: (row.editions ?? []).map((edition) => ({
+      year: edition.year,
+      startDate: edition.startDate,
+      endDate: edition.endDate,
+      boothFeeMin: edition.boothFeeMin ?? null,
+      status: edition.status,
+    })),
   };
 }
 

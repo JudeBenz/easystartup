@@ -52,6 +52,36 @@ describe("mobile show DTOs", () => {
     });
     expect(detail.officialApplyUrl).toBe("https://www.cherryarts.org/artists");
     expect(detail.officialApplyUrl).not.toMatch(/\/apply$/);
+    expect(detail.editions).toEqual([]);
+  });
+
+  it("includes year history without inventing prior-year booth fees", () => {
+    const prior: ShowEdition = {
+      ...edition,
+      id: "e0",
+      year: 2025,
+      startDate: "2025-07-04",
+      endDate: "2025-07-06",
+      boothFeeMin: undefined,
+      status: "completed",
+    };
+    const detail = showDetail({ show, current: edition, editions: [edition, prior] });
+    expect(detail.editions).toEqual([
+      {
+        year: 2026,
+        startDate: "2026-07-03",
+        endDate: "2026-07-05",
+        boothFeeMin: 900,
+        status: "upcoming",
+      },
+      {
+        year: 2025,
+        startDate: "2025-07-04",
+        endDate: "2025-07-06",
+        boothFeeMin: null,
+        status: "completed",
+      },
+    ]);
   });
 
   it("sorts upcoming shows by start date", () => {

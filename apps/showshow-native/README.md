@@ -2,6 +2,8 @@
 
 Expo app for the ShowShow art-fair directory. Native screens talk to JSON APIs on the website. This is not a WebView of `showshow.vercel.app`.
 
+Native screens: Shows (search + this-month / deadline filters), Calendar, Saved hearts on this phone, Account (sign in or join). Show pages include year history, maps, share, and director contact when the official site listed it.
+
 ## Run on a phone (Expo Go)
 
 1. Website APIs must be live at `https://showshow.vercel.app/api/v1/shows`.

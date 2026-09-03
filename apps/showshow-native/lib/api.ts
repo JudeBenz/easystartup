@@ -7,6 +7,9 @@ export type ShowListItem = {
   name: string;
   city: string;
   region: string;
+  country?: string;
+  lat?: number;
+  lng?: number;
   officialWebsiteUrl: string;
   officialApplyUrl: string;
   startDate: string | null;
@@ -15,6 +18,14 @@ export type ShowListItem = {
   boothFeeMin: number | null;
   boothFeeMax: number | null;
   venueName: string | null;
+};
+
+export type ShowEditionSummary = {
+  year: number;
+  startDate: string;
+  endDate: string;
+  boothFeeMin: number | null;
+  status: string;
 };
 
 export type ShowDetail = ShowListItem & {
@@ -28,6 +39,7 @@ export type ShowDetail = ShowListItem & {
   directorPhone: string | null;
   year: number | null;
   status: string | null;
+  editions?: ShowEditionSummary[];
 };
 
 export type MobileUser = {
@@ -67,6 +79,13 @@ export function login(email: string, password: string) {
   return request<{ token: string; user: MobileUser }>("/api/v1/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
+  });
+}
+
+export function register(input: { name: string; email: string; password: string; role: string }) {
+  return request<{ token: string; user: MobileUser }>("/api/v1/auth/register", {
+    method: "POST",
+    body: JSON.stringify(input),
   });
 }
 

@@ -1,25 +1,30 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   TextInput,
   View,
 } from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect } from "expo-router";
 
 import { Text } from "@/components/Themed";
+import { ShowRow } from "@/components/ShowRow";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
-import { formatDate, formatMoney, listShows, type ShowListItem } from "@/lib/api";
+import { listShows, formatDate, type ShowListItem } from "@/lib/api";
+import { openDeadline, overlappingThisMonth } from "@/lib/show-filters";
+
+type Filter = "all" | "month" | "deadlines";
 
 export default function ShowsScreen() {
-  const router = useRouter();
   const colors = Colors[useColorScheme() ?? "light"];
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
   const [shows, setShows] = useState<ShowListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +48,12 @@ export default function ShowsScreen() {
     }, [load, query]),
   );
 
+  const visible = useMemo(() => {
+    if (filter === "month") return shows.filter((show) => overlappingThisMonth(show));
+    if (filter === "deadlines") return shows.filter((show) => openDeadline(show));
+    return shows;
+  }, [filter, shows]);
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <View style={styles.searchRow}>
@@ -64,12 +75,39 @@ export default function ShowsScreen() {
           <Text style={styles.searchBtnLabel}>Search</Text>
         </Pressable>
       </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.chipRow}
+        contentContainerStyle={styles.chips}
+      >
+        {(
+          [
+            ["all", "All"],
+            ["month", "This month"],
+            ["deadlines", "Open deadlines"],
+          ] as const
+        ).map(([id, label]) => (
+          <Pressable
+            key={id}
+            onPress={() => setFilter(id)}
+            style={[
+              styles.chip,
+              filter === id
+                ? { backgroundColor: colors.masthead }
+                : { borderColor: "#C9D2CC", borderWidth: 1 },
+            ]}
+          >
+            <Text style={{ color: filter === id ? "#F4F0E6" : colors.text, fontWeight: "700" }}>{label}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {loading && !shows.length ? (
         <ActivityIndicator style={styles.spinner} color={colors.tint} />
       ) : (
         <FlatList
-          data={shows}
+          data={visible}
           keyExtractor={(item) => item.id}
           refreshControl={
             <RefreshControl refreshing={loading} onRefresh={() => void load(query)} tintColor={colors.tint} />
@@ -77,36 +115,25 @@ export default function ShowsScreen() {
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <Text style={[styles.empty, { color: colors.muted }]}>
-              {query ? `No shows match “${query}”.` : "No upcoming fairs in the directory yet."}
+              {query
+                ? `No shows match “${query}”.`
+                : filter === "deadlines"
+                  ? "No upcoming application deadlines are published yet."
+                  : filter === "month"
+                    ? "No fairs listed this month."
+                    : "No upcoming fairs in the directory yet."}
             </Text>
           }
-          renderItem={({ item }) => {
-            const fee = formatMoney(item.boothFeeMin);
-            const dates =
-              item.startDate && item.endDate
-                ? `${formatDate(item.startDate)} – ${formatDate(item.endDate)}`
-                : null;
-            return (
-              <Pressable
-                onPress={() => router.push(`/show/${item.slug}`)}
-                style={styles.row}
-              >
-                <Text style={[styles.name, { color: colors.text }]}>{item.name}</Text>
-                <Text style={[styles.meta, { color: colors.muted }]}>
-                  {item.city}, {item.region}
-                  {dates ? ` · ${dates}` : ""}
-                </Text>
-                {fee ? (
-                  <Text style={[styles.fee, { color: colors.text }]}>
-                    Booth {fee}
-                    {item.boothFeeMax && item.boothFeeMax !== item.boothFeeMin
-                      ? `–${formatMoney(item.boothFeeMax)}`
-                      : ""}
-                  </Text>
-                ) : null}
-              </Pressable>
-            );
-          }}
+          renderItem={({ item }) => (
+            <ShowRow
+              item={item}
+              extra={
+                filter === "deadlines" && item.applicationDeadline
+                  ? `Apply by ${formatDate(item.applicationDeadline)}`
+                  : null
+              }
+            />
+          )}
         />
       )}
     </View>
@@ -127,12 +154,11 @@ const styles = StyleSheet.create({
   },
   searchBtn: { minHeight: 48, justifyContent: "center", paddingHorizontal: 14, borderRadius: 8 },
   searchBtnLabel: { color: "#F4F0E6", fontWeight: "700" },
+  chipRow: { flexGrow: 0 },
+  chips: { paddingHorizontal: 16, paddingBottom: 8, gap: 8, alignItems: "center" },
+  chip: { minHeight: 40, paddingHorizontal: 14, borderRadius: 20, justifyContent: "center" },
   spinner: { marginTop: 40 },
   list: { paddingBottom: 32 },
-  row: { paddingHorizontal: 16, paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#D5DDD8" },
-  name: { fontSize: 20, fontWeight: "700", lineHeight: 24 },
-  meta: { marginTop: 6, fontSize: 16 },
-  fee: { marginTop: 6, fontSize: 16, fontWeight: "600" },
   empty: { padding: 24, fontSize: 16 },
   error: { paddingHorizontal: 16, color: "#8B2E2E", fontSize: 16 },
 });

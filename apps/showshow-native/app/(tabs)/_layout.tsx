@@ -27,7 +27,33 @@ export default function TabLayout() {
           title: "Shows",
           tabBarIcon: ({ color }) => (
             <SymbolView
+              name={{ ios: "list.bullet", android: "list", web: "list" }}
+              tintColor={color}
+              size={28}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: "Calendar",
+          tabBarIcon: ({ color }) => (
+            <SymbolView
               name={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }}
+              tintColor={color}
+              size={28}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="saved"
+        options={{
+          title: "Saved",
+          tabBarIcon: ({ color }) => (
+            <SymbolView
+              name={{ ios: "heart", android: "favorite", web: "favorite" }}
               tintColor={color}
               size={28}
             />
