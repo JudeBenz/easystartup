@@ -18,9 +18,9 @@ export interface ThemePreset {
 export const THEME_PRESETS: ThemePreset[] = [
   {
     id: "rust-turquoise",
-    name: "Rust & turquoise",
-    blurb: "Warm booth metal with cool water-glass accents. Default.",
-    swatches: ["#F2F6F5", "#B54A2A", "#0F7F7B", "#1A1F1E"],
+    name: "Park green",
+    blurb: "Bright paper with a forest masthead. Default.",
+    swatches: ["#FFFDF8", "#245C45", "#1E3D32", "#171614"],
   },
   {
     id: "fair-crimson",

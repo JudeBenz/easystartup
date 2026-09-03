@@ -14,7 +14,6 @@ export function EmptyState({
   return (
     <div className="max-w-xl border-b border-[var(--line)] py-8">
       <h2 className="font-display text-[1.75rem] leading-tight">{title}</h2>
-      <span className="ss-rule" aria-hidden />
       <p className="ss-prose mt-3 text-[1.125rem] text-[var(--muted)]">{description}</p>
       {action || secondary ? (
         <div className="mt-5 flex flex-wrap gap-3">

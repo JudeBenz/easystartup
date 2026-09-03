@@ -106,13 +106,12 @@ export function SiteNav({
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)] pt-[env(safe-area-inset-top)]">
-        <div className="mx-auto flex max-w-6xl items-end gap-3 px-4 py-3 md:px-6">
+      <header className="sticky top-0 z-40 bg-[var(--masthead)] pt-[env(safe-area-inset-top)] text-[var(--paper)]">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-6">
           <Link href="/" className="shrink-0 no-underline">
-            <span className="font-display block text-[1.85rem] leading-none text-[var(--ink)] md:text-[2.15rem]">
+            <span className="font-display block text-[1.7rem] leading-none text-[var(--paper)] md:text-[1.95rem]">
               ShowShow
             </span>
-            <span className="ss-rule !mt-1 !w-10" aria-hidden />
           </Link>
 
           <nav aria-label="Main" className="ml-6 hidden flex-1 items-center gap-1 lg:flex">
@@ -121,10 +120,10 @@ export function SiteNav({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "inline-flex min-h-[48px] items-center border-b-4 px-3 text-[1.05rem] font-bold no-underline",
+                  "inline-flex min-h-[48px] items-center border-b-2 px-3 text-[1.05rem] font-bold no-underline",
                   isActive(pathname, item.href)
-                    ? "border-[var(--accent)] text-[var(--ink)]"
-                    : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]",
+                    ? "border-[var(--paper)] text-[var(--paper)]"
+                    : "border-transparent text-[color-mix(in_oklab,var(--paper)_72%,transparent)] hover:text-[var(--paper)]",
                 )}
               >
                 {item.label}
@@ -132,7 +131,7 @@ export function SiteNav({
             ))}
             <button
               type="button"
-              className="ml-2 inline-flex min-h-[48px] items-center border-b-4 border-transparent px-3 text-[1.05rem] font-bold text-[var(--muted)] hover:text-[var(--ink)]"
+              className="ml-2 inline-flex min-h-[48px] items-center border-b-2 border-transparent px-3 text-[1.05rem] font-bold text-[color-mix(in_oklab,var(--paper)_72%,transparent)] hover:text-[var(--paper)]"
               aria-expanded={open}
               aria-controls="more-menu"
               onClick={() => setOpen((v) => !v)}
@@ -141,22 +140,24 @@ export function SiteNav({
             </button>
           </nav>
 
-          <div className="ml-auto flex items-center gap-2 pb-1">
+          <div className="ml-auto flex items-center gap-2">
             {signedIn ? (
-              <p className="hidden font-meta text-[var(--muted)] sm:block">{userLabel}</p>
+              <p className="hidden text-[0.95rem] text-[color-mix(in_oklab,var(--paper)_75%,transparent)] sm:block">
+                {userLabel}
+              </p>
             ) : (
               <div className="hidden items-center gap-2 sm:flex">
-                <Link href="/signin" className="ss-btn ss-btn-ghost min-h-[48px] px-3">
+                <Link href="/signin" className="ss-btn ss-btn-ghost-on-dark min-h-[48px] px-3">
                   Sign in
                 </Link>
-                <Link href="/join" className="ss-btn ss-btn-primary min-h-[48px] px-3">
+                <Link href="/join" className="ss-btn ss-btn-on-dark min-h-[48px] px-3">
                   Join
                 </Link>
               </div>
             )}
             <button
               type="button"
-              className="ss-btn ss-btn-secondary min-h-[48px] lg:hidden"
+              className="ss-btn ss-btn-ghost-on-dark min-h-[48px] lg:hidden"
               aria-expanded={open}
               aria-controls="more-menu"
               onClick={() => setOpen((v) => !v)}
@@ -167,12 +168,14 @@ export function SiteNav({
         </div>
 
         {open ? (
-          <div id="more-menu" className="border-t border-[var(--line)] bg-[var(--paper)]">
+          <div id="more-menu" className="border-t border-[color-mix(in_oklab,var(--paper)_18%,transparent)] bg-[var(--masthead)]">
             <div className="mx-auto grid max-w-6xl gap-8 px-4 py-6 md:grid-cols-[1.4fr_0.8fr] md:px-6">
               <div className="grid gap-8 sm:grid-cols-2">
                 {groups.map((group) => (
                   <div key={group.label}>
-                    <p className="font-meta mb-2 uppercase text-[var(--muted)]">{group.label}</p>
+                    <p className="mb-2 text-[0.9rem] text-[color-mix(in_oklab,var(--paper)_65%,transparent)]">
+                      {group.label}
+                    </p>
                     <ul className="space-y-1">
                       {group.items.map((item) => (
                         <li key={`${group.label}-${item.href}`}>
@@ -182,8 +185,8 @@ export function SiteNav({
                             className={cn(
                               "flex min-h-[var(--tap)] items-center text-lg no-underline",
                               isActive(pathname, item.href)
-                                ? "font-bold text-[var(--accent)]"
-                                : "text-[var(--ink)] hover:underline",
+                                ? "font-bold text-[var(--paper)]"
+                                : "text-[color-mix(in_oklab,var(--paper)_85%,transparent)] hover:text-[var(--paper)] hover:underline",
                             )}
                           >
                             {item.label}
@@ -194,12 +197,12 @@ export function SiteNav({
                   </div>
                 ))}
               </div>
-              <div className="space-y-4 border-t border-[var(--line)] pt-4 md:border-l md:border-t-0 md:pl-8 md:pt-0">
-                <p className="font-meta mb-2 uppercase text-[var(--muted)]">You</p>
-                {accountPanel}
+              <div className="space-y-4 border-t border-[color-mix(in_oklab,var(--paper)_18%,transparent)] pt-4 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+                <p className="mb-2 text-[0.9rem] text-[color-mix(in_oklab,var(--paper)_65%,transparent)]">You</p>
+                <div className="text-[var(--paper)]">{accountPanel}</div>
                 <button
                   type="button"
-                  className="ss-btn ss-btn-ghost w-full min-h-[48px]"
+                  className="ss-btn ss-btn-ghost-on-dark w-full min-h-[48px]"
                   onClick={() => setOpen(false)}
                 >
                   Close menu

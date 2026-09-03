@@ -46,10 +46,10 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     </p>
   ) : (
     <div className="flex flex-col gap-3">
-      <Link href="/signin" className="ss-btn ss-btn-secondary w-full">
+      <Link href="/signin" className="ss-btn ss-btn-ghost-on-dark w-full">
         Sign in
       </Link>
-      <Link href="/join" className="ss-btn ss-btn-primary w-full">
+      <Link href="/join" className="ss-btn ss-btn-on-dark w-full">
         Create account
       </Link>
     </div>

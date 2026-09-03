@@ -14,8 +14,8 @@ export default async function ShowsPage() {
   return (
     <div>
       <PageHeader
-        title="Art fair directory"
-        description="Dates, fees, and addresses from each show's own website. No copied rankings."
+        title="Shows"
+        description="Dates, fees, and addresses from each show's own website."
         actions={
           <p className="font-meta flex flex-wrap gap-x-4 gap-y-2 text-[1.05rem]">
             <Link href="/shows/calendar" className="inline-flex min-h-[48px] items-center underline-offset-4 hover:underline">

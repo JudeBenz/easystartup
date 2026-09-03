@@ -15,7 +15,6 @@ export function PageHeader({
         <h1 className="font-display text-[2rem] leading-[0.95] text-[var(--ink)] md:text-[2.75rem]">
           {title}
         </h1>
-        <span className="ss-rule" aria-hidden />
         {description ? (
           <p className="mt-3 text-[1.125rem] text-[var(--muted)]">{description}</p>
         ) : null}

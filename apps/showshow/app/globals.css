@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
 /*
-  Theme tokens. Default = rust & turquoise.
+  Theme tokens. Default = park green masthead.
   Switch with html[data-theme="…"] from Settings (cookie ss_theme).
 */
 :root,
 [data-theme="rust-turquoise"] {
-  --paper: #f2f6f5;
+  --paper: #fffdf8;
   --surface: #ffffff;
-  --ink: #1a1f1e;
-  --muted: #3f4a48;
-  --line: #c5d0cd;
-  --accent: #b54a2a;
-  --accent-deep: #8f3a20;
-  --good: #0f7f7b;
-  --warn: #8a5a00;
-  --focus: #0f7f7b;
-  --paper-2: #e4ecea;
+  --ink: #171614;
+  --muted: #5c5852;
+  --line: #ddd8ce;
+  --accent: #245c45;
+  --accent-deep: #1a4332;
+  --masthead: #1e3d32;
+  --good: #245c45;
+  --warn: #9a4a12;
+  --focus: #245c45;
+  --paper-2: #f4f0e8;
 }
 
 [data-theme="fair-crimson"] {
@@ -27,6 +28,7 @@
   --line: #c5ccd6;
   --accent: #b91c1c;
   --accent-deep: #8f1515;
+  --masthead: #3b0d0d;
   --good: #0f5c45;
   --warn: #8a5a00;
   --focus: #0b57d0;
@@ -41,6 +43,7 @@
   --line: #c4d2c9;
   --accent: #c46b3a;
   --accent-deep: #9a522c;
+  --masthead: #14201a;
   --good: #1f5c45;
   --warn: #8a5a00;
   --focus: #1f5c45;
@@ -55,6 +58,7 @@
   --line: #d4cfc2;
   --accent: #2f3a8f;
   --accent-deep: #232b6c;
+  --masthead: #1a1a2e;
   --good: #3f6b5a;
   --warn: #8a5a00;
   --focus: #2f3a8f;
@@ -69,6 +73,7 @@
   --line: #2c3b38;
   --accent: #e07a4b;
   --accent-deep: #c45f33;
+  --masthead: #0a1211;
   --good: #3dbdb5;
   --warn: #e0b14a;
   --focus: #3dbdb5;
@@ -76,8 +81,8 @@
 }
 
 :root {
-  --radius-panel: 2px;
-  --radius-control: 2px;
+  --radius-panel: 6px;
+  --radius-control: 6px;
   --tap: 48px;
   --shadow: none;
   --rule: 4px;
@@ -106,7 +111,7 @@
   --color-warn: var(--warn);
   --font-display: var(--font-display);
   --font-sans: var(--font-body);
-  --font-mono: var(--font-meta);
+  --font-mono: var(--font-body);
 }
 
 * {
@@ -170,26 +175,22 @@ a:hover {
 }
 
 .font-display {
-  font-family: var(--font-display), "Bebas Neue", Impact, sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   text-wrap: balance;
 }
 
 .font-meta {
-  font-family: var(--font-meta), ui-monospace, monospace;
+  font-family: var(--font-body), "Atkinson Hyperlegible", ui-sans-serif, sans-serif;
   font-size: 0.95rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
 }
 
 .ss-rule {
-  display: block;
-  height: var(--rule);
-  width: 4.5rem;
-  background: var(--accent);
-  margin: 0.75rem 0 0;
+  display: none;
 }
 
 .ss-panel {
@@ -297,17 +298,35 @@ a:hover {
   color: var(--ink);
 }
 
+.ss-btn-on-dark {
+  background: var(--paper);
+  color: var(--masthead);
+  border-color: var(--paper);
+}
+
+.ss-btn-on-dark:hover {
+  background: color-mix(in oklab, var(--paper) 88%, white);
+}
+
+.ss-btn-ghost-on-dark {
+  background: transparent;
+  border-color: color-mix(in oklab, var(--paper) 45%, transparent);
+  color: var(--paper);
+}
+
+.ss-btn-ghost-on-dark:hover {
+  border-color: var(--paper);
+}
+
 .ss-chip {
   display: inline-flex;
   align-items: center;
   min-height: 1.75rem;
   border-radius: var(--radius-control);
   padding: 0.15rem 0.5rem;
-  font-family: var(--font-meta), ui-monospace, monospace;
   font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   border: 1px solid var(--line);
   background: transparent;
   color: var(--ink);
@@ -343,7 +362,7 @@ a:hover {
 
 /* Show detail — catalog nameplate, no gradient orbs */
 .ss-show-hero {
-  background: var(--ink);
+  background: var(--masthead);
 }
 
 /* Comfortable reading measure */

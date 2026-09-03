@@ -1,25 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
-import { Atkinson_Hyperlegible, Big_Shoulders, IBM_Plex_Mono } from "next/font/google";
+import { Atkinson_Hyperlegible, Bricolage_Grotesque } from "next/font/google";
 import { DEFAULT_THEME, THEME_COOKIE, resolveThemeId } from "@/lib/themes";
 import "./globals.css";
 
-const display = Big_Shoulders({
+const display = Bricolage_Grotesque({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: ["500", "700", "800"],
 });
 
 const body = Atkinson_Hyperlegible({
   variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "700"],
-});
-
-const meta = IBM_Plex_Mono({
-  variable: "--font-meta",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -48,7 +42,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#F2F6F5",
+  themeColor: "#1E3D32",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -57,7 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" data-theme={theme} suppressHydrationWarning>
-      <body className={`${display.variable} ${body.variable} ${meta.variable}`}>{children}</body>
+      <body className={`${display.variable} ${body.variable}`}>{children}</body>
     </html>
   );
 }

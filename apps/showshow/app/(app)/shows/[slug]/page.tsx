@@ -71,11 +71,11 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ slu
                 href={show.officialWebsiteUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="ss-btn ss-btn-primary"
+                className="ss-btn ss-btn-on-dark"
               >
                 Official site
               </a>
-              <Link href={`/shows/${show.slug}/weekend`} className="ss-btn ss-btn-ghost !border-[color-mix(in_oklab,var(--paper)_35%,transparent)] !text-[var(--paper)]">
+              <Link href={`/shows/${show.slug}/weekend`} className="ss-btn ss-btn-ghost-on-dark">
                 Weekend mode
               </Link>
               {current?.applicationDeadline ? (
