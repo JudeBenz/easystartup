@@ -18,8 +18,7 @@ export default async function HomePage() {
   return (
     <div className="grid gap-12 lg:grid-cols-[1.4fr_0.8fr] lg:gap-16">
       <section>
-        <p className="font-meta uppercase tracking-[0.14em] text-[var(--muted)]">Art fair sourcebook</p>
-        <h1 className="font-display mt-3 text-[3.4rem] leading-[0.88] text-[var(--ink)] md:text-[5.25rem]">
+        <h1 className="font-display text-[3.4rem] leading-[0.88] text-[var(--ink)] md:text-[5.25rem]">
           ShowShow
         </h1>
         <span className="ss-rule !w-24" aria-hidden />
