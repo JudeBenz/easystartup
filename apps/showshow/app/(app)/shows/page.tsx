@@ -5,17 +5,31 @@ import { listShows } from "@/lib/store";
 
 export const metadata = { title: "Shows" };
 
-export default async function ShowsPage() {
+export default async function ShowsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
+  const needle = q.toLowerCase();
   const rows = await listShows();
   const current = rows.filter(
     (r) => r.current && (r.current.status === "upcoming" || r.current.status === "active"),
   );
+  const visible = needle
+    ? current.filter(
+        ({ show }) =>
+          show.name.toLowerCase().includes(needle) ||
+          show.primaryCity.toLowerCase().includes(needle) ||
+          show.primaryRegion.toLowerCase().includes(needle),
+      )
+    : current;
 
   return (
     <div>
       <PageHeader
         title="Shows"
-        description="Dates, fees, and addresses from each show's own website."
         actions={
           <p className="font-meta flex flex-wrap gap-x-4 gap-y-2 text-[1.05rem]">
             <Link href="/shows/calendar" className="inline-flex min-h-[48px] items-center underline-offset-4 hover:underline">
@@ -30,13 +44,31 @@ export default async function ShowsPage() {
           </p>
         }
       />
+      <form action="/shows" method="get" className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <label className="ss-label min-w-0 flex-1">
+          Find a show
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            className="ss-input"
+            autoComplete="off"
+            enterKeyHint="search"
+          />
+        </label>
+        <button type="submit" className="ss-btn ss-btn-secondary">
+          Search
+        </button>
+      </form>
       <div className="border-t border-[var(--line)]">
-        {!current.length ? (
+        {!visible.length ? (
           <p className="py-8 text-[1.125rem] text-[var(--muted)]">
-            No upcoming fairs in the directory yet. Check back after the next official-site update.
+            {q
+              ? `No shows match “${q}”.`
+              : "No upcoming fairs in the directory yet."}
           </p>
         ) : null}
-        {current.map(({ show, current: edition, aggregate, promoted }) => (
+        {visible.map(({ show, current: edition, aggregate, promoted }) => (
           <Link
             key={show.id}
             href={`/shows/${show.slug}`}

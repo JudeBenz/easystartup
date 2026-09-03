@@ -70,8 +70,8 @@ function primaryFor(roles: UserRole[]): NavItem[] {
   return [
     { href: "/shows", label: "Shows", short: "Shows" },
     { href: "/shows/map", label: "Map", short: "Map" },
-    { href: "/feed", label: "Feed", short: "Feed" },
-    { href: "/artists", label: "Artists", short: "Artists" },
+    { href: "/shows/calendar", label: "Calendar", short: "Dates" },
+    { href: "/install", label: "Add to phone", short: "Install" },
   ];
 }
 

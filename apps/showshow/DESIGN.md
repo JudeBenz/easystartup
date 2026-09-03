@@ -51,6 +51,10 @@ Separate content with whitespace first, then a hairline if needed. `.ss-well` on
 
 Thumb bar (mobile) is job-based, max four destinations + Menu. Masthead is dark; the thumb bar stays light so it remains readable in sun.
 
+- Guest: Shows, Map, Calendar, Install
+- Artist: Shows, Season, Apps, ROI
+- Director: Shows, Map, Desk, Feed
+
 ## Contrast
 
 Ink on paper on the page. White on park green in the header. Muted text must still read outdoors.

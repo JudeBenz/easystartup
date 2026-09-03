@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHeader, Panel } from "@/components/ui";
+import { EmptyState } from "@/components/empty-state";
 import { formatDate } from "@/lib/format";
 import { listRoutes } from "@/lib/store";
 
@@ -10,10 +11,14 @@ export default async function RoutesPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Preloaded show routes"
-        description="Curated multi-show circuits with travel distance between stops."
-      />
+      <PageHeader title="Routes" />
+      {!routes.length ? (
+        <EmptyState
+          title="No routes yet"
+          description="Multi-show circuits will show up here when someone publishes one."
+          action={{ href: "/shows", label: "Browse shows" }}
+        />
+      ) : (
       <div className="grid gap-6">
         {routes.map(({ route, stops }) => (
           <Panel key={route.id}>
@@ -47,6 +52,7 @@ export default async function RoutesPage() {
           </Panel>
         ))}
       </div>
+      )}
     </div>
   );
 }

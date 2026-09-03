@@ -19,10 +19,7 @@ export default async function JoinPage({
 
   return (
     <AppShell>
-      <PageHeader
-        title="Create a ShowShow account"
-        description="Artists track applications and ROI. Directors claim fairs. Showgoers follow artists at the weekend."
-      />
+      <PageHeader title="Create a ShowShow account" />
       <FormBanner searchParams={sp} />
       <Panel well className="max-w-lg">
         {!pg ? (
