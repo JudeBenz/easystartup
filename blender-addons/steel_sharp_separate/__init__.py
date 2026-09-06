@@ -2,14 +2,15 @@
 from __future__ import annotations
 
 bl_info = {
-    "name": "Steel Sharp Separate 1.0",
+    "name": "Steel Sharp Separate 1.1",
     "author": "Cursor Agent",
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Steel",
     "description": (
         "Separate a mesh into objects along Mark Sharp seams, duplicating "
-        "internal cap faces onto both sides so each part stays closed"
+        "internal cap faces onto both sides. Blocks weak single-edge bridges "
+        "so parts do not leak into neighbors."
     ),
     "category": "Mesh",
 }
@@ -17,7 +18,7 @@ bl_info = {
 try:
     import bmesh
     import bpy
-    from bpy.props import BoolProperty, StringProperty
+    from bpy.props import BoolProperty, IntProperty, StringProperty
     from bpy.types import Operator, Panel, PropertyGroup
     from mathutils import Vector
 
@@ -81,6 +82,24 @@ if _HAS_BPY:
             ),
             default=False,
         )
+        block_weak_bridges: BoolProperty(
+            name="Block Weak Bridges",
+            description=(
+                "If two big face groups only touch through a single shared edge, "
+                "treat that as a leak and keep them as separate parts"
+            ),
+            default=True,
+        )
+        min_bridge_side_faces: IntProperty(
+            name="Min Faces Per Side",
+            description=(
+                "Only block a weak bridge when both sides have at least this many "
+                "faces (keeps long single-file strips from shattering)"
+            ),
+            default=3,
+            min=2,
+            soft_max=12,
+        )
         hide_original: BoolProperty(
             name="Hide Original",
             default=True,
@@ -91,7 +110,7 @@ if _HAS_BPY:
         )
 
     class STEELSEP_OT_select_caps(Operator):
-        """Select faces that look like caps (every boundary edge is Mark Sharp)"""
+        """Select faces that look like caps (boundary mostly/fully Mark Sharp)"""
 
         bl_idname = "mesh.steel_select_sharp_caps"
         bl_label = "Select Detected Cap Faces"
@@ -164,6 +183,8 @@ if _HAS_BPY:
                 sharp_edges=sharp,
                 cap_face_indices=selected_caps if props.use_selected_caps else None,
                 name_prefix=props.name_prefix or "Part",
+                block_weak_bridges=props.block_weak_bridges,
+                min_bridge_side_faces=props.min_bridge_side_faces,
             )
             if not parts:
                 self.report({"ERROR"}, "No parts created")
@@ -202,7 +223,8 @@ if _HAS_BPY:
                 f"Separated into {stats.parts} object(s) · "
                 f"{stats.caps_found} cap(s) · "
                 f"{stats.caps_duplicated} duplicated to both sides · "
-                f"{stats.sharp_edges} sharp edges"
+                f"{stats.sharp_edges} sharp edges · "
+                f"{stats.weak_bridges_blocked} weak bridge(s) blocked"
             )
             if stats.warnings:
                 msg += " · " + "; ".join(stats.warnings[:2])
@@ -227,6 +249,10 @@ if _HAS_BPY:
             layout.separator()
             layout.prop(props, "name_prefix")
             layout.prop(props, "use_selected_caps")
+            layout.prop(props, "block_weak_bridges")
+            sub = layout.row()
+            sub.enabled = props.block_weak_bridges
+            sub.prop(props, "min_bridge_side_faces")
             layout.prop(props, "hide_original")
             layout.separator()
             col = layout.column(align=True)

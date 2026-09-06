@@ -78,6 +78,74 @@ class TestSeparate(unittest.TestCase):
         self.assertEqual(stats.parts, 1)
         self.assertTrue(stats.warnings)
 
+    def test_weak_bridge_splits_two_blobs(self):
+        """
+        Two solid patches joined by exactly one shared non-sharp edge.
+        With weak-bridge blocking they must become two parts.
+        """
+        # Left patch: a 2x2 grid of quads (faces 0-3), verts 0-8
+        # Right patch: another 2x2 (faces 4-7), verts 8-16 sharing vert line...
+        # Simpler explicit topology:
+        # Left faces share many edges among 0,1,2,3,4
+        # Right faces among 5,6,7,8,9
+        # One non-sharp edge joins face 2 and face 5 via verts 100-101 — use shared verts 4 and 10? 
+        #
+        # Left blob verts:
+        # 0--1--2
+        # |A |B |
+        # 3--4--5
+        # |C |D |
+        # 6--7--8
+        # Right blob attached only at edge 2-5 to the right:
+        #       2--9--10
+        #       |E |F |
+        #       5--11-12
+        #       |G |H |
+        #       13-14-15
+        faces = [
+            [0, 1, 4, 3],  # A
+            [1, 2, 5, 4],  # B
+            [3, 4, 7, 6],  # C
+            [4, 5, 8, 7],  # D
+            [2, 9, 11, 5],  # E  (shares edge 2-5 with B — the weak bridge)
+            [9, 10, 12, 11],  # F
+            [5, 11, 14, 13],  # G
+            [11, 12, 15, 14],  # H
+        ]
+        # No sharp edges — without weak-bridge logic this is one connected shell.
+        # With weak bridges, the dual bridge between B and E should split left/right.
+        parts, stats = separate_by_sharp_caps(
+            faces,
+            sharp_edges=set(),
+            block_weak_bridges=True,
+            min_bridge_side_faces=3,
+        )
+        # No sharp → early return single part before weak bridges.
+        # So add a dummy sharp elsewhere that doesn't cut the bridge, OR
+        # call remove_weak_bridges via a sharp on an unused edge.
+        # Better: mark a sharp on an internal left edge that doesn't disconnect
+        # left blob much — actually early exit if not sharp_edges.
+        #
+        # Put a sharp on a boundary edge of left that isn't a dual connector,
+        # so we don't early-return, and shell still has the weak bridge.
+        sharp = {edge_key(0, 1)}  # boundary of face A only; still connects via other edges
+        parts, stats = separate_by_sharp_caps(
+            faces,
+            sharp_edges=sharp,
+            block_weak_bridges=True,
+            min_bridge_side_faces=3,
+        )
+        self.assertGreaterEqual(stats.weak_bridges_blocked, 1)
+        self.assertGreaterEqual(stats.parts, 2)
+
+        # Left faces 0-3 should not share a part with all of 4-7
+        membership = {}
+        for part in parts:
+            for fi in part.face_indices:
+                membership[fi] = part.name
+        # Face B (1) and face E (4) should be in different parts
+        self.assertNotEqual(membership[1], membership[4])
+
 
 if __name__ == "__main__":
     unittest.main()
