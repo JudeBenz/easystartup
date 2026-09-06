@@ -1,6 +1,10 @@
 # Blender Steel Fabrication Add-ons
 
-Two add-ons for low-poly Corten / sheet-metal sculpture workflows.
+Add-ons for low-poly Corten / sheet-metal sculpture workflows.
+
+## Pepakura note
+
+Pepakura’s `.pdo` format is **proprietary** — only Pepakura Designer can write real `.pdo` files. The reliable pipeline is: batch-export each Blender part as **OBJ named after the object** → open in Pepakura → unfold → **Save As `.pdo`**.
 
 ## 1. Steel Face Planarize (`steel_face_planarize`)
 
@@ -63,3 +67,19 @@ If a cap is made of several faces, select all of them and turn on **Use Selected
 **Clean install:** disable the add-on, quit Blender, delete the whole
 `steel_sharp_separate` folder under your Blender `scripts/addons`, then install
 the new zip. Partial updates leave a stale `core.py` and break new options.
+
+## 4. Steel Pepakura Export (`steel_pepakura_export`)
+
+Batch-exports each mesh part as its **own OBJ/STL file named after the object**, for opening in **Pepakura Designer**.
+
+Pepakura cannot be fed real `.pdo` files from Blender (proprietary format). Workflow:
+
+1. Select all separated / checkpointed parts
+2. **N-panel → Steel → Batch Export for Pepakura**
+3. In Pepakura: **File → Open** each OBJ → unfold → **Save As** `PartName.pdo`
+
+| Setting | Default | Meaning |
+|--------|---------|---------|
+| Format | OBJ | Best Pepakura import |
+| Selected Only | on | Export selection (off = all visible meshes) |
+| Scale | 1.0 | Use **25.4** if you modeled in inches and Pepakura is in mm |
