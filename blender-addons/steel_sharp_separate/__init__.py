@@ -2,26 +2,26 @@
 from __future__ import annotations
 
 bl_info = {
-    "name": "Steel Sharp Separate 1.2",
+    "name": "Steel Sharp Separate 1.3",
     "author": "Cursor Agent",
-    "version": (1, 2, 0),
+    "version": (1, 3, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Steel",
     "description": (
         "Separate a mesh into objects along Mark Sharp seams, duplicating "
-        "internal cap faces onto both sides. Blocks weak single-edge bridges "
-        "so parts do not leak into neighbors."
+        "internal cap faces onto both sides. Blocks weak bridges. "
+        "Inset checkpoint rims (1\") and delete insides."
     ),
     "category": "Mesh",
 }
 
 # Must match core.CORE_VERSION — catches mixed/partial installs
-ADDON_VERSION = (1, 2, 0)
+ADDON_VERSION = (1, 3, 0)
 
 try:
     import bmesh
     import bpy
-    from bpy.props import BoolProperty, IntProperty, StringProperty
+    from bpy.props import BoolProperty, FloatProperty, IntProperty, StringProperty
     from bpy.types import Operator, Panel, PropertyGroup
     from mathutils import Vector
 
@@ -116,6 +116,14 @@ if _HAS_BPY:
             name="Name Prefix",
             default="Part",
         )
+        checkpoint_inset: FloatProperty(
+            name="Checkpoint Inset (in)",
+            description="Inset distance for checkpoint rims (model units; 1 BU = 1 inch)",
+            default=1.0,
+            min=0.001,
+            soft_max=12.0,
+            unit="LENGTH",
+        )
 
     class STEELSEP_OT_select_caps(Operator):
         """Select faces that look like caps (boundary mostly/fully Mark Sharp)"""
@@ -191,7 +199,7 @@ if _HAS_BPY:
                     {"ERROR"},
                     "Mixed install (old core.py). Disable add-on, DELETE folder "
                     r"C:\Users\judej\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\addons\steel_sharp_separate "
-                    "then restart Blender and install steel_sharp_separate_1.2_addon.zip.",
+                    "then restart Blender and install steel_sharp_separate_1.3_addon.zip.",
                 )
                 return {"CANCELLED"}
 
@@ -214,7 +222,7 @@ if _HAS_BPY:
                 self.report(
                     {"ERROR"},
                     f"Outdated core.py ({exc}). Delete the steel_sharp_separate "
-                    "addons folder, restart Blender, reinstall the 1.2 zip.",
+                    "addons folder, restart Blender, reinstall the 1.3 zip.",
                 )
                 return {"CANCELLED"}
             if not parts:
@@ -265,6 +273,99 @@ if _HAS_BPY:
                 self.report({"INFO"}, msg)
             return {"FINISHED"}
 
+    class STEELSEP_OT_checkpoint_rim(Operator):
+        """Select Mark-Sharp checkpoint faces, inset, delete insides — leave rims"""
+
+        bl_idname = "mesh.steel_checkpoint_rim"
+        bl_label = "Checkpoint Rim (Inset + Delete Inside)"
+        bl_options = {"REGISTER", "UNDO"}
+
+        def execute(self, context):
+            props = context.scene.steel_separate
+            inset = float(props.checkpoint_inset)
+
+            # Selected meshes, or active mesh
+            targets = [o for o in context.selected_objects if o.type == "MESH"]
+            if not targets:
+                obj = _active_mesh(context)
+                if obj is None:
+                    self.report({"ERROR"}, "Select one or more mesh parts")
+                    return {"CANCELLED"}
+                targets = [obj]
+
+            if context.mode != "OBJECT":
+                bpy.ops.object.mode_set(mode="OBJECT")
+
+            total_caps = 0
+            total_rims = 0
+            skipped = 0
+
+            for obj in targets:
+                # Work in object local space via bmesh from mesh data
+                scale = obj.matrix_world.to_scale()
+                avg_scale = (abs(scale.x) + abs(scale.y) + abs(scale.z)) / 3.0
+                thickness = inset / max(avg_scale, 1e-8)
+
+                bm = bmesh.new()
+                bm.from_mesh(obj.data)
+                bm.faces.ensure_lookup_table()
+                bm.edges.ensure_lookup_table()
+                bm.verts.ensure_lookup_table()
+
+                sharp = {
+                    edge_key(e.verts[0].index, e.verts[1].index)
+                    for e in bm.edges
+                    if not e.smooth
+                }
+
+                checkpoints = []
+                for f in bm.faces:
+                    face = [v.index for v in f.verts]
+                    if is_cap_face(face, sharp) or is_likely_cap_face(face, sharp):
+                        checkpoints.append(f)
+
+                if not checkpoints:
+                    skipped += 1
+                    bm.free()
+                    continue
+
+                total_caps += len(checkpoints)
+
+                # Inset each checkpoint; returned faces are the inner faces
+                result = bmesh.ops.inset_individual(
+                    bm,
+                    faces=checkpoints,
+                    thickness=thickness,
+                    depth=0.0,
+                    use_even_offset=True,
+                    use_interpolate=True,
+                    use_relative_offset=False,
+                )
+                inner = list(result.get("faces", []))
+                if inner:
+                    bmesh.ops.delete(bm, geom=inner, context="FACES")
+                    total_rims += len(checkpoints)
+
+                bm.to_mesh(obj.data)
+                obj.data.update()
+                bm.free()
+
+            if total_caps == 0:
+                self.report(
+                    {"WARNING"},
+                    "No checkpoint faces found (need faces whose border is Mark Sharp)",
+                )
+                return {"CANCELLED"}
+
+            msg = (
+                f"Checkpoint rims on {len(targets) - skipped} part(s) · "
+                f"{total_caps} checkpoint(s) · inset {inset:g}\" · insides deleted"
+            )
+            if skipped:
+                msg += f" · {skipped} part(s) had no checkpoints"
+            self.report({"INFO"}, msg)
+            return {"FINISHED"}
+
     class STEELSEP_PT_panel(Panel):
         bl_label = "Steel Sharp Separate"
         bl_idname = "STEELSEP_PT_panel"
@@ -290,11 +391,17 @@ if _HAS_BPY:
             col = layout.column(align=True)
             col.operator("mesh.steel_select_sharp_caps", icon="FACESEL")
             col.operator("mesh.steel_sharp_separate", icon="MOD_EXPLODE")
+            layout.separator()
+            col = layout.column(align=True)
+            col.label(text="After parts are separated:")
+            col.prop(props, "checkpoint_inset")
+            col.operator("mesh.steel_checkpoint_rim", icon="MOD_SOLIDIFY")
 
     classes = (
         STEELSEP_PG_settings,
         STEELSEP_OT_select_caps,
         STEELSEP_OT_separate,
+        STEELSEP_OT_checkpoint_rim,
         STEELSEP_PT_panel,
     )
 
