@@ -56,7 +56,7 @@ Splits a sculpture into separate objects along **Mark Sharp** seams.
 3. Optional: select cap faces and enable **Use Selected Faces as Caps**
 4. **N-panel → Steel → Separate by Sharp Caps**
 5. Use **Select Detected Cap Faces** first to verify what it thinks are caps
-6. Select the new parts → **Checkpoint Rim (Inset + Delete Inside)**
+6. Select the new parts → **Rim All Checkpoints**, or in Edit Mode select faces → **Rim Selected Faces**
 
 If a cap is made of several faces, select all of them and turn on **Use Selected Faces as Caps**.
 
