@@ -151,6 +151,34 @@ class TestPlanarize(unittest.TestCase):
         self.assertAlmostEqual(inches_to_blender_units(1.0), 0.0254)
         self.assertAlmostEqual(inches_to_blender_units(0.001), 2.54e-5)
 
+    def test_warped_grid_all_faces_forced_flat(self):
+        """Shared-vert grid must all land within tolerance under strict mode."""
+        positions = {}
+        for y in range(8):
+            for x in range(8):
+                idx = y * 8 + x
+                z = 0.15 * ((x % 2) - (y % 2)) + 0.05 * ((x * y) % 3)
+                positions[idx] = (float(x), float(y), float(z))
+        faces = []
+        for y in range(7):
+            for x in range(7):
+                v0 = y * 8 + x
+                faces.append([v0, v0 + 1, v0 + 9, v0 + 8])
+
+        before = max(face_max_deviation([positions[i] for i in face]) for face in faces)
+        self.assertGreater(before, TOL_INCH)
+
+        new_pos, stats = planarize_positions(
+            positions,
+            faces,
+            tolerance=TOL_INCH,
+            max_iterations=500,
+            strict=True,
+        )
+        after = max(face_max_deviation([new_pos[i] for i in face]) for face in faces)
+        self.assertEqual(stats.faces_still_warped, 0)
+        self.assertLessEqual(after, TOL_INCH)
+
 
 class TestBestFitMatchesKnownPlane(unittest.TestCase):
     def test_tilted_plane(self):

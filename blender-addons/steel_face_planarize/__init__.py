@@ -4,7 +4,7 @@ from __future__ import annotations
 bl_info = {
     "name": "Steel Face Planarize",
     "author": "Cursor Agent",
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Steel",
     "description": (
@@ -17,7 +17,7 @@ bl_info = {
 try:
     import bmesh
     import bpy
-    from bpy.props import EnumProperty, FloatProperty, IntProperty
+    from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
     from bpy.types import Operator, Panel, PropertyGroup
 
     _HAS_BPY = True
@@ -68,10 +68,18 @@ if _HAS_BPY:
         )
         max_iterations: IntProperty(
             name="Max Iterations",
-            description="Safety limit for the least-move planarize solver",
-            default=80,
+            description="Solver iteration budget (strict mode often needs 300–800)",
+            default=500,
             min=1,
-            soft_max=200,
+            soft_max=2000,
+        )
+        strict_flatten: BoolProperty(
+            name="Force Every Face Flat",
+            description=(
+                "Ramp planarity until every selected face is within tolerance. "
+                "Keeps the shortest total vertex travel that still lets all plates fit together"
+            ),
+            default=True,
         )
 
     class STEELPLANAR_OT_planarize_selected(Operator):
@@ -125,6 +133,7 @@ if _HAS_BPY:
                 tolerance=tolerance,
                 max_iterations=props.max_iterations,
                 face_ids=face_ids,
+                strict=props.strict_flatten,
             )
 
             for index, co in new_positions.items():
@@ -138,12 +147,13 @@ if _HAS_BPY:
                 f"in {stats.iterations_used} iters · "
                 f"max warp {stats.max_deviation_before:.6g} → {stats.max_deviation_after:.6g} BU · "
                 f"moved {stats.vertices_moved} verts · "
+                f"travel {stats.total_displacement:.6g} BU · "
                 f"tol {props.tolerance_value:g} {unit_label}"
             )
             if stats.faces_still_warped:
                 msg += (
-                    f" · {stats.faces_still_warped} still over tolerance "
-                    "(shared constraints)"
+                    f" · {stats.faces_still_warped} still over tolerance — "
+                    "raise Max Iterations and keep Force Every Face Flat on"
                 )
                 self.report({"WARNING"}, msg)
             else:
@@ -263,6 +273,7 @@ if _HAS_BPY:
             row.prop(props, "tolerance_value")
             row.prop(props, "tolerance_unit", text="")
             layout.prop(props, "max_iterations")
+            layout.prop(props, "strict_flatten")
 
             layout.separator()
             col = layout.column(align=True)
