@@ -142,8 +142,12 @@ if _HAS_BPY:
             bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
             unit_label = {"INCH": "in", "MM": "mm", "BU": "BU"}[props.tolerance_unit]
+            # 260 in "X/260" means selected faces with 4+ verts (triangles ignored).
+            now_flat = stats.faces_considered - stats.faces_still_warped
             msg = (
-                f"Planarized {stats.faces_planarized}/{stats.faces_considered} faces "
+                f"Flat now {now_flat}/{stats.faces_considered} faces (4+ verts) · "
+                f"newly fixed {stats.faces_planarized} · "
+                f"already flat {stats.faces_already_planar} · "
                 f"in {stats.iterations_used} iters · "
                 f"max warp {stats.max_deviation_before:.6g} → {stats.max_deviation_after:.6g} BU · "
                 f"moved {stats.vertices_moved} verts · "
@@ -152,8 +156,9 @@ if _HAS_BPY:
             )
             if stats.faces_still_warped:
                 msg += (
-                    f" · {stats.faces_still_warped} still over tolerance — "
-                    "raise Max Iterations and keep Force Every Face Flat on"
+                    f" · {stats.faces_still_warped} still warped — "
+                    "confirm Steel Face Planarize 2.0 is enabled, "
+                    "Force Every Face Flat on, Max Iterations 500+"
                 )
                 self.report({"WARNING"}, msg)
             else:
