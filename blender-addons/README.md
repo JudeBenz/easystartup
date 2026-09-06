@@ -39,16 +39,20 @@ Unfolds selected parts into **connected flat nets**, leaves **2 small bend bridg
 | Bridge Width | 0.1 in | Each bend bridge width |
 | Bridges / Fold | 2 | Bridges left on every fold edge |
 
-### Tips
+## 3. Steel Sharp Separate (`steel_sharp_separate`)
 
-1. Run **Planarize** on fabrication copies first
-2. Keep each weldable/foldable section as its **own object**
-3. If a net won’t fit on one sheet, the add-on splits into multiple islands / sheets
-4. Adjust bridge width for your plate thickness / bend method
+Splits a sculpture into separate objects along **Mark Sharp** seams.
 
-### Tests (no Blender needed)
+- Detects **cap faces** that fill those sharp loops (your internal orange plates)
+- **Duplicates each cap onto both sides** of the cut so every part stays closed
+- Creates new objects named `Part_01`, `Part_02`, …
 
-```bash
-cd blender-addons
-python3 -m unittest discover -s tests -v
-```
+### Usage
+
+1. Mark cut loops: select edges → **Edge → Mark Sharp**
+2. Make sure each loop has a filling cap face (your internal plates)
+3. Optional: select cap faces and enable **Use Selected Faces as Caps**
+4. **N-panel → Steel → Separate by Sharp Caps**
+5. Use **Select Detected Cap Faces** first to verify what it thinks are caps
+
+If a cap is made of several faces, select all of them and turn on **Use Selected Faces as Caps**.
