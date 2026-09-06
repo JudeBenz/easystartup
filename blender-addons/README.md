@@ -1,52 +1,54 @@
-# Steel Face Planarize (Blender Add-on)
+# Blender Steel Fabrication Add-ons
 
-Planarize **selected quads and n-gons** with the **smallest vertex moves** possible so every face can be cut from flat sheet metal (Corten / plate steel). **Never splits** faces into triangles.
+Two add-ons for low-poly Corten / sheet-metal sculpture workflows.
 
-## Install
+## 1. Steel Face Planarize (`steel_face_planarize`)
 
-1. Zip the folder `steel_face_planarize` (the folder itself must be at the root of the zip).
-2. In Blender: **Edit → Preferences → Add-ons → Install…** and choose the zip.
-3. Enable **Mesh: Steel Face Planarize**.
-4. Open the **N-panel → Steel** tab in the 3D Viewport.
+Makes selected quads/n-gons **planar** with minimal vertex movement (no splitting).
 
-Or copy `steel_face_planarize/` into your Blender `scripts/addons/` directory and enable it.
+## 2. Steel Unfold Nest (`steel_unfold_nest`)
 
-Requires **Blender 3.6+** (4.x fine).
+Unfolds selected parts into **connected flat nets**, leaves **2 small bend bridges** on each fold edge, nests them onto **48″ × 96″** sheets (1″ margin), and exports **SVG for LightBurn**.
 
-## Usage
+### Install either add-on
 
-1. Select your sculpture mesh and enter **Edit Mode**.
-2. Select the faces to flatten (or `A` for all).
-3. Open **N-panel → Steel**.
-4. Set tolerance (default **0.001 inch**).
-5. Optional: **Check Selected Planarity** or **Select Warped Among Selection**.
-6. Click **Planarize Selected Faces**.
+1. Zip the add-on folder (folder at zip root), e.g. `steel_unfold_nest/`
+2. Blender → **Edit → Preferences → Add-ons → Install…**
+3. Enable it
+4. Open **N-panel → Steel**
 
-Triangles are ignored (already flat). Only faces with **4+ vertices** are processed.
+### Unfold + Nest usage
 
-## What it does
+1. Model units: set **Model Units** to **Inches** if you modeled with 1 BU = 1″
+2. Select all part objects (each foldable assembly)
+3. **N-panel → Steel → Unfold + Nest to SVG**
+4. Open the SVG(s) in LightBurn
 
-For every selected face with 4+ verts:
+**LightBurn layers**
+- **Blue (`#0000FF`)** — outer cuts
+- **Red (`#FF0000`)** — fold cuts (gaps = the 2 bridges)
+- Magenta/cyan dashed — sheet & margin guides (ignore / don’t cut)
 
-1. Fits the least-squares best-fit plane (minimal total squared distance).
-2. Collects each vertex’s projection onto every incident target face plane.
-3. Moves each vertex to the **average of those projections** — the least-move compromise when faces share edges/verts.
-4. Repeats until every face is within tolerance (or max iterations).
-
-Shared topology is preserved: one vertex stays one vertex; silhouette changes only as much as planarity requires.
-
-## Settings
+### Unfold settings
 
 | Setting | Default | Meaning |
 |--------|---------|---------|
-| Tolerance | `0.001` | Max distance from best-fit plane |
-| Unit | Inch | Inch / Millimeter / Blender units |
-| Max Iterations | `80` | Solver safety cap |
+| Sheet | 48 × 96 in | Stock size |
+| Margin | 1 in | Keep-out from sheet edge |
+| Part Gap | 0.25 in | Space between nested nets |
+| Bridge Width | 0.1 in | Each bend bridge width |
+| Bridges / Fold | 2 | Bridges left on every fold edge |
 
-`0.001 inch` ≈ `0.0254 mm`. Tolerance is converted using the scene’s unit scale.
+### Tips
 
-## Notes for fabrication
+1. Run **Planarize** on fabrication copies first
+2. Keep each weldable/foldable section as its **own object**
+3. If a net won’t fit on one sheet, the add-on splits into multiple islands / sheets
+4. Adjust bridge width for your plate thickness / bend method
 
-- If faces still report over tolerance after running, neighboring faces are fighting over shared verts. Raise iterations slightly, or planarize in regions.
-- This does **not** unfold / nest plates for cutting — it only makes faces planar in 3D.
-- Always keep a duplicate of the artistic mesh before planarizing a fabrication copy.
+### Tests (no Blender needed)
+
+```bash
+cd blender-addons
+python3 -m unittest discover -s tests -v
+```
