@@ -22,7 +22,7 @@ from steel_sharp_separate.core import (  # noqa: E402
 
 class TestVersion(unittest.TestCase):
     def test_core_version(self):
-        self.assertEqual(CORE_VERSION, (1, 5, 0))
+        self.assertEqual(CORE_VERSION, (1, 6, 0))
 
 
 class TestCapDetect(unittest.TestCase):

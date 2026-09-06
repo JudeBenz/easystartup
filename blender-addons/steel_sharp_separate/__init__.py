@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 bl_info = {
-    "name": "Steel Sharp Separate 1.5",
+    "name": "Steel Sharp Separate 1.6",
     "author": "Cursor Agent",
-    "version": (1, 5, 0),
+    "version": (1, 6, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Steel",
     "description": (
@@ -16,7 +16,7 @@ bl_info = {
 }
 
 # Must match core.CORE_VERSION — catches mixed/partial installs
-ADDON_VERSION = (1, 5, 0)
+ADDON_VERSION = (1, 6, 0)
 
 try:
     import bmesh
@@ -215,7 +215,7 @@ if _HAS_BPY:
                     {"ERROR"},
                     "Mixed install (old core.py). Disable add-on, DELETE folder "
                     r"C:\Users\judej\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\addons\steel_sharp_separate "
-                    "then restart Blender and install steel_sharp_separate_1.5_addon.zip.",
+                    "then restart Blender and install steel_sharp_separate_1.6_addon.zip.",
                 )
                 return {"CANCELLED"}
 
@@ -238,7 +238,7 @@ if _HAS_BPY:
                 self.report(
                     {"ERROR"},
                     f"Outdated core.py ({exc}). Delete the steel_sharp_separate "
-                    "addons folder, restart Blender, reinstall the 1.5 zip.",
+                    "addons folder, restart Blender, reinstall the 1.6 zip.",
                 )
                 return {"CANCELLED"}
             if not parts:
@@ -298,27 +298,56 @@ if _HAS_BPY:
             return {"FINISHED"}
 
 
+
     def _local_inset_thickness(obj, inset):
         scale = obj.matrix_world.to_scale()
         avg = (abs(scale.x) + abs(scale.y) + abs(scale.z)) / 3.0
-        return inset / max(avg, 1e-8)
+        return float(inset) / max(avg, 1e-8)
 
     def _inset_delete_inners(bm, faces, thickness):
-        """Inset faces individually; delete shrunk centers; leave rim. Returns count."""
-        if not faces:
+        """
+        Inset faces on a *standalone* BMesh (from_mesh), then delete the
+        shrunk centers. Do not call this on bmesh.from_edit_mesh — that path
+        can hard-crash Blender when combined with delete.
+        """
+        if not faces or thickness <= 0.0:
             return 0
+
+        # Copy list; indices after inset stay valid for original face refs
         inners = list(faces)
-        bmesh.ops.inset_individual(
-            bm,
-            faces=faces,
-            thickness=thickness,
-            depth=0.0,
-            use_even_offset=True,
-            use_interpolate=True,
-            use_relative_offset=False,
-        )
-        alive = [f for f in inners if f.is_valid]
-        if alive:
+        try:
+            bmesh.ops.inset_individual(
+                bm,
+                faces=inners,
+                thickness=thickness,
+                depth=0.0,
+                use_even_offset=True,
+                use_interpolate=True,
+                use_relative_offset=False,
+            )
+        except Exception:
+            # Fall back to region inset if individual fails
+            bmesh.ops.inset_region(
+                bm,
+                faces=inners,
+                thickness=thickness,
+                depth=0.0,
+                use_boundary=True,
+                use_even_offset=True,
+                use_interpolate=True,
+                use_relative_offset=False,
+                use_edge_rail=False,
+                use_outset=False,
+            )
+
+        bm.faces.ensure_lookup_table()
+        alive = [f for f in inners if getattr(f, "is_valid", False)]
+        if not alive:
+            return 0
+        # FACES_ONLY avoids some delete crashes vs FACES on complex meshes
+        try:
+            bmesh.ops.delete(bm, geom=alive, context="FACES_ONLY")
+        except Exception:
             bmesh.ops.delete(bm, geom=alive, context="FACES")
         return len(alive)
 
@@ -341,6 +370,7 @@ if _HAS_BPY:
                     return {"CANCELLED"}
                 targets = [obj]
 
+            was_edit = context.mode == "EDIT_MESH"
             if context.mode != "OBJECT":
                 bpy.ops.object.mode_set(mode="OBJECT")
 
@@ -383,10 +413,13 @@ if _HAS_BPY:
                 obj.data.update()
                 bm.free()
 
+            if was_edit and context.view_layer.objects.active:
+                bpy.ops.object.mode_set(mode="EDIT")
+
             if total_caps == 0:
                 hint = (
                     "No checkpoint faces found. Need Mark Sharp on part edges "
-                    "(re-separate with 1.5 so sharps are preserved), or use "
+                    "(re-separate with 1.6 so sharps are preserved), or use "
                     "Rim Selected Faces on the faces you want."
                 )
                 if no_sharp_hint:
@@ -404,7 +437,7 @@ if _HAS_BPY:
             return {"FINISHED"}
 
     class STEELSEP_OT_rim_selected(Operator):
-        """Inset only the faces you have selected and delete their centers (fine tune)"""
+        """Inset only selected faces and delete their centers (fine tune). Safe object-mode path."""
 
         bl_idname = "mesh.steel_rim_selected_faces"
         bl_label = "Rim Selected Faces"
@@ -427,24 +460,51 @@ if _HAS_BPY:
                 self.report({"ERROR"}, "Select a mesh in Edit Mode")
                 return {"CANCELLED"}
 
-            bm = bmesh.from_edit_mesh(obj.data)
-            bm.faces.ensure_lookup_table()
-            selected = [f for f in bm.faces if f.select]
-            if not selected:
+            # Capture selection indices WHILE still in edit mode, then leave
+            # edit mode. Running inset+delete on from_edit_mesh hard-crashes
+            # Blender on many builds.
+            bm_edit = bmesh.from_edit_mesh(obj.data)
+            bm_edit.faces.ensure_lookup_table()
+            face_indices = [f.index for f in bm_edit.faces if f.select]
+            if not face_indices:
                 self.report({"ERROR"}, "Select one or more faces first")
                 return {"CANCELLED"}
 
-            thickness = _local_inset_thickness(obj, inset)
-            count = len(selected)
-            rimmed = _inset_delete_inners(bm, selected, thickness)
-            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=True)
+            bpy.ops.object.mode_set(mode="OBJECT")
 
+            thickness = _local_inset_thickness(obj, inset)
+            bm = bmesh.new()
+            bm.from_mesh(obj.data)
+            bm.faces.ensure_lookup_table()
+
+            faces = []
+            for i in face_indices:
+                if 0 <= i < len(bm.faces):
+                    faces.append(bm.faces[i])
+            if not faces:
+                bm.free()
+                bpy.ops.object.mode_set(mode="EDIT")
+                self.report({"ERROR"}, "Selected faces no longer valid")
+                return {"CANCELLED"}
+
+            count = len(faces)
+            try:
+                rimmed = _inset_delete_inners(bm, faces, thickness)
+                bm.to_mesh(obj.data)
+                obj.data.update()
+            except Exception as exc:
+                bm.free()
+                bpy.ops.object.mode_set(mode="EDIT")
+                self.report({"ERROR"}, f"Rim failed: {exc}")
+                return {"CANCELLED"}
+            bm.free()
+
+            bpy.ops.object.mode_set(mode="EDIT")
             self.report(
                 {"INFO"},
                 f"Rimmed {rimmed}/{count} selected face(s) · inset {inset:g}\"",
             )
             return {"FINISHED"}
-
 
     class STEELSEP_PT_panel(Panel):
         bl_label = "Steel Sharp Separate"
