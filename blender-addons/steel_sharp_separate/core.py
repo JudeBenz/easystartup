@@ -7,6 +7,9 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
+# Keep in sync with __init__.bl_info["version"] / ADDON_VERSION
+CORE_VERSION = (1, 2, 0)
+
 EdgeKey = Tuple[int, int]
 Face = Sequence[int]
 Vec3 = Tuple[float, float, float]

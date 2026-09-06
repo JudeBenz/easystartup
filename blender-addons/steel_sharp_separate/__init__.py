@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 bl_info = {
-    "name": "Steel Sharp Separate 1.1",
+    "name": "Steel Sharp Separate 1.2",
     "author": "Cursor Agent",
-    "version": (1, 1, 0),
+    "version": (1, 2, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Steel",
     "description": (
@@ -14,6 +14,9 @@ bl_info = {
     ),
     "category": "Mesh",
 }
+
+# Must match core.CORE_VERSION — catches mixed/partial installs
+ADDON_VERSION = (1, 2, 0)
 
 try:
     import bmesh
@@ -27,6 +30,9 @@ except ImportError:
     _HAS_BPY = False
 
 if _HAS_BPY:
+    import inspect
+
+    from . import core as _core
     from .core import (
         edge_key,
         extract_part_geometry,
@@ -34,6 +40,8 @@ if _HAS_BPY:
         is_likely_cap_face,
         separate_by_sharp_caps,
     )
+
+    CORE_VERSION = getattr(_core, "CORE_VERSION", (0, 0, 0))
 
     def _active_mesh(context):
         obj = context.object
@@ -178,14 +186,37 @@ if _HAS_BPY:
                 )
                 return {"CANCELLED"}
 
-            parts, stats = separate_by_sharp_caps(
-                faces=faces,
-                sharp_edges=sharp,
-                cap_face_indices=selected_caps if props.use_selected_caps else None,
-                name_prefix=props.name_prefix or "Part",
-                block_weak_bridges=props.block_weak_bridges,
-                min_bridge_side_faces=props.min_bridge_side_faces,
-            )
+            if CORE_VERSION != ADDON_VERSION:
+                self.report(
+                    {"ERROR"},
+                    "Mixed install (old core.py). Disable add-on, DELETE folder "
+                    r"C:\Users\judej\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\addons\steel_sharp_separate "
+                    "then restart Blender and install steel_sharp_separate_1.2_addon.zip.",
+                )
+                return {"CANCELLED"}
+
+            # Only pass kwargs the installed core.py actually supports
+            kwargs = {
+                "faces": faces,
+                "sharp_edges": sharp,
+                "cap_face_indices": selected_caps if props.use_selected_caps else None,
+                "name_prefix": props.name_prefix or "Part",
+            }
+            sig = inspect.signature(separate_by_sharp_caps)
+            if "block_weak_bridges" in sig.parameters:
+                kwargs["block_weak_bridges"] = props.block_weak_bridges
+            if "min_bridge_side_faces" in sig.parameters:
+                kwargs["min_bridge_side_faces"] = props.min_bridge_side_faces
+
+            try:
+                parts, stats = separate_by_sharp_caps(**kwargs)
+            except TypeError as exc:
+                self.report(
+                    {"ERROR"},
+                    f"Outdated core.py ({exc}). Delete the steel_sharp_separate "
+                    "addons folder, restart Blender, reinstall the 1.2 zip.",
+                )
+                return {"CANCELLED"}
             if not parts:
                 self.report({"ERROR"}, "No parts created")
                 return {"CANCELLED"}
@@ -219,12 +250,13 @@ if _HAS_BPY:
                 o.select_set(True)
             context.view_layer.objects.active = new_objects[0]
 
+            weak_blocked = getattr(stats, "weak_bridges_blocked", 0)
             msg = (
                 f"Separated into {stats.parts} object(s) · "
                 f"{stats.caps_found} cap(s) · "
                 f"{stats.caps_duplicated} duplicated to both sides · "
                 f"{stats.sharp_edges} sharp edges · "
-                f"{stats.weak_bridges_blocked} weak bridge(s) blocked"
+                f"{weak_blocked} weak bridge(s) blocked"
             )
             if stats.warnings:
                 msg += " · " + "; ".join(stats.warnings[:2])
