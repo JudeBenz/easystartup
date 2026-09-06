@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 bl_info = {
-    "name": "Steel Face Planarize 2.0",
+    "name": "Steel Face Planarize 3.0",
     "author": "Cursor Agent",
-    "version": (2, 0, 0),
+    "version": (3, 0, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Steel",
     "description": (
