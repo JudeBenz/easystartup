@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 bl_info = {
-    "name": "Steel Face Planarize 3.0",
+    "name": "Steel Face Planarize 3.1",
     "author": "Cursor Agent",
-    "version": (3, 0, 0),
+    "version": (3, 1, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Steel",
     "description": (
@@ -13,6 +13,9 @@ bl_info = {
     ),
     "category": "Mesh",
 }
+
+# Bump together with algorithm.ALGORITHM_VERSION — used to catch mixed installs.
+ADDON_VERSION = (3, 1, 0)
 
 try:
     import bmesh
@@ -25,12 +28,13 @@ except ImportError:
     _HAS_BPY = False
 
 if _HAS_BPY:
-    from .algorithm import (
-        face_max_deviation,
-        inches_to_blender_units,
-        mm_to_blender_units,
-        planarize_positions,
-    )
+    from . import algorithm as _algo
+
+    ALGORITHM_VERSION = getattr(_algo, "ALGORITHM_VERSION", (0, 0, 0))
+    face_max_deviation = _algo.face_max_deviation
+    inches_to_blender_units = _algo.inches_to_blender_units
+    mm_to_blender_units = _algo.mm_to_blender_units
+    planarize_positions = _algo.planarize_positions
 
     def _tolerance_in_blender_units(scene, props):
         scale = scene.unit_settings.scale_length
@@ -127,14 +131,31 @@ if _HAS_BPY:
                 faces.append(loop)
                 face_ids.append(face.index)
 
-            new_positions, stats = planarize_positions(
-                positions=positions,
-                faces=faces,
-                tolerance=tolerance,
-                max_iterations=props.max_iterations,
-                face_ids=face_ids,
-                strict=props.strict_flatten,
-            )
+            if ALGORITHM_VERSION != ADDON_VERSION:
+                self.report(
+                    {"ERROR"},
+                    "Mixed/old install detected. Disable the add-on, delete folder: "
+                    "C:\\Users\\judej\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\scripts\\addons\\steel_face_planarize "
+                    "then restart Blender and install steel_face_planarize_3.1_addon.zip.",
+                )
+                return {"CANCELLED"}
+
+            try:
+                new_positions, stats = planarize_positions(
+                    positions=positions,
+                    faces=faces,
+                    tolerance=tolerance,
+                    max_iterations=props.max_iterations,
+                    face_ids=face_ids,
+                    strict=bool(getattr(props, "strict_flatten", True)),
+                )
+            except TypeError as exc:
+                self.report(
+                    {"ERROR"},
+                    f"Outdated algorithm.py ({exc}). Delete the steel_face_planarize "
+                    "addons folder, restart Blender, reinstall the 3.1 zip.",
+                )
+                return {"CANCELLED"}
 
             for index, co in new_positions.items():
                 bm.verts[index].co = co

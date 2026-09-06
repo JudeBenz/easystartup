@@ -22,6 +22,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List, Sequence, Tuple
 
+# Keep in sync with __init__.ADDON_VERSION / bl_info["version"]
+ALGORITHM_VERSION = (3, 1, 0)
+
 
 Vec3 = Tuple[float, float, float]
 
