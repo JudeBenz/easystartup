@@ -45,7 +45,9 @@ Splits a sculpture into separate objects along **Mark Sharp** seams.
 
 - Detects **cap faces** that fill those sharp loops (your internal orange plates)
 - **Duplicates each cap onto both sides** of the cut so every part stays closed
-- Creates new objects named `Part_01`, `Part_02`, …
+- **Blocks weak bridges** (thin single-edge leaks between big face groups)
+- **Preserves Mark Sharp** on the new `Part_*` objects
+- **Checkpoint Rim**: inset caps by 1″ and delete insides (rim stays joined)
 
 ### Usage
 
@@ -54,5 +56,10 @@ Splits a sculpture into separate objects along **Mark Sharp** seams.
 3. Optional: select cap faces and enable **Use Selected Faces as Caps**
 4. **N-panel → Steel → Separate by Sharp Caps**
 5. Use **Select Detected Cap Faces** first to verify what it thinks are caps
+6. Select the new parts → **Checkpoint Rim (Inset + Delete Inside)**
 
 If a cap is made of several faces, select all of them and turn on **Use Selected Faces as Caps**.
+
+**Clean install:** disable the add-on, quit Blender, delete the whole
+`steel_sharp_separate` folder under your Blender `scripts/addons`, then install
+the new zip. Partial updates leave a stale `core.py` and break new options.

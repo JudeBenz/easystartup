@@ -178,8 +178,8 @@ if _HAS_BPY:
             if stats.faces_still_warped:
                 msg += (
                     f" · {stats.faces_still_warped} still warped — "
-                    "confirm Steel Face Planarize 2.0 is enabled, "
-                    "Force Every Face Flat on, Max Iterations 500+"
+                    "re-run, raise Max Iterations, or confirm Steel Face "
+                    "Planarize 3.x is enabled with Force Every Face Flat on"
                 )
                 self.report({"WARNING"}, msg)
             else:

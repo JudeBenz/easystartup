@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 # Keep in sync with __init__.bl_info["version"] / ADDON_VERSION
-CORE_VERSION = (1, 3, 0)
+CORE_VERSION = (1, 4, 0)
 
 EdgeKey = Tuple[int, int]
 Face = Sequence[int]
@@ -91,7 +91,6 @@ def component_size_without_edge(
     adj: Dict[int, Set[int]], start: int, blocked: DualEdge
 ) -> int:
     """Count nodes reachable from start without crossing blocked dual edge."""
-    a, b = blocked
     seen = {start}
     q = deque([start])
     while q:
@@ -106,54 +105,85 @@ def component_size_without_edge(
     return len(seen)
 
 
+def component_total(adj: Dict[int, Set[int]], start: int) -> int:
+    seen = {start}
+    q = deque([start])
+    while q:
+        cur = q.popleft()
+        for nb in adj.get(cur, ()):
+            if nb not in seen:
+                seen.add(nb)
+                q.append(nb)
+    return len(seen)
+
+
+def _is_weak_bridge(
+    size_a: int,
+    size_b: int,
+    min_side_faces: int,
+) -> bool:
+    """
+    True when a dual bridge is a thin leak between substantial groups.
+
+    - Both sides ≥ min_side_faces (default 2), or
+    - Smaller side ≥ min_side_faces and larger side is clearly a big body
+      (≥ max(8, min*4)) — catches leg↔torso single-edge leaks.
+    """
+    if size_a < 1 or size_b < 1:
+        return False
+    small, large = (size_a, size_b) if size_a <= size_b else (size_b, size_a)
+    if small >= min_side_faces and large >= min_side_faces:
+        return True
+    body_threshold = max(8, min_side_faces * 4)
+    return small >= min_side_faces and large >= body_threshold
+
+
 def remove_weak_bridges(
     adj: Dict[int, Set[int]],
     nodes: Sequence[int],
-    min_side_faces: int = 3,
+    min_side_faces: int = 2,
 ) -> Tuple[Dict[int, Set[int]], int]:
     """
-    Drop dual-graph bridges that join two substantial face groups.
+    Iteratively drop dual-graph bridges that join two substantial face groups.
 
-    A dual bridge is "weak" when both sides have at least `min_side_faces`
-    faces. Thin single-edge leaks between a leg chunk and a body face get
-    cut; long single-file strips usually stay together because one side of
-    an end bridge is too small.
+    Thin single-edge leaks between a leg chunk and a body face get cut; long
+    single-file strips usually stay together because one side of an end bridge
+    is too small. Removing one weak bridge can expose another — loop until stable.
     """
     if min_side_faces < 1 or len(nodes) < min_side_faces * 2:
         return adj, 0
 
-    bridges = find_bridges(adj, nodes)
-    if not bridges:
-        return adj, 0
-
-    weak: Set[DualEdge] = set()
-    for br in bridges:
-        a, b = br
-        # Size of a's side without the bridge
-        size_a = component_size_without_edge(adj, a, br)
-        # Total component size via a (with bridge) — walk allowing bridge
-        total_seen = set()
-        q = deque([a])
-        total_seen.add(a)
-        while q:
-            cur = q.popleft()
-            for nb in adj.get(cur, ()):
-                if nb not in total_seen:
-                    total_seen.add(nb)
-                    q.append(nb)
-        size_b = len(total_seen) - size_a
-        if size_a >= min_side_faces and size_b >= min_side_faces:
-            weak.add(br)
-
-    if not weak:
-        return adj, 0
-
-    new_adj: Dict[int, Set[int]] = defaultdict(set)
+    current: Dict[int, Set[int]] = defaultdict(set)
     for v, nbs in adj.items():
-        for nb in nbs:
-            if _dual_edge(v, nb) not in weak:
-                new_adj[v].add(nb)
-    return new_adj, len(weak)
+        current[v] = set(nbs)
+
+    total_blocked = 0
+    # Safety cap — topology shouldn't need dozens of passes
+    for _ in range(64):
+        bridges = find_bridges(current, nodes)
+        if not bridges:
+            break
+
+        weak: Set[DualEdge] = set()
+        for br in bridges:
+            a, b = br
+            size_a = component_size_without_edge(current, a, br)
+            size_b = component_total(current, a) - size_a
+            if _is_weak_bridge(size_a, size_b, min_side_faces):
+                weak.add(br)
+
+        if not weak:
+            break
+
+        new_adj: Dict[int, Set[int]] = defaultdict(set)
+        for v, nbs in current.items():
+            for nb in nbs:
+                if _dual_edge(v, nb) not in weak:
+                    new_adj[v].add(nb)
+        current = new_adj
+        total_blocked += len(weak)
+
+    return current, total_blocked
 
 
 @dataclass
@@ -173,13 +203,49 @@ class MeshPart:
     face_indices: List[int]
 
 
+def _cap_touching_islands(
+    cap_i: int,
+    faces: Sequence[Face],
+    sharp_edges: Set[EdgeKey],
+    edge_to_faces: Dict[EdgeKey, List[int]],
+    face_island: Dict[int, int],
+) -> Set[int]:
+    """
+    Pick which shell islands should receive a copy of this cap.
+
+    Prefer islands that share Mark Sharp edges with the cap (the real cut
+    loop). Fall back to any multi-edge touch, then any single-edge touch.
+    """
+    sharp_touch: Dict[int, int] = defaultdict(int)
+    any_touch: Dict[int, int] = defaultdict(int)
+    for e in face_edges(faces[cap_i]):
+        for fi in edge_to_faces.get(e, ()):
+            if fi not in face_island:
+                continue
+            iid = face_island[fi]
+            any_touch[iid] += 1
+            if e in sharp_edges:
+                sharp_touch[iid] += 1
+
+    # Any shared Mark Sharp edge means this island sits on the cut loop.
+    if sharp_touch:
+        return set(sharp_touch.keys())
+
+    # No sharp touch: require 2+ shared edges so a single accidental contact
+    # can't claim the cap.
+    strong = {iid for iid, n in any_touch.items() if n >= 2}
+    if strong:
+        return strong
+    return set(any_touch.keys())
+
+
 def separate_by_sharp_caps(
     faces: Sequence[Face],
     sharp_edges: Set[EdgeKey],
     cap_face_indices: Optional[Sequence[int]] = None,
     name_prefix: str = "Part",
     block_weak_bridges: bool = True,
-    min_bridge_side_faces: int = 3,
+    min_bridge_side_faces: int = 2,
 ) -> Tuple[List[MeshPart], SeparateStats]:
     """
     Split shell faces into parts using sharp edges as cuts.
@@ -237,7 +303,7 @@ def separate_by_sharp_caps(
         if blocked:
             stats.warnings.append(
                 f"Blocked {blocked} weak bridge(s) "
-                f"(single-link joins of {min_bridge_side_faces}+ faces per side)"
+                f"(thin joins of {min_bridge_side_faces}+ faces per side)"
             )
 
     remaining = set(shell)
@@ -262,19 +328,11 @@ def separate_by_sharp_caps(
 
     part_faces: List[List[int]] = [sorted(island) for island in islands]
 
-    # Caps: only duplicate onto parts that share a meaningful amount of the
-    # cap loop (at least 2 boundary edges), so a single touch can't claim it.
     duplicated = 0
     for cap_i in sorted(caps):
-        touch_edges: Dict[int, int] = defaultdict(int)
-        for e in face_edges(faces[cap_i]):
-            for fi in edge_to_faces.get(e, ()):
-                if fi in face_island:
-                    touch_edges[face_island[fi]] += 1
-
-        # Prefer islands that share 2+ edges with the cap; fall back to any touch
-        strong = {iid for iid, n in touch_edges.items() if n >= 2}
-        touching = strong if strong else set(touch_edges.keys())
+        touching = _cap_touching_islands(
+            cap_i, faces, sharp_edges, edge_to_faces, face_island
+        )
 
         if not touching:
             part_faces.append([cap_i])
@@ -309,8 +367,14 @@ def extract_part_geometry(
     positions: Dict[int, Vec3],
     faces: Sequence[Face],
     face_indices: Sequence[int],
-) -> Tuple[List[Vec3], List[List[int]]]:
-    """Build reindexed verts/faces for one part (welded within the part)."""
+    sharp_edges: Optional[Set[EdgeKey]] = None,
+) -> Tuple[List[Vec3], List[List[int]], Set[EdgeKey]]:
+    """
+    Build reindexed verts/faces for one part (welded within the part).
+
+    Also remaps Mark Sharp edges into the new vertex index space so separated
+    Part_* objects keep sharps (needed for Checkpoint Rim).
+    """
     new_positions: List[Vec3] = []
     new_faces: List[List[int]] = []
     remap: Dict[int, int] = {}
@@ -323,4 +387,13 @@ def extract_part_geometry(
 
     for fi in face_indices:
         new_faces.append([get_new(v) for v in faces[fi]])
-    return new_positions, new_faces
+
+    new_sharp: Set[EdgeKey] = set()
+    if sharp_edges:
+        for fi in face_indices:
+            for a, b in face_edges(faces[fi]):
+                if (a, b) in sharp_edges or edge_key(a, b) in sharp_edges:
+                    if a in remap and b in remap:
+                        new_sharp.add(edge_key(remap[a], remap[b]))
+
+    return new_positions, new_faces, new_sharp

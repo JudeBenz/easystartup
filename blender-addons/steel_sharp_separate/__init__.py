@@ -2,21 +2,21 @@
 from __future__ import annotations
 
 bl_info = {
-    "name": "Steel Sharp Separate 1.3",
+    "name": "Steel Sharp Separate 1.4",
     "author": "Cursor Agent",
-    "version": (1, 3, 0),
+    "version": (1, 4, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Steel",
     "description": (
         "Separate a mesh into objects along Mark Sharp seams, duplicating "
         "internal cap faces onto both sides. Blocks weak bridges. "
-        "Inset checkpoint rims (1\") and delete insides."
+        "Preserves Mark Sharp on parts. Inset checkpoint rims and delete insides."
     ),
     "category": "Mesh",
 }
 
 # Must match core.CORE_VERSION — catches mixed/partial installs
-ADDON_VERSION = (1, 3, 0)
+ADDON_VERSION = (1, 4, 0)
 
 try:
     import bmesh
@@ -81,6 +81,21 @@ if _HAS_BPY:
         bm.faces.ensure_lookup_table()
         return [f.index for f in bm.faces if f.select]
 
+    def _apply_sharp_edges(mesh, sharp_edges):
+        """Mark edges as sharp (smooth=False) from remapped edge keys."""
+        if not sharp_edges:
+            return
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.edges.ensure_lookup_table()
+        bm.verts.ensure_lookup_table()
+        for e in bm.edges:
+            ek = edge_key(e.verts[0].index, e.verts[1].index)
+            e.smooth = ek not in sharp_edges
+        bm.to_mesh(mesh)
+        bm.free()
+        mesh.update()
+
     class STEELSEP_PG_settings(PropertyGroup):
         use_selected_caps: BoolProperty(
             name="Use Selected Faces as Caps",
@@ -93,19 +108,20 @@ if _HAS_BPY:
         block_weak_bridges: BoolProperty(
             name="Block Weak Bridges",
             description=(
-                "If two big face groups only touch through a single shared edge, "
-                "treat that as a leak and keep them as separate parts"
+                "If two big face groups only touch through a thin dual-graph "
+                "bridge (typical leg↔body leak), cut that link and keep them "
+                "as separate parts"
             ),
             default=True,
         )
         min_bridge_side_faces: IntProperty(
             name="Min Faces Per Side",
             description=(
-                "Only block a weak bridge when both sides have at least this many "
-                "faces (keeps long single-file strips from shattering)"
+                "Only block a weak bridge when the smaller side has at least "
+                "this many faces (keeps long single-file strips from shattering)"
             ),
-            default=3,
-            min=2,
+            default=2,
+            min=1,
             soft_max=12,
         )
         hide_original: BoolProperty(
@@ -123,6 +139,14 @@ if _HAS_BPY:
             min=0.001,
             soft_max=12.0,
             unit="LENGTH",
+        )
+        checkpoint_use_selected: BoolProperty(
+            name="Use Selected as Checkpoints",
+            description=(
+                "If any faces are selected on a part in Edit Mode, rim those "
+                "instead of auto-detecting Mark Sharp caps"
+            ),
+            default=False,
         )
 
     class STEELSEP_OT_select_caps(Operator):
@@ -199,7 +223,7 @@ if _HAS_BPY:
                     {"ERROR"},
                     "Mixed install (old core.py). Disable add-on, DELETE folder "
                     r"C:\Users\judej\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\addons\steel_sharp_separate "
-                    "then restart Blender and install steel_sharp_separate_1.3_addon.zip.",
+                    "then restart Blender and install steel_sharp_separate_1.4_addon.zip.",
                 )
                 return {"CANCELLED"}
 
@@ -222,7 +246,7 @@ if _HAS_BPY:
                 self.report(
                     {"ERROR"},
                     f"Outdated core.py ({exc}). Delete the steel_sharp_separate "
-                    "addons folder, restart Blender, reinstall the 1.3 zip.",
+                    "addons folder, restart Blender, reinstall the 1.4 zip.",
                 )
                 return {"CANCELLED"}
             if not parts:
@@ -238,13 +262,20 @@ if _HAS_BPY:
             new_objects = []
 
             for part in parts:
-                world_verts, part_faces = extract_part_geometry(
-                    positions, faces, part.face_indices
+                result = extract_part_geometry(
+                    positions, faces, part.face_indices, sharp_edges=sharp
                 )
+                if len(result) == 3:
+                    world_verts, part_faces, part_sharp = result
+                else:
+                    # Old core.py without sharp remap
+                    world_verts, part_faces = result
+                    part_sharp = set()
                 local_verts = [tuple(inv @ Vector(v)) for v in world_verts]
                 mesh = bpy.data.meshes.new(part.name)
                 mesh.from_pydata(local_verts, [], part_faces)
                 mesh.update()
+                _apply_sharp_edges(mesh, part_sharp)
                 new_obj = bpy.data.objects.new(part.name, mesh)
                 new_obj.matrix_world = obj.matrix_world.copy()
                 collection.objects.link(new_obj)
@@ -264,7 +295,8 @@ if _HAS_BPY:
                 f"{stats.caps_found} cap(s) · "
                 f"{stats.caps_duplicated} duplicated to both sides · "
                 f"{stats.sharp_edges} sharp edges · "
-                f"{weak_blocked} weak bridge(s) blocked"
+                f"{weak_blocked} weak bridge(s) blocked · "
+                f"Mark Sharp preserved on parts"
             )
             if stats.warnings:
                 msg += " · " + "; ".join(stats.warnings[:2])
@@ -274,7 +306,7 @@ if _HAS_BPY:
             return {"FINISHED"}
 
     class STEELSEP_OT_checkpoint_rim(Operator):
-        """Select Mark-Sharp checkpoint faces, inset, delete insides — leave rims"""
+        """Inset Mark-Sharp checkpoint faces and delete insides — leave rims joined"""
 
         bl_idname = "mesh.steel_checkpoint_rim"
         bl_label = "Checkpoint Rim (Inset + Delete Inside)"
@@ -283,6 +315,7 @@ if _HAS_BPY:
         def execute(self, context):
             props = context.scene.steel_separate
             inset = float(props.checkpoint_inset)
+            use_selected = bool(props.checkpoint_use_selected)
 
             # Selected meshes, or active mesh
             targets = [o for o in context.selected_objects if o.type == "MESH"]
@@ -293,15 +326,22 @@ if _HAS_BPY:
                     return {"CANCELLED"}
                 targets = [obj]
 
+            # Capture edit-mode selection per object before leaving edit mode
+            selected_by_obj = {}
+            if use_selected:
+                for obj in targets:
+                    if obj.mode == "EDIT":
+                        selected_by_obj[obj.name] = set(_selected_face_indices(obj))
+
             if context.mode != "OBJECT":
                 bpy.ops.object.mode_set(mode="OBJECT")
 
             total_caps = 0
             total_rims = 0
             skipped = 0
+            no_sharp_hint = 0
 
             for obj in targets:
-                # Work in object local space via bmesh from mesh data
                 scale = obj.matrix_world.to_scale()
                 avg_scale = (abs(scale.x) + abs(scale.y) + abs(scale.z)) / 3.0
                 thickness = inset / max(avg_scale, 1e-8)
@@ -317,12 +357,20 @@ if _HAS_BPY:
                     for e in bm.edges
                     if not e.smooth
                 }
+                if not sharp:
+                    no_sharp_hint += 1
 
                 checkpoints = []
-                for f in bm.faces:
-                    face = [v.index for v in f.verts]
-                    if is_cap_face(face, sharp) or is_likely_cap_face(face, sharp):
-                        checkpoints.append(f)
+                sel = selected_by_obj.get(obj.name)
+                if use_selected and sel:
+                    for f in bm.faces:
+                        if f.index in sel:
+                            checkpoints.append(f)
+                else:
+                    for f in bm.faces:
+                        face = [v.index for v in f.verts]
+                        if is_cap_face(face, sharp) or is_likely_cap_face(face, sharp):
+                            checkpoints.append(f)
 
                 if not checkpoints:
                     skipped += 1
@@ -331,8 +379,10 @@ if _HAS_BPY:
 
                 total_caps += len(checkpoints)
 
-                # Inset each checkpoint; returned faces are the inner faces
-                result = bmesh.ops.inset_individual(
+                # inset_individual: original faces shrink to inners; returned
+                # faces are the NEW rim faces. Delete the inners, keep the rim.
+                inners = list(checkpoints)
+                bmesh.ops.inset_individual(
                     bm,
                     faces=checkpoints,
                     thickness=thickness,
@@ -341,20 +391,25 @@ if _HAS_BPY:
                     use_interpolate=True,
                     use_relative_offset=False,
                 )
-                inner = list(result.get("faces", []))
-                if inner:
-                    bmesh.ops.delete(bm, geom=inner, context="FACES")
-                    total_rims += len(checkpoints)
+                # Drop any dead refs; delete remaining original (inner) faces
+                alive_inners = [f for f in inners if f.is_valid]
+                if alive_inners:
+                    bmesh.ops.delete(bm, geom=alive_inners, context="FACES")
+                    total_rims += len(alive_inners)
 
                 bm.to_mesh(obj.data)
                 obj.data.update()
                 bm.free()
 
             if total_caps == 0:
-                self.report(
-                    {"WARNING"},
-                    "No checkpoint faces found (need faces whose border is Mark Sharp)",
+                hint = (
+                    "No checkpoint faces found. Need Mark Sharp on part edges "
+                    "(re-separate with 1.4 so sharps are preserved), or select "
+                    "faces and enable Use Selected as Checkpoints."
                 )
+                if no_sharp_hint:
+                    hint += f" ({no_sharp_hint} part(s) had zero sharp edges.)"
+                self.report({"WARNING"}, hint)
                 return {"CANCELLED"}
 
             msg = (
@@ -378,7 +433,7 @@ if _HAS_BPY:
             props = context.scene.steel_separate
             col = layout.column(align=True)
             col.label(text="Split on Mark Sharp seams")
-            col.label(text="Cap faces copy to both parts")
+            col.label(text="Caps copy to both parts · sharps kept")
             layout.separator()
             layout.prop(props, "name_prefix")
             layout.prop(props, "use_selected_caps")
@@ -395,6 +450,7 @@ if _HAS_BPY:
             col = layout.column(align=True)
             col.label(text="After parts are separated:")
             col.prop(props, "checkpoint_inset")
+            col.prop(props, "checkpoint_use_selected")
             col.operator("mesh.steel_checkpoint_rim", icon="MOD_SOLIDIFY")
 
     classes = (
