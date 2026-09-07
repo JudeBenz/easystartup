@@ -18,7 +18,7 @@ INCH_TO_MM = 25.4
 DEFAULT_SHEET_W = 48.0
 DEFAULT_SHEET_H = 96.0
 DEFAULT_MARGIN = 1.0
-DEFAULT_GAP = 0.25
+DEFAULT_GAP = 0.15
 
 
 @dataclass
@@ -285,6 +285,16 @@ def _seg_len(seg: Segment) -> float:
     return math.hypot(seg.p1[0] - seg.p0[0], seg.p1[1] - seg.p0[1])
 
 
+def _median(vals: list[float]) -> float:
+    if not vals:
+        return 0.0
+    s = sorted(vals)
+    mid = len(s) // 2
+    if len(s) % 2:
+        return s[mid]
+    return 0.5 * (s[mid - 1] + s[mid])
+
+
 def clean_segments(segments: Sequence[Segment], min_len: float = 1e-6) -> list[Segment]:
     """Drop zero-length junk that Pepakura sometimes emits."""
     out: list[Segment] = []
@@ -294,15 +304,45 @@ def clean_segments(segments: Sequence[Segment], min_len: float = 1e-6) -> list[S
     return out
 
 
-def chain_polylines(segments: Sequence[Segment], tol: float = 1e-4) -> list[list[Vec2]]:
+def filter_outlier_segments(
+    segments: Sequence[Segment], *, k: float = 5.0
+) -> list[Segment]:
+    """
+    Drop stray Pepakura lines far from the main pattern cluster.
+    Those outliers inflate the bbox and look like 'blown out' artifacts
+    once parts are placed away from LightBurn's work origin.
+    """
+    segs = list(segments)
+    if len(segs) < 5:
+        return segs
+    mids = [
+        ((s.p0[0] + s.p1[0]) * 0.5, (s.p0[1] + s.p1[1]) * 0.5) for s in segs
+    ]
+    cx = _median([m[0] for m in mids])
+    cy = _median([m[1] for m in mids])
+    dists = [math.hypot(m[0] - cx, m[1] - cy) for m in mids]
+    med = _median(dists)
+    if med <= 1e-9:
+        return segs
+    limit = max(med * k, med + 1e-6)
+    kept = [s for s, d in zip(segs, dists) if d <= limit]
+    # Don't over-prune if something went wrong
+    if len(kept) < max(3, len(segs) // 5):
+        return segs
+    return kept
+
+
+def chain_polylines(segments: Sequence[Segment], tol: float = 0.02) -> list[list[Vec2]]:
     """
     Join end-to-end segments into polylines so LightBurn gets continuous paths
     instead of thousands of disconnected 2-point sticks (looks 'messed up').
+
+    tol default ~0.02" catches Pepakura micro-gaps after unit conversion.
     """
     unused = [
         Segment(s.p0, s.p1, s.kind, s.layer, s.color)
         for s in segments
-        if _seg_len(s) >= tol
+        if _seg_len(s) >= min(tol * 0.25, 1e-5)
     ]
     polys: list[list[Vec2]] = []
 
@@ -339,7 +379,6 @@ def chain_polylines(segments: Sequence[Segment], tol: float = 1e-4) -> list[list
                     changed = True
                     continue
                 i += 1
-        # Dedup consecutive duplicates
         cleaned = [poly[0]]
         for p in poly[1:]:
             if not near(cleaned[-1], p):
@@ -351,9 +390,12 @@ def chain_polylines(segments: Sequence[Segment], tol: float = 1e-4) -> list[list
 
 def load_part(path: Path) -> Part:
     segs = clean_segments(parse_dxf_segments(path))
+    segs = filter_outlier_segments(segs)
     if not segs:
         raise ValueError(f"No line geometry in {path.name}")
-    return Part(name=path.stem, segments=segs)
+    part = Part(name=path.stem, segments=segs)
+    part.shift_to_origin()
+    return part
 
 
 def guess_unit_scale_to_inches(parts: Sequence[Part]) -> tuple[float, str]:
@@ -636,43 +678,45 @@ def _path_shape_xml(
 def _path_shape_lbrn2(
     segments: Sequence[Segment], cut_index: int, scale: float, indent: str = "  "
 ) -> str:
-    """LightBurn 1.7 prefers condensed VertList / PrimList (.lbrn2)."""
+    """
+    LightBurn 1.7 VertList / PrimList.
+    One Shape per polyline — huge multi-contour VertLists get unstable
+    when placed far from the work origin.
+    """
     if not segments:
         return ""
-    # Chain into polylines so outlines look solid instead of broken sticks
     polys = chain_polylines(segments)
     if not polys:
         return ""
 
-    vert_bits: list[str] = []
-    prim_bits: list[str] = []
-    vi = 0
+    chunks: list[str] = []
     for poly in polys:
-        start = vi
+        if len(poly) < 2:
+            continue
+        vert_bits: list[str] = []
+        prim_bits: list[str] = []
         for x, y in poly:
-            vert_bits.append(f"V{x * scale:.6f} {y * scale:.6f}c0x1c1x1")
-            vi += 1
-        for a, b in zip(range(start, vi - 1), range(start + 1, vi)):
-            prim_bits.append(f"L{a} {b}")
-    n_vert = vi
-    n_prim = len(prim_bits)
-    if n_prim == 0:
-        return ""
-    return (
-        f'{indent}<Shape Type="Path" CutIndex="{cut_index}" '
-        f'VertID="{n_vert}" PrimID="{n_prim}">\n'
-        f"{indent}  <XForm>1 0 0 1 0 0</XForm>\n"
-        f"{indent}  <VertList>{''.join(vert_bits)}</VertList>\n"
-        f"{indent}  <PrimList>{''.join(prim_bits)}</PrimList>\n"
-        f"{indent}</Shape>\n"
-    )
+            vert_bits.append(f"V{x * scale:.4f} {y * scale:.4f}c0x1c1x1")
+        for a in range(len(poly) - 1):
+            prim_bits.append(f"L{a} {a + 1}")
+        n_vert = len(poly)
+        n_prim = len(prim_bits)
+        chunks.append(
+            f'{indent}<Shape Type="Path" CutIndex="{cut_index}" '
+            f'VertID="{n_vert}" PrimID="{n_prim}">\n'
+            f"{indent}  <XForm>1 0 0 1 0 0</XForm>\n"
+            f"{indent}  <VertList>{''.join(vert_bits)}</VertList>\n"
+            f"{indent}  <PrimList>{''.join(prim_bits)}</PrimList>\n"
+            f"{indent}</Shape>\n"
+        )
+    return "".join(chunks)
 
 
 def arrange_parts_in_grid(
     parts: Sequence[Part], gap: float = DEFAULT_GAP, columns: int | None = None
 ) -> list[Part]:
     """
-    Pack parts into a roughly square grid (rows × columns), not one long line.
+    Pack parts into a roughly square grid tightly near the origin.
     Keeps file order. Does not nest onto a steel sheet.
     """
     work = [p.copy() for p in parts]
@@ -683,18 +727,14 @@ def arrange_parts_in_grid(
         return []
 
     if columns is None:
-        # Prefer a square-ish layout
         columns = max(1, int(math.ceil(math.sqrt(n))))
     columns = max(1, min(columns, n))
     rows = int(math.ceil(n / columns))
 
-    # Row heights / col widths from the parts that land in each row/col
     sizes = [p.width_height() for p in work]
     row_h = [0.0] * rows
     col_w = [0.0] * columns
     for i, (w, h) in enumerate(sizes):
-        r, c = divmod(i, columns)
-        # wait - row-major: i // columns is row, i % columns is col
         r = i // columns
         c = i % columns
         row_h[r] = max(row_h[r], h)
@@ -716,13 +756,31 @@ def arrange_parts_in_grid(
     for i, part in enumerate(work):
         r = i // columns
         c = i % columns
-        # Center part inside its cell for a cleaner "cube" look
         pw, ph = part.width_height()
         ox = col_x[c] + max(0.0, (col_w[c] - pw) * 0.5)
         oy = row_y[r] + max(0.0, (row_h[r] - ph) * 0.5)
         part.shift(ox, oy)
         placed.append(part)
-    return placed
+
+    # Pin the whole assembly to the LightBurn origin (white box corner)
+    return nudge_assembly_to_origin(placed, margin=0.1)
+
+
+def nudge_assembly_to_origin(
+    parts: Sequence[Part], margin: float = 0.1
+) -> list[Part]:
+    """Translate all parts so the union bbox sits just inside (0,0)."""
+    if not parts:
+        return []
+    x0, y0, _, _ = parts_union_bbox(parts)
+    dx = margin - x0
+    dy = margin - y0
+    out: list[Part] = []
+    for src in parts:
+        p = src.copy()
+        p.shift(dx, dy)
+        out.append(p)
+    return out
 
 
 def arrange_parts_side_by_side(
@@ -730,7 +788,6 @@ def arrange_parts_side_by_side(
 ) -> list[Part]:
     """Backward-compatible alias: single-row grid."""
     return arrange_parts_in_grid(parts, gap=gap, columns=len(parts) or 1)
-
 def parts_union_bbox(parts: Sequence[Part]) -> BBox:
     if not parts:
         return (0.0, 0.0, 0.0, 0.0)

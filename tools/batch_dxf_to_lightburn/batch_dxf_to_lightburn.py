@@ -91,9 +91,9 @@ class App(tk.Tk):
         tip = ttk.Label(
             self,
             text=(
-                "Writes walking_cub_all.lbrn2 + .svg — all parts same scale, packed in a square grid.\n"
-                "If vectors look broken, re-run with this build (paths are chained now).\n"
-                "Open .lbrn2, or File → Import the .svg, then Ctrl+A → Zoom to Selection."
+                "Packs parts in a tight square grid next to LightBurn’s white work box.\n"
+                "Stray Pepakura lines far from each part are filtered (those caused ‘blow out’).\n"
+                "Open .lbrn2 or File→Import the .svg, then Ctrl+A → Zoom to Selection."
             ),
             justify="left",
         )

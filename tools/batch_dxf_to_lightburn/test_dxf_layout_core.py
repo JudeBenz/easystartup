@@ -82,8 +82,8 @@ class TestScaleAndCombine(unittest.TestCase):
             Part("b", [Segment((0, 0), (3, 0)), Segment((0, 0), (0, 1))]),
         ]
         placed = arrange_parts_side_by_side(parts, gap=0.5)
-        self.assertAlmostEqual(placed[0].bbox()[0], 0.0, places=6)
-        self.assertAlmostEqual(placed[1].bbox()[0], 2.5, places=6)
+        self.assertAlmostEqual(placed[0].bbox()[0], 0.1, places=6)
+        self.assertAlmostEqual(placed[1].bbox()[0], 2.6, places=6)
 
     def test_grid_is_squareish(self) -> None:
         parts = []
@@ -173,7 +173,20 @@ class TestScaleAndCombine(unittest.TestCase):
     def test_lbrn_uses_mm_coords(self) -> None:
         part = Part("p", [Segment((0, 0), (1, 0))])  # 1 inch
         xml = parts_to_lbrn([part])
-        self.assertIn("V25.400000 0.000000", xml)
+        self.assertIn("V25.4000 0.0000", xml)
+
+    def test_outlier_filter(self) -> None:
+        from dxf_layout_core import filter_outlier_segments
+
+        segs = [
+            Segment((0, 0), (1, 0)),
+            Segment((1, 0), (1, 1)),
+            Segment((1, 1), (0, 1)),
+            Segment((0, 1), (0, 0)),
+            Segment((100, 100), (101, 100)),  # stray
+        ]
+        kept = filter_outlier_segments(segs, k=3.0)
+        self.assertEqual(len(kept), 4)
 
 
 class TestNestStillWorks(unittest.TestCase):
