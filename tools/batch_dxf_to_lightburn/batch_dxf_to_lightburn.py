@@ -91,9 +91,9 @@ class App(tk.Tk):
         tip = ttk.Label(
             self,
             text=(
-                "Writes walking_cub_all.lbrn2 + .svg (same scale for every part).\n"
-                "If .lbrn2 looks empty: File → Import → pick the .svg, then Ctrl+A and zoom.\n"
-                "Your old file may already have geometry — try Ctrl+A, then Edit → Zoom to Selection."
+                "Writes walking_cub_all.lbrn2 + .svg — all parts same scale, packed in a square grid.\n"
+                "If vectors look broken, re-run with this build (paths are chained now).\n"
+                "Open .lbrn2, or File → Import the .svg, then Ctrl+A → Zoom to Selection."
             ),
             justify="left",
         )
@@ -158,7 +158,7 @@ class App(tk.Tk):
         if not messagebox.askyesno(
             "Combine DXFs?",
             f"Combine {len(files)} DXF(s) into one LightBurn file?\n"
-            "(Same scale for all — no sheet nesting.)",
+            "(Same scale for all — square grid layout, no sheet nesting.)",
         ):
             return
         self._busy = True

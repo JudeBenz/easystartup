@@ -2,24 +2,20 @@
 
 Takes a folder of Pepakura **DXF** files and writes one LightBurn project with all parts at the same scale.
 
-- Does **not** nest onto a 48×96 sheet
-- Parts are spaced side-by-side so they don’t stack
-- Prefer opening **`walking_cub_all.lbrn2`**, or **File → Import** the `.svg` if vectors don’t show
+- Packs parts in a **square grid** (not one long line)
+- Chains line segments into continuous paths (cleaner than broken sticks)
+- Prefer **`walking_cub_all.lbrn2`**, or **File → Import** the `.svg`
 
 ## Output
-- `walking_cub_all.lbrn2` — LightBurn 1.7 project
-- `walking_cub_all.lbrn` — same content, legacy name
-- `walking_cub_all.svg` — backup import (mm units)
+- `walking_cub_all.lbrn2`
+- `walking_cub_all.lbrn`
+- `walking_cub_all.svg` (mm)
 
 Layers: **C00** cut (blue), **C01** fold (red)
 
 ## Use
-1. Install Python (Add to PATH)
-2. Double-click **`Run_Batch_DXF_to_LightBurn.bat`**
-3. Browse to your DXF folder
-4. Click **Make one LightBurn file**
-5. In LightBurn: open the `.lbrn2`, or **File → Import** the `.svg`
-6. Press **Ctrl+A**, then zoom to selection if you don’t see lines yet
-
-## If it looks empty
-There is often still geometry selected (check Width/Height in the top bar). Zoom out / Zoom to Selection. If still blank, import the `.svg` instead.
+1. Double-click **`Run_Batch_DXF_to_LightBurn.bat`**
+2. Browse to your DXF folder
+3. **Make one LightBurn file**
+4. Open `.lbrn2` (or import `.svg`)
+5. Ctrl+A → Zoom to Selection

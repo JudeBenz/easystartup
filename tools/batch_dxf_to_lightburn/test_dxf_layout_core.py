@@ -10,8 +10,10 @@ from pathlib import Path
 from dxf_layout_core import (
     Part,
     Segment,
+    arrange_parts_in_grid,
     arrange_parts_side_by_side,
     build_layout_from_folder,
+    chain_polylines,
     combine_folder_to_lightburn,
     guess_unit_scale_to_inches,
     list_dxf_files,
@@ -82,6 +84,42 @@ class TestScaleAndCombine(unittest.TestCase):
         placed = arrange_parts_side_by_side(parts, gap=0.5)
         self.assertAlmostEqual(placed[0].bbox()[0], 0.0, places=6)
         self.assertAlmostEqual(placed[1].bbox()[0], 2.5, places=6)
+
+    def test_grid_is_squareish(self) -> None:
+        parts = []
+        for i in range(9):
+            parts.append(
+                Part(
+                    f"p{i}",
+                    [
+                        Segment((0, 0), (2, 0)),
+                        Segment((2, 0), (2, 2)),
+                        Segment((2, 2), (0, 2)),
+                        Segment((0, 2), (0, 0)),
+                    ],
+                )
+            )
+        placed = arrange_parts_in_grid(parts, gap=0.25)
+        x0, y0, x1, y1 = (
+            min(p.bbox()[0] for p in placed),
+            min(p.bbox()[1] for p in placed),
+            max(p.bbox()[2] for p in placed),
+            max(p.bbox()[3] for p in placed),
+        )
+        # 3x3 of 2" squares + gaps → roughly square, not a long strip
+        self.assertLess(x1 - x0, 8.0)
+        self.assertLess(y1 - y0, 8.0)
+        self.assertGreater(y1 - y0, 4.0)
+
+    def test_chain_polylines(self) -> None:
+        segs = [
+            Segment((0, 0), (1, 0)),
+            Segment((1, 0), (1, 1)),
+            Segment((1, 1), (0, 1)),
+        ]
+        polys = chain_polylines(segs)
+        self.assertEqual(len(polys), 1)
+        self.assertEqual(len(polys[0]), 4)
 
     def test_combine_one_lbrn(self) -> None:
         with tempfile.TemporaryDirectory() as td:

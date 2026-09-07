@@ -281,8 +281,76 @@ def parse_dxf_segments(path: Path) -> list[Segment]:
     return segments
 
 
+def _seg_len(seg: Segment) -> float:
+    return math.hypot(seg.p1[0] - seg.p0[0], seg.p1[1] - seg.p0[1])
+
+
+def clean_segments(segments: Sequence[Segment], min_len: float = 1e-6) -> list[Segment]:
+    """Drop zero-length junk that Pepakura sometimes emits."""
+    out: list[Segment] = []
+    for s in segments:
+        if _seg_len(s) >= min_len:
+            out.append(s)
+    return out
+
+
+def chain_polylines(segments: Sequence[Segment], tol: float = 1e-4) -> list[list[Vec2]]:
+    """
+    Join end-to-end segments into polylines so LightBurn gets continuous paths
+    instead of thousands of disconnected 2-point sticks (looks 'messed up').
+    """
+    unused = [
+        Segment(s.p0, s.p1, s.kind, s.layer, s.color)
+        for s in segments
+        if _seg_len(s) >= tol
+    ]
+    polys: list[list[Vec2]] = []
+
+    def near(a: Vec2, b: Vec2) -> bool:
+        return math.hypot(a[0] - b[0], a[1] - b[1]) <= tol
+
+    while unused:
+        seg = unused.pop(0)
+        poly = [seg.p0, seg.p1]
+        changed = True
+        while changed:
+            changed = False
+            i = 0
+            while i < len(unused):
+                s = unused[i]
+                if near(poly[-1], s.p0):
+                    poly.append(s.p1)
+                    unused.pop(i)
+                    changed = True
+                    continue
+                if near(poly[-1], s.p1):
+                    poly.append(s.p0)
+                    unused.pop(i)
+                    changed = True
+                    continue
+                if near(poly[0], s.p1):
+                    poly.insert(0, s.p0)
+                    unused.pop(i)
+                    changed = True
+                    continue
+                if near(poly[0], s.p0):
+                    poly.insert(0, s.p1)
+                    unused.pop(i)
+                    changed = True
+                    continue
+                i += 1
+        # Dedup consecutive duplicates
+        cleaned = [poly[0]]
+        for p in poly[1:]:
+            if not near(cleaned[-1], p):
+                cleaned.append(p)
+        if len(cleaned) >= 2:
+            polys.append(cleaned)
+    return polys
+
+
 def load_part(path: Path) -> Part:
-    segs = parse_dxf_segments(path)
+    segs = clean_segments(parse_dxf_segments(path))
     if not segs:
         raise ValueError(f"No line geometry in {path.name}")
     return Part(name=path.stem, segments=segs)
@@ -571,19 +639,25 @@ def _path_shape_lbrn2(
     """LightBurn 1.7 prefers condensed VertList / PrimList (.lbrn2)."""
     if not segments:
         return ""
+    # Chain into polylines so outlines look solid instead of broken sticks
+    polys = chain_polylines(segments)
+    if not polys:
+        return ""
+
     vert_bits: list[str] = []
     prim_bits: list[str] = []
     vi = 0
-    for seg in segments:
-        x0, y0 = seg.p0[0] * scale, seg.p0[1] * scale
-        x1, y1 = seg.p1[0] * scale, seg.p1[1] * scale
-        # c0x1c1x1 marks a sharp/corner vertex (straight line ends)
-        vert_bits.append(f"V{x0:.6f} {y0:.6f}c0x1c1x1")
-        vert_bits.append(f"V{x1:.6f} {y1:.6f}c0x1c1x1")
-        prim_bits.append(f"L{vi} {vi + 1}")
-        vi += 2
+    for poly in polys:
+        start = vi
+        for x, y in poly:
+            vert_bits.append(f"V{x * scale:.6f} {y * scale:.6f}c0x1c1x1")
+            vi += 1
+        for a, b in zip(range(start, vi - 1), range(start + 1, vi)):
+            prim_bits.append(f"L{a} {b}")
     n_vert = vi
-    n_prim = len(segments)
+    n_prim = len(prim_bits)
+    if n_prim == 0:
+        return ""
     return (
         f'{indent}<Shape Type="Path" CutIndex="{cut_index}" '
         f'VertID="{n_vert}" PrimID="{n_prim}">\n'
@@ -594,23 +668,68 @@ def _path_shape_lbrn2(
     )
 
 
+def arrange_parts_in_grid(
+    parts: Sequence[Part], gap: float = DEFAULT_GAP, columns: int | None = None
+) -> list[Part]:
+    """
+    Pack parts into a roughly square grid (rows × columns), not one long line.
+    Keeps file order. Does not nest onto a steel sheet.
+    """
+    work = [p.copy() for p in parts]
+    for p in work:
+        p.shift_to_origin()
+    n = len(work)
+    if n == 0:
+        return []
+
+    if columns is None:
+        # Prefer a square-ish layout
+        columns = max(1, int(math.ceil(math.sqrt(n))))
+    columns = max(1, min(columns, n))
+    rows = int(math.ceil(n / columns))
+
+    # Row heights / col widths from the parts that land in each row/col
+    sizes = [p.width_height() for p in work]
+    row_h = [0.0] * rows
+    col_w = [0.0] * columns
+    for i, (w, h) in enumerate(sizes):
+        r, c = divmod(i, columns)
+        # wait - row-major: i // columns is row, i % columns is col
+        r = i // columns
+        c = i % columns
+        row_h[r] = max(row_h[r], h)
+        col_w[c] = max(col_w[c], w)
+
+    col_x = [0.0] * columns
+    x = 0.0
+    for c in range(columns):
+        col_x[c] = x
+        x += col_w[c] + gap
+
+    row_y = [0.0] * rows
+    y = 0.0
+    for r in range(rows):
+        row_y[r] = y
+        y += row_h[r] + gap
+
+    placed: list[Part] = []
+    for i, part in enumerate(work):
+        r = i // columns
+        c = i % columns
+        # Center part inside its cell for a cleaner "cube" look
+        pw, ph = part.width_height()
+        ox = col_x[c] + max(0.0, (col_w[c] - pw) * 0.5)
+        oy = row_y[r] + max(0.0, (row_h[r] - ph) * 0.5)
+        part.shift(ox, oy)
+        placed.append(part)
+    return placed
+
+
 def arrange_parts_side_by_side(
     parts: Sequence[Part], gap: float = DEFAULT_GAP
 ) -> list[Part]:
-    """
-    Place parts in file order left→right with a small gap so they don't overlap.
-    Does NOT nest onto a steel sheet — just keeps everything selectable in one file.
-    """
-    placed: list[Part] = []
-    x = 0.0
-    for src in parts:
-        part = src.copy()
-        part.shift_to_origin()
-        part.shift(x, 0.0)
-        placed.append(part)
-        x += part.width_height()[0] + gap
-    return placed
-
+    """Backward-compatible alias: single-row grid."""
+    return arrange_parts_in_grid(parts, gap=gap, columns=len(parts) or 1)
 
 def parts_union_bbox(parts: Sequence[Part]) -> BBox:
     if not parts:
@@ -661,7 +780,6 @@ def parts_to_svg(parts: Sequence[Part]) -> str:
     """SVG in millimeters — most reliable LightBurn File → Import path."""
     x0, y0, x1, y1 = parts_union_bbox(parts)
     pad_in = 0.25
-    # Convert inch coords → mm for SVG (matches LightBurn mm UI)
     s = INCH_TO_MM
     vx0 = (x0 - pad_in) * s
     vy0 = (y0 - pad_in) * s
@@ -677,39 +795,31 @@ def parts_to_svg(parts: Sequence[Part]) -> str:
             "viewBox": f"{vx0:.4f} {vy0:.4f} {width:.4f} {height:.4f}",
         },
     )
-    g_cut = ET.SubElement(svg, "g", {"id": "cuts", "stroke": "#0000FF", "fill": "none"})
-    g_fold = ET.SubElement(svg, "g", {"id": "folds", "stroke": "#FF0000", "fill": "none"})
+    g_cut = ET.SubElement(svg, "g", {"id": "cuts", "fill": "none"})
+    g_fold = ET.SubElement(svg, "g", {"id": "folds", "fill": "none"})
+
+    def add_polys(parent: ET.Element, segs: list[Segment], color: str) -> None:
+        for poly in chain_polylines(segs):
+            pts = " ".join(f"{x * s:.4f},{y * s:.4f}" for x, y in poly)
+            ET.SubElement(
+                parent,
+                "polyline",
+                {
+                    "points": pts,
+                    "stroke": color,
+                    "stroke-width": "0.15",
+                    "fill": "none",
+                },
+            )
+
     for part in parts:
         g = ET.SubElement(svg, "g", {"id": part.name})
-        for seg in part.segments:
-            target = g_fold if seg.kind == "fold" else g_cut
-            color = "#FF0000" if seg.kind == "fold" else "#0000FF"
-            ET.SubElement(
-                target,
-                "line",
-                {
-                    "x1": f"{seg.p0[0] * s:.4f}",
-                    "y1": f"{seg.p0[1] * s:.4f}",
-                    "x2": f"{seg.p1[0] * s:.4f}",
-                    "y2": f"{seg.p1[1] * s:.4f}",
-                    "stroke": color,
-                    "stroke-width": "0.1",
-                    "fill": "none",
-                },
-            )
-            ET.SubElement(
-                g,
-                "line",
-                {
-                    "x1": f"{seg.p0[0] * s:.4f}",
-                    "y1": f"{seg.p0[1] * s:.4f}",
-                    "x2": f"{seg.p1[0] * s:.4f}",
-                    "y2": f"{seg.p1[1] * s:.4f}",
-                    "stroke": color,
-                    "stroke-width": "0.1",
-                    "fill": "none",
-                },
-            )
+        cuts = [s for s in part.segments if s.kind != "fold"]
+        folds = [s for s in part.segments if s.kind == "fold"]
+        add_polys(g_cut, cuts, "#0000FF")
+        add_polys(g_fold, folds, "#FF0000")
+        add_polys(g, cuts, "#0000FF")
+        add_polys(g, folds, "#FF0000")
         b = part.bbox()
         t = ET.SubElement(
             g,
@@ -810,12 +920,13 @@ def combine_folder_to_lightburn(
     unit_mode: Literal["auto", "inches", "mm"] = "auto",
     manual_scale: float = 1.0,
     gap: float = DEFAULT_GAP,
+    columns: int | None = None,
 ) -> tuple[list[Part], str]:
-    """Scale all DXFs the same way and space them in one canvas (no sheet nest)."""
+    """Scale all DXFs the same way and pack them in a square-ish grid."""
     parts, reason = load_scaled_parts_from_folder(
         dxf_dir, unit_mode=unit_mode, manual_scale=manual_scale
     )
-    return arrange_parts_side_by_side(parts, gap=gap), reason
+    return arrange_parts_in_grid(parts, gap=gap, columns=columns), reason
 
 
 def build_layout_from_folder(
