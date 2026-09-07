@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: MIT
 """
-Automate Pepakura Designer: open each .pdo and export Vector Format → DXF.
+Automate Pepakura Designer 6: open each .pdo → export Pattern Single File → DXF.
 
-Requires: Windows + Pepakura Designer + Python packages:
-  pip install pyautogui pywinauto pygetwindow pyperclip
+Pepakura 6 English menus (from user screenshots):
+  File → Export → Pattern: Single File (dxf, svg, eps, emf, png, jpg, bmp, tiff)...
+  Save As → type DXF (*.dxf)
 
-DXF (not DFX) is the Autodesk format LightBurn imports.
+Also available: Ctrl+Shift+E = Pattern: Per Sheet (use if Single File fails).
 """
 
 from __future__ import annotations
@@ -14,122 +15,112 @@ import subprocess
 import time
 from pathlib import Path
 
+# Exact Pepakura Designer 6 menu labels
+MENU_SINGLE_FILE = (
+    "File->Export->Pattern: Single File (dxf, svg, eps, emf, png, jpg, bmp, tiff)..."
+)
+MENU_SINGLE_FILE_NO_ELLIPSIS = (
+    "File->Export->Pattern: Single File (dxf, svg, eps, emf, png, jpg, bmp, tiff)"
+)
+MENU_PER_SHEET = (
+    "File->Export->Pattern: Per Sheet (dxf, svg, pdf, png, jpg, bmp, tiff)..."
+)
+
 
 def _sleep(s: float) -> None:
     time.sleep(s)
 
 
-def export_pdo_to_dxf(
-    pepakura_exe: Path,
-    pdo: Path,
-    dxf: Path,
-    *,
-    open_wait: float = 4.0,
-    dialog_wait: float = 1.2,
-    after_save_wait: float = 1.5,
-) -> None:
-    """
-    Drive Pepakura UI for one file.
-
-    Assumed English Pepakura Designer menu:
-      File → Export → Vector Format… → choose DXF → Save
-    Key sequence (Alt menus):
-      Alt+F, X, V   then save dialog gets the path via clipboard+Ctrl+V
-    """
-    import pyautogui
-    import pyperclip
-
-    pyautogui.FAILSAFE = True
-    pyautogui.PAUSE = 0.15
-
-    dxf.parent.mkdir(parents=True, exist_ok=True)
-    if dxf.exists():
-        dxf.unlink()
-
-    # Open this PDO in Pepakura (reuses/starts app depending on OS association)
-    subprocess.Popen([str(pepakura_exe), str(pdo)], shell=False)
-    _sleep(open_wait)
-
-    # Focus Pepakura if possible
+def _focus_pepakura() -> None:
     try:
         import pygetwindow as gw
 
-        titles = [
-            w
-            for w in gw.getAllTitles()
-            if w and ("pepakura" in w.lower() or "designer" in w.lower())
-        ]
-        if titles:
-            wins = gw.getWindowsWithTitle(titles[0])
-            if wins:
-                win = wins[0]
-                if win.isMinimized:
-                    win.restore()
-                win.activate()
-                _sleep(0.5)
+        for title in gw.getAllTitles():
+            if not title:
+                continue
+            t = title.lower()
+            if "pepakura designer" in t or (
+                "pepakura" in t and "designer" in t
+            ):
+                wins = gw.getWindowsWithTitle(title)
+                if wins:
+                    win = wins[0]
+                    if win.isMinimized:
+                        win.restore()
+                    win.activate()
+                    _sleep(0.4)
+                    return
     except Exception:
         pass
 
-    # File → Export → Vector Format
-    # Pepakura English: File(F) → Export → Vector Format
-    pyautogui.hotkey("alt", "f")
-    _sleep(0.4)
-    # Walk Export: press X (Export) — if that fails users can remapped in UI later
-    pyautogui.press("x")
-    _sleep(0.35)
-    pyautogui.press("v")
-    _sleep(dialog_wait)
 
-    # Some Pepakura versions open a format picker first (DXF/EPS/EMF).
-    # Try selecting DXF by typing "dxf" / Down arrows, then Enter.
-    pyautogui.typewrite("dxf")
-    _sleep(0.25)
-    pyautogui.press("enter")
-    _sleep(dialog_wait)
+def _open_pdo(pepakura_exe: Path, pdo: Path, open_wait: float) -> None:
+    subprocess.Popen([str(pepakura_exe), str(pdo)], shell=False)
+    _sleep(open_wait)
+    _focus_pepakura()
 
-    # Save dialog: paste full path
+
+def _save_dialog_paste_dxf(dxf: Path, dialog_wait: float = 1.0) -> None:
+    import pyautogui
+    import pyperclip
+
+    _sleep(dialog_wait)
+    # Ensure DXF is selected in "Save as type" — Tab to combo, type dxf
+    # Filename field is usually focused first; paste full path with .dxf
     pyperclip.copy(str(dxf))
+    pyautogui.hotkey("ctrl", "a")
+    _sleep(0.1)
     pyautogui.hotkey("ctrl", "v")
-    _sleep(0.3)
-    pyautogui.press("enter")
-    _sleep(0.4)
-    # If overwrite prompt
+    _sleep(0.25)
+    # Jump to type dropdown and force DXF
+    pyautogui.hotkey("alt", "t")  # common Windows "Save as type" accelerator
+    _sleep(0.2)
+    pyautogui.typewrite("dxf")
+    _sleep(0.2)
+    pyautogui.press("enter")  # confirm type
+    _sleep(0.25)
+    pyautogui.press("enter")  # Save
+    _sleep(0.35)
+    # Overwrite Yes
     pyautogui.press("y")
-    _sleep(after_save_wait)
+    _sleep(0.8)
 
-    # Close current document so next open is clean (Ctrl+F4 or Ctrl+W)
+
+def _close_document() -> None:
+    import pyautogui
+
     pyautogui.hotkey("ctrl", "w")
+    _sleep(0.35)
+    pyautogui.press("n")  # don't save PDO changes
     _sleep(0.4)
-    # Discard unsaved changes if prompted
-    pyautogui.press("n")
-    _sleep(0.5)
 
 
 def try_pywinauto_export(
     pepakura_exe: Path,
     pdo: Path,
     dxf: Path,
-    open_wait: float = 4.0,
+    open_wait: float = 5.0,
 ) -> bool:
-    """Prefer UI Automation menus when available. Returns True on success."""
     try:
         from pywinauto import Application
-        from pywinauto.findwindows import ElementNotFoundError
     except ImportError:
         return False
 
-    import pyperclip
-
+    if dxf.exists():
+        try:
+            dxf.unlink()
+        except OSError:
+            pass
     dxf.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.Popen([str(pepakura_exe), str(pdo)], shell=False)
-    time.sleep(open_wait)
+
+    _open_pdo(pepakura_exe, pdo, open_wait)
 
     try:
-        app = Application(backend="uia").connect(path=str(pepakura_exe), timeout=20)
+        app = Application(backend="uia").connect(path=str(pepakura_exe), timeout=25)
     except Exception:
         try:
             app = Application(backend="uia").connect(
-                title_re=".*Pepakura.*", timeout=20
+                title_re=".*Pepakura Designer.*", timeout=25
             )
         except Exception:
             return False
@@ -137,43 +128,97 @@ def try_pywinauto_export(
     try:
         win = app.top_window()
         win.set_focus()
-        # Try a few menu path variants across Pepakura versions
+        opened = False
         for path in (
-            "File->Export->Vector Format...",
-            "File->Export->Vector Format",
-            "File->Export->DXF...",
-            "ファイル(&F)->エクスポート->ベクター形式...",
+            MENU_SINGLE_FILE,
+            MENU_SINGLE_FILE_NO_ELLIPSIS,
+            MENU_PER_SHEET,
+            "File->Export->Pattern: Single File...",
         ):
             try:
                 win.menu_select(path)
+                opened = True
                 break
             except Exception:
                 continue
-        else:
+        if not opened:
             return False
 
-        time.sleep(1.0)
-        # Save As dialog
-        try:
-            dlg = app.window(title_re=".*(Save|Export|保存).*")
-            dlg.set_focus()
-            edit = dlg.child_window(control_type="Edit")
-            edit.set_edit_text(str(dxf))
-            dlg.child_window(title_re=".*(Save|OK|保存).*", control_type="Button").click()
-        except ElementNotFoundError:
-            pyperclip.copy(str(dxf))
-            import pyautogui
-
-            pyautogui.hotkey("ctrl", "v")
-            pyautogui.press("enter")
-
-        time.sleep(1.2)
-        try:
-            win.type_keys("^w")
-            time.sleep(0.3)
-            win.type_keys("n")
-        except Exception:
-            pass
-        return dxf.exists()
+        _save_dialog_paste_dxf(dxf)
+        _close_document()
+        return dxf.exists() and dxf.stat().st_size > 0
     except Exception:
         return False
+
+
+def export_pdo_to_dxf_keyboard(
+    pepakura_exe: Path,
+    pdo: Path,
+    dxf: Path,
+    *,
+    open_wait: float = 5.0,
+    use_per_sheet_hotkey: bool = False,
+) -> None:
+    """
+    Keyboard-driven Pepakura 6 export.
+
+    Single File path:
+      Alt+F → Down to Export → Right → Enter on Pattern: Single File
+    Per Sheet shortcut (one DXF per page):
+      Ctrl+Shift+E
+    """
+    import pyautogui
+
+    pyautogui.FAILSAFE = True
+    pyautogui.PAUSE = 0.12
+
+    if dxf.exists():
+        try:
+            dxf.unlink()
+        except OSError:
+            pass
+    dxf.parent.mkdir(parents=True, exist_ok=True)
+
+    _open_pdo(pepakura_exe, pdo, open_wait)
+
+    if use_per_sheet_hotkey:
+        # Documented Pepakura 6 shortcut for Pattern: Per Sheet
+        pyautogui.hotkey("ctrl", "shift", "e")
+    else:
+        # File menu → Export → Pattern: Single File (first submenu item)
+        pyautogui.hotkey("alt", "f")
+        _sleep(0.45)
+        # File items: Open, Save, Save As, Reload, Import, Export  → 5 downs from Open
+        for _ in range(5):
+            pyautogui.press("down")
+            _sleep(0.08)
+        pyautogui.press("right")  # open Export submenu
+        _sleep(0.35)
+        # First item = Pattern: Single File
+        pyautogui.press("enter")
+
+    _save_dialog_paste_dxf(dxf)
+    _close_document()
+
+
+def export_pdo_to_dxf(
+    pepakura_exe: Path,
+    pdo: Path,
+    dxf: Path,
+    *,
+    open_wait: float = 5.0,
+    dialog_wait: float = 1.2,
+    after_save_wait: float = 1.5,
+    use_per_sheet_hotkey: bool = False,
+) -> None:
+    """Try UI Automation, then keyboard fallback matching Pepakura 6 menus."""
+    if try_pywinauto_export(pepakura_exe, pdo, dxf, open_wait=open_wait):
+        return
+    export_pdo_to_dxf_keyboard(
+        pepakura_exe,
+        pdo,
+        dxf,
+        open_wait=open_wait,
+        use_per_sheet_hotkey=use_per_sheet_hotkey,
+    )
+    _ = (dialog_wait, after_save_wait)  # kept for call compatibility

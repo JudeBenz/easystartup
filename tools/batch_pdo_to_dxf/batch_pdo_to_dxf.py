@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Batch PDO → DXF for LightBurn
-Opens each Pepakura .pdo and exports Vector Format as .dxf (same base name).
+Batch PDO → DXF for LightBurn (Pepakura Designer 6)
 
-Windows + Pepakura Designer required.
+Uses the real Pepakura 6 menu from screenshots:
+  File → Export → Pattern: Single File (dxf, svg, …) → Save as DXF
+
   pip install -r requirements.txt
   Double-click Run_Batch_PDO_to_DXF.bat
 """
@@ -16,22 +17,22 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from pdo_batch_core import dxf_path_for, find_pepakura, list_pdo_files
-from pepakura_dxf_export import export_pdo_to_dxf, try_pywinauto_export
+from pepakura_dxf_export import export_pdo_to_dxf
 
 
 class App(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("Batch PDO → DXF (LightBurn)")
-        self.geometry("760x560")
-        self.minsize(600, 420)
+        self.title("Batch PDO → DXF (Pepakura 6 / LightBurn)")
+        self.geometry("780x580")
+        self.minsize(620, 440)
 
         self.pdo_dir = tk.StringVar(value="")
         self.out_dir = tk.StringVar(value="")
         self.pepakura = tk.StringVar(value="")
-        self.open_wait = tk.DoubleVar(value=4.0)
-        self.use_auto = tk.BooleanVar(value=True)
+        self.open_wait = tk.DoubleVar(value=5.0)
         self.skip_existing = tk.BooleanVar(value=True)
+        self.use_per_sheet = tk.BooleanVar(value=False)
         self._busy = False
 
         hit = find_pepakura()
@@ -52,22 +53,26 @@ class App(tk.Tk):
 
         opts = ttk.Frame(self)
         opts.pack(fill="x", **pad)
-        ttk.Label(opts, text="Seconds to wait after opening each PDO:").pack(
-            side="left"
-        )
+        ttk.Label(opts, text="Wait after open (sec):").pack(side="left")
         ttk.Spinbox(
-            opts, from_=2.0, to=20.0, increment=0.5, textvariable=self.open_wait, width=6
+            opts, from_=3.0, to=20.0, increment=0.5, textvariable=self.open_wait, width=6
         ).pack(side="left", padx=6)
         ttk.Checkbutton(
             opts, text="Skip if DXF already exists", variable=self.skip_existing
-        ).pack(side="left", padx=12)
+        ).pack(side="left", padx=10)
+        ttk.Checkbutton(
+            opts,
+            text="Use Per Sheet (Ctrl+Shift+E)",
+            variable=self.use_per_sheet,
+        ).pack(side="left", padx=10)
 
         tip = ttk.Label(
             self,
             text=(
-                "DXF is the correct LightBurn format (not DFX).\n"
-                "While exporting: don’t touch mouse/keyboard. Move mouse to a corner to abort.\n"
-                "Pepakura must be English UI for the Alt+F → Export → Vector shortcuts."
+                "Pepakura 6 path this tool uses:\n"
+                "  File → Export → Pattern: Single File (dxf, svg, …) → Save as type DXF\n"
+                "Don’t touch mouse/keyboard while it runs. Mouse to a screen corner = abort.\n"
+                "Your license is fine — the old tool failed because it looked for “Vector Format”."
             ),
             justify="left",
         )
@@ -78,13 +83,18 @@ class App(tk.Tk):
         ttk.Button(btns, text="Preview file list", command=self.preview).pack(
             side="left"
         )
-        ttk.Button(btns, text="Export all to DXF", command=self.start_export).pack(
+        ttk.Button(btns, text="Test export ONE file", command=self.start_one).pack(
+            side="left", padx=8
+        )
+        ttk.Button(btns, text="Export ALL to DXF", command=self.start_all).pack(
             side="left", padx=8
         )
 
         self.listbox = tk.Listbox(self, font=("Consolas", 10))
         self.listbox.pack(fill="both", expand=True, padx=10, pady=6)
-        self.status = tk.StringVar(value="Pick your PDO folder (e.g. …\\WalkingCub\\PDO).")
+        self.status = tk.StringVar(
+            value="Pick PDO folder → Preview → Test ONE file first, then Export ALL."
+        )
         ttk.Label(self, textvariable=self.status).pack(anchor="w", padx=10, pady=(0, 8))
 
     def _row_path(self, parent, row, label, var, cmd) -> None:
@@ -113,13 +123,30 @@ class App(tk.Tk):
         if p:
             self.pepakura.set(p)
 
-    def preview(self) -> None:
+    def _files(self) -> tuple[Path, Path, Path, list[Path]] | None:
+        pep = Path(self.pepakura.get().strip())
         folder = Path(self.pdo_dir.get().strip())
         out = Path(self.out_dir.get().strip() or (folder / "dxf_export"))
+        if not pep.is_file():
+            messagebox.showerror(
+                "Pepakura not found",
+                "Browse to Pepakura Designer.exe",
+            )
+            return None
         if not folder.is_dir():
             messagebox.showerror("Error", "Choose a valid PDO folder.")
-            return
+            return None
         files = list_pdo_files(folder)
+        if not files:
+            messagebox.showinfo("None", "No .pdo files in that folder.")
+            return None
+        return pep, folder, out, files
+
+    def preview(self) -> None:
+        got = self._files()
+        if not got:
+            return
+        _, _, out, files = got
         self.listbox.delete(0, tk.END)
         for pdo in files:
             dxf = dxf_path_for(pdo, out)
@@ -127,42 +154,47 @@ class App(tk.Tk):
             self.listbox.insert(tk.END, f"{pdo.name}  →  {dxf.name}{mark}")
         self.status.set(f"{len(files)} .pdo file(s) found.")
 
-    def start_export(self) -> None:
-        if self._busy:
+    def start_one(self) -> None:
+        got = self._files()
+        if not got:
             return
-        pep = Path(self.pepakura.get().strip())
-        folder = Path(self.pdo_dir.get().strip())
-        out = Path(self.out_dir.get().strip() or (folder / "dxf_export"))
-        if not pep.is_file():
-            messagebox.showerror(
-                "Pepakura not found",
-                "Browse to Pepakura Designer.exe\n"
-                r"(usually under C:\Program Files\tama software\...)",
+        pep, _, out, files = got
+        # Prefer selection in listbox, else first missing dxf, else first file
+        idx = self.listbox.curselection()
+        if idx:
+            pdo = files[idx[0]]
+        else:
+            pdo = next(
+                (p for p in files if not dxf_path_for(p, out).exists()), files[0]
             )
+        if not messagebox.askyesno(
+            "Test one file?",
+            f"Export only:\n{pdo.name}\n\n"
+            "Don’t touch mouse/keyboard. Corner of screen = abort.",
+        ):
             return
-        if not folder.is_dir():
-            messagebox.showerror("Error", "Choose a valid PDO folder.")
+        self._busy = True
+        threading.Thread(
+            target=self._run_batch, args=(pep, [pdo], out), daemon=True
+        ).start()
+
+    def start_all(self) -> None:
+        got = self._files()
+        if not got:
             return
-        files = list_pdo_files(folder)
-        if not files:
-            messagebox.showinfo("None", "No .pdo files in that folder.")
-            return
+        pep, _, out, files = got
         if self.skip_existing.get():
             files = [p for p in files if not dxf_path_for(p, out).exists()]
         if not files:
-            messagebox.showinfo("Done", "All DXFs already exist — nothing to do.")
+            messagebox.showinfo("Done", "All DXFs already exist.")
             return
-
         if not messagebox.askyesno(
-            "Start batch export?",
-            f"Export {len(files)} PDO(s) to DXF via Pepakura?\n\n"
-            "Do not use the mouse/keyboard until it finishes.\n"
-            "Move the mouse to a screen corner to emergency-stop.",
+            "Export all?",
+            f"Export {len(files)} PDO(s) to DXF?\n\n"
+            "Don’t touch mouse/keyboard until finished.",
         ):
             return
-
         self._busy = True
-        self.status.set("Exporting…")
         threading.Thread(
             target=self._run_batch, args=(pep, files, out), daemon=True
         ).start()
@@ -171,27 +203,34 @@ class App(tk.Tk):
         ok = 0
         fail: list[str] = []
         wait = float(self.open_wait.get())
+        per_sheet = bool(self.use_per_sheet.get())
         for i, pdo in enumerate(files, 1):
             dxf = dxf_path_for(pdo, out)
             self.status.set(f"[{i}/{len(files)}] {pdo.name}")
             try:
-                used = try_pywinauto_export(pep, pdo, dxf, open_wait=wait)
-                if not used:
-                    export_pdo_to_dxf(pep, pdo, dxf, open_wait=wait)
+                export_pdo_to_dxf(
+                    pep,
+                    pdo,
+                    dxf,
+                    open_wait=wait,
+                    use_per_sheet_hotkey=per_sheet,
+                )
                 if dxf.exists() and dxf.stat().st_size > 0:
                     ok += 1
                 else:
-                    fail.append(f"{pdo.name}: DXF not created (check Pepakura menus)")
+                    fail.append(
+                        f"{pdo.name}: no DXF written — try 'Use Per Sheet' or longer wait"
+                    )
             except Exception as exc:
                 fail.append(f"{pdo.name}: {exc}")
-                break  # stop on failsafe / crash
+                break
 
         def done() -> None:
             self._busy = False
             self.preview()
-            msg = f"Exported {ok}/{len(files)} DXF file(s) to:\n{out}"
+            msg = f"Exported {ok}/{len(files)} DXF(s) → {out}"
             if fail:
-                msg += "\n\nIssues:\n" + "\n".join(fail[:6])
+                msg += "\n\n" + "\n".join(fail[:8])
                 messagebox.showwarning("Finished with issues", msg)
             else:
                 messagebox.showinfo("Done", msg)
