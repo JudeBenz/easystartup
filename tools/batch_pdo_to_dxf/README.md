@@ -1,34 +1,27 @@
-# Batch PDO → DXF for LightBurn
+# Batch PDO → DXF for LightBurn (Pepakura Designer **6**)
 
-**DXF** (Drawing Exchange Format) is the correct LightBurn import — not “DFX”.
+**DXF** is the correct LightBurn format.
 
-Pepakura’s `.pdo` format is proprietary and has **no official batch export**.  
-This tool opens each `.pdo` in **Pepakura Designer** and exports **File → Export → Vector Format → DXF**, named like the PDO (`1_CubBackLeftFoot.dxf`, …).
+## Why the first version failed
+Pepakura 6’s menu is **not** “Vector Format”. From your screenshots it is:
 
-## Setup (Windows)
+**File → Export → Pattern: Single File (dxf, svg, eps, emf, png, jpg, bmp, tiff)…**  
+then **Save as type: DXF (*.dxf)**
 
-1. Install [Python](https://www.python.org/downloads/) (check **Add to PATH**).
-2. Have **Pepakura Designer** installed (English UI works best).
-3. Unzip this folder anywhere.
-4. Double-click **`Run_Batch_PDO_to_DXF.bat`**  
-   (it installs `pyautogui` / `pywinauto` once, then opens the app).
+Your license was fine — the old auto-clicker was looking for the wrong menu name.
+
+## Setup
+1. Python installed (Add to PATH)
+2. Pepakura Designer 6 (licensed)
+3. Double-click **`Run_Batch_PDO_to_DXF.bat`**
 
 ## Use
+1. PDO folder = `...\WalkingCub\PDO`
+2. DXF output = e.g. `...\PDO\dxf_export`
+3. Confirm Pepakura.exe
+4. Click **Test export ONE file** first
+5. If that works → **Export ALL to DXF**
 
-1. **PDO folder** → your `...\WalkingCub\PDO` folder  
-2. **DXF output** → e.g. `...\PDO\dxf_export`  
-3. Confirm **Pepakura.exe** path (auto-detected when possible)  
-4. **Preview** → **Export all to DXF**  
-5. Don’t touch mouse/keyboard until it finishes  
-6. In LightBurn: **File → Import** each DXF (or drag the folder)
+Optional: check **Use Per Sheet (Ctrl+Shift+E)** if Single File automation still misses.
 
-## Tips
-
-- Move the mouse to a **screen corner** to emergency-stop (`pyautogui` failsafe).
-- If menus don’t match (non-English Pepakura), export may fail — switch Pepakura to English or export one file by hand to confirm: **File → Export → Vector Format → DXF**.
-- LightBurn also opens **SVG**; Pepakura’s native batch path here is DXF.
-- Increase “seconds to wait” if Pepakura is slow to open big files.
-
-## Manual fallback (one file)
-
-In Pepakura: **File → Export → Vector Format…** → choose **DXF** → save next to the PDO with the same name.
+Don’t touch mouse/keyboard while it runs. Move mouse to a **screen corner** to abort.
