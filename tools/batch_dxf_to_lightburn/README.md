@@ -1,26 +1,25 @@
-# Batch DXF → LightBurn layout (48×96)
+# Batch DXF → one LightBurn file
 
-Takes a folder of Pepakura **DXF** files, scales them, packs them onto steel sheet(s), and writes:
+Takes a folder of Pepakura **DXF** files and writes **one** LightBurn project with all parts at the same scale.
 
-- **`.lbrn`** — open directly in LightBurn  
-- **`.svg`** — backup import (same nesting)
+- Does **not** nest onto a 48×96 sheet — you arrange in LightBurn
+- Parts are spaced side-by-side so they don’t stack on top of each other
+- Each part is a group (easy to select/move)
 
-## Defaults
-- Sheet: **48″ × 96″**
-- Margin: **1″**
-- Gap between parts: **0.25″**
-- Units: **auto** (if parts look like millimeters, convert to inches)
-- Layers: **Cut** (blue), **Fold** (red), **SheetGuide** (magenta outline — delete before cutting)
+## Output
+- `walking_cub_all.lbrn` — open in LightBurn
+- `walking_cub_all.svg` — optional backup
+
+Layers: **Cut** (blue), **Fold** (red)
 
 ## Use
 1. Install Python (Add to PATH)
 2. Double-click **`Run_Batch_DXF_to_LightBurn.bat`**
 3. Browse to your DXF folder (e.g. `...\WalkingCub\DXF`)
-4. Click **Preview DXF list**, then **Build LightBurn layout**
-5. Open `walking_cub_sheet_01.lbrn` in LightBurn
+4. Click **Make one LightBurn file**
+5. Open `walking_cub_all.lbrn` in LightBurn
 
-## Tips
-- If parts are tiny or huge, set **DXF units** to `inches` or `mm` instead of `auto`.
-- Use **Extra scale** only if you need a global resize (e.g. `1.02` for kerf experiments).
-- Parts are grouped by name so you can select/move one cub piece at a time.
-- Fold detection uses Pepakura-ish cues: layer name containing `fold` / `bend`, or red ACI colors.
+## Scale
+- **auto** — if parts look like millimeters, convert to inches
+- Or force **inches** / **mm**
+- **Extra scale** only if you need a global resize

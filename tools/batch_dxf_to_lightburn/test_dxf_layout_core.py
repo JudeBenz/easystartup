@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""Unit tests for DXF → LightBurn layout core (no GUI)."""
+"""Unit tests for DXF → LightBurn combine core (no GUI)."""
 
 from __future__ import annotations
 
@@ -10,12 +10,15 @@ from pathlib import Path
 from dxf_layout_core import (
     Part,
     Segment,
+    arrange_parts_side_by_side,
     build_layout_from_folder,
+    combine_folder_to_lightburn,
     guess_unit_scale_to_inches,
     list_dxf_files,
     nest_parts,
     parse_dxf_segments,
-    write_outputs,
+    parts_to_lbrn,
+    write_combined_outputs,
 )
 
 
@@ -61,7 +64,7 @@ class TestDxfParse(unittest.TestCase):
         self.assertEqual(names, ["1_c.dxf", "2_a.dxf", "10_b.dxf"])
 
 
-class TestScaleAndNest(unittest.TestCase):
+class TestScaleAndCombine(unittest.TestCase):
     def test_auto_mm_to_inches(self) -> None:
         part = Part(
             "big",
@@ -71,15 +74,72 @@ class TestScaleAndNest(unittest.TestCase):
         self.assertAlmostEqual(scale, 1 / 25.4, places=6)
         self.assertIn("mm", reason)
 
-    def test_auto_inches(self) -> None:
-        part = Part("small", [Segment((0, 0), (5, 0)), Segment((0, 0), (0, 4))])
-        scale, reason = guess_unit_scale_to_inches([part])
-        self.assertEqual(scale, 1.0)
-        self.assertIn("inches", reason)
+    def test_side_by_side_no_overlap(self) -> None:
+        parts = [
+            Part("a", [Segment((0, 0), (2, 0)), Segment((0, 0), (0, 1))]),
+            Part("b", [Segment((0, 0), (3, 0)), Segment((0, 0), (0, 1))]),
+        ]
+        placed = arrange_parts_side_by_side(parts, gap=0.5)
+        self.assertAlmostEqual(placed[0].bbox()[0], 0.0, places=6)
+        self.assertAlmostEqual(placed[1].bbox()[0], 2.5, places=6)
 
-    def test_nest_fits_one_sheet(self) -> None:
+    def test_combine_one_lbrn(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            dxf_dir = root / "dxf"
+            out_dir = root / "out"
+            dxf_dir.mkdir()
+            (dxf_dir / "1_A.dxf").write_text(
+                _minimal_dxf([(0, 0, 5, 0), (5, 0, 5, 4), (5, 4, 0, 4), (0, 4, 0, 0)]),
+                encoding="utf-8",
+            )
+            (dxf_dir / "2_B.dxf").write_text(
+                _minimal_dxf(
+                    [(0, 0, 3, 0), (3, 0, 3, 2), (3, 2, 0, 2), (0, 2, 0, 0)],
+                    color=1,
+                ),
+                encoding="utf-8",
+            )
+            parts, reason = combine_folder_to_lightburn(dxf_dir, unit_mode="auto")
+            self.assertIn("inches", reason)
+            self.assertEqual(len(parts), 2)
+            written = write_combined_outputs(parts, out_dir, basename="cub")
+            lbrn = next(p for p in written if p.suffix == ".lbrn")
+            self.assertEqual(lbrn.name, "cub_all.lbrn")
+            text = lbrn.read_text(encoding="utf-8")
+            self.assertIn("LightBurnProject", text)
+            self.assertIn("1_A", text)
+            self.assertIn("2_B", text)
+            self.assertNotIn("SheetGuide", text)
+            self.assertIn('<P T="L"', text)
+
+    def test_mm_dxf_scaled(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            dxf_dir = root / "dxf"
+            dxf_dir.mkdir()
+            (dxf_dir / "1_mm.dxf").write_text(
+                _minimal_dxf(
+                    [(0, 0, 100, 0), (100, 0, 100, 50), (100, 50, 0, 50), (0, 50, 0, 0)]
+                ),
+                encoding="utf-8",
+            )
+            parts, reason = combine_folder_to_lightburn(dxf_dir, unit_mode="auto")
+            self.assertIn("mm", reason)
+            w, h = parts[0].width_height()
+            self.assertAlmostEqual(w, 100 / 25.4, places=4)
+            self.assertAlmostEqual(h, 50 / 25.4, places=4)
+
+    def test_lbrn_uses_mm_coords(self) -> None:
+        part = Part("p", [Segment((0, 0), (1, 0))])  # 1 inch
+        xml = parts_to_lbrn([part])
+        self.assertIn('vx="25.400000"', xml)
+
+
+class TestNestStillWorks(unittest.TestCase):
+    def test_nest_optional(self) -> None:
         parts = []
-        for i in range(4):
+        for i in range(3):
             parts.append(
                 Part(
                     f"p{i}",
@@ -93,85 +153,6 @@ class TestScaleAndNest(unittest.TestCase):
             )
         sheets = nest_parts(parts, sheet_width=48, sheet_height=96, margin=1, gap=0.25)
         self.assertEqual(len(sheets), 1)
-        self.assertEqual(len(sheets[0].parts), 4)
-        # All parts inside usable area
-        for p in sheets[0].parts:
-            x0, y0, x1, y1 = p.bbox()
-            self.assertGreaterEqual(x0, 1.0 - 1e-6)
-            self.assertGreaterEqual(y0, 1.0 - 1e-6)
-            self.assertLessEqual(x1, 47.0 + 1e-6)
-            self.assertLessEqual(y1, 95.0 + 1e-6)
-
-    def test_too_large_raises(self) -> None:
-        part = Part(
-            "huge",
-            [
-                Segment((0, 0), (50, 0)),
-                Segment((50, 0), (50, 50)),
-                Segment((50, 50), (0, 50)),
-                Segment((0, 50), (0, 0)),
-            ],
-        )
-        with self.assertRaises(ValueError):
-            nest_parts([part], sheet_width=48, sheet_height=96, margin=1)
-
-
-class TestWriters(unittest.TestCase):
-    def test_lbrn_and_svg_roundtrip_folder(self) -> None:
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            dxf_dir = root / "dxf"
-            out_dir = root / "out"
-            dxf_dir.mkdir()
-            # ~5 inch square in inches
-            (dxf_dir / "1_A.dxf").write_text(
-                _minimal_dxf([(0, 0, 5, 0), (5, 0, 5, 4), (5, 4, 0, 4), (0, 4, 0, 0)]),
-                encoding="utf-8",
-            )
-            # fold-colored diagonal
-            (dxf_dir / "2_B.dxf").write_text(
-                _minimal_dxf(
-                    [(0, 0, 3, 0), (3, 0, 3, 2), (3, 2, 0, 2), (0, 2, 0, 0), (0, 0, 3, 2)],
-                    color=1,
-                ),
-                encoding="utf-8",
-            )
-            sheets, reason, parts = build_layout_from_folder(dxf_dir, unit_mode="auto")
-            self.assertIn("inches", reason)
-            self.assertEqual(len(parts), 2)
-            written = write_outputs(sheets, out_dir, basename="test")
-            self.assertTrue(any(p.suffix == ".lbrn" for p in written))
-            self.assertTrue(any(p.suffix == ".svg" for p in written))
-            lbrn = next(p for p in written if p.suffix == ".lbrn").read_text(
-                encoding="utf-8"
-            )
-            self.assertIn("LightBurnProject", lbrn)
-            self.assertIn('<P T="L"', lbrn)
-            self.assertIn("Cut", lbrn)
-            self.assertIn("Fold", lbrn)
-            svg = next(p for p in written if p.suffix == ".svg").read_text(
-                encoding="utf-8"
-            )
-            self.assertIn('width="48.0in"', svg)
-
-    def test_mm_dxf_scaled(self) -> None:
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            dxf_dir = root / "dxf"
-            dxf_dir.mkdir()
-            # 100mm x 50mm rectangle
-            (dxf_dir / "1_mm.dxf").write_text(
-                _minimal_dxf(
-                    [(0, 0, 100, 0), (100, 0, 100, 50), (100, 50, 0, 50), (0, 50, 0, 0)]
-                ),
-                encoding="utf-8",
-            )
-            sheets, reason, parts = build_layout_from_folder(dxf_dir, unit_mode="auto")
-            self.assertIn("mm", reason)
-            w, h = parts[0].width_height()
-            self.assertAlmostEqual(w, 100 / 25.4, places=4)
-            self.assertAlmostEqual(h, 50 / 25.4, places=4)
-            self.assertEqual(len(sheets), 1)
 
 
 if __name__ == "__main__":

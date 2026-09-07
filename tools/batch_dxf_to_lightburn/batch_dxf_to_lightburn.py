@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Batch DXF → nested LightBurn layout (48×96 steel sheets)
+Batch DXF → one LightBurn file
 
-Takes a folder of Pepakura DXFs, scales them, packs them onto sheet(s),
-and writes .lbrn (open directly in LightBurn) + matching .svg files.
+Loads every Pepakura DXF from a folder, scales them all the same way,
+and writes a single .lbrn you can open in LightBurn.
+Parts are spaced side-by-side (not nested onto a steel sheet).
 """
 
 from __future__ import annotations
@@ -15,32 +16,25 @@ from tkinter import filedialog, messagebox, ttk
 
 from dxf_layout_core import (
     DEFAULT_GAP,
-    DEFAULT_MARGIN,
-    DEFAULT_SHEET_H,
-    DEFAULT_SHEET_W,
-    build_layout_from_folder,
+    combine_folder_to_lightburn,
     list_dxf_files,
-    write_outputs,
+    write_combined_outputs,
 )
 
 
 class App(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("Batch DXF → LightBurn Layout (48×96)")
-        self.geometry("820x620")
-        self.minsize(640, 480)
+        self.title("Batch DXF → one LightBurn file")
+        self.geometry("760x520")
+        self.minsize(580, 400)
 
         self.dxf_dir = tk.StringVar(value="")
         self.out_dir = tk.StringVar(value="")
         self.basename = tk.StringVar(value="walking_cub")
-        self.sheet_w = tk.DoubleVar(value=DEFAULT_SHEET_W)
-        self.sheet_h = tk.DoubleVar(value=DEFAULT_SHEET_H)
-        self.margin = tk.DoubleVar(value=DEFAULT_MARGIN)
         self.gap = tk.DoubleVar(value=DEFAULT_GAP)
         self.unit_mode = tk.StringVar(value="auto")
         self.manual_scale = tk.DoubleVar(value=1.0)
-        self.rotate90 = tk.BooleanVar(value=True)
         self.write_lbrn = tk.BooleanVar(value=True)
         self.write_svg = tk.BooleanVar(value=True)
         self._busy = False
@@ -56,54 +50,50 @@ class App(tk.Tk):
         self._row(f, 0, "DXF folder:", self.dxf_dir, self._browse_dxf)
         self._row(f, 1, "Output folder:", self.out_dir, self._browse_out)
 
-        ttk.Label(f, text="File basename:").grid(row=2, column=0, sticky="w")
+        ttk.Label(f, text="Output name:").grid(row=2, column=0, sticky="w")
         ttk.Entry(f, textvariable=self.basename).grid(
             row=2, column=1, sticky="ew", padx=6
         )
 
-        opts = ttk.LabelFrame(self, text="Sheet / scale (inches)")
+        opts = ttk.LabelFrame(self, text="Scale")
         opts.pack(fill="x", **pad)
 
-        row1 = ttk.Frame(opts)
-        row1.pack(fill="x", padx=8, pady=4)
-        for label, var, width in (
-            ("Sheet W", self.sheet_w, 6),
-            ("Sheet H", self.sheet_h, 6),
-            ("Margin", self.margin, 6),
-            ("Gap", self.gap, 6),
-            ("Extra scale", self.manual_scale, 6),
-        ):
-            ttk.Label(row1, text=label).pack(side="left")
-            ttk.Spinbox(
-                row1, from_=0.01, to=200.0, increment=0.25, textvariable=var, width=width
-            ).pack(side="left", padx=(2, 10))
-
-        row2 = ttk.Frame(opts)
-        row2.pack(fill="x", padx=8, pady=4)
-        ttk.Label(row2, text="DXF units:").pack(side="left")
+        row = ttk.Frame(opts)
+        row.pack(fill="x", padx=8, pady=6)
+        ttk.Label(row, text="DXF units:").pack(side="left")
         ttk.Combobox(
-            row2,
+            row,
             textvariable=self.unit_mode,
             values=("auto", "inches", "mm"),
             width=10,
             state="readonly",
         ).pack(side="left", padx=6)
-        ttk.Checkbutton(
-            row2, text="Allow 90° rotate", variable=self.rotate90
-        ).pack(side="left", padx=10)
-        ttk.Checkbutton(row2, text="Write .lbrn", variable=self.write_lbrn).pack(
-            side="left", padx=6
+        ttk.Label(row, text="Extra scale:").pack(side="left", padx=(12, 0))
+        ttk.Spinbox(
+            row,
+            from_=0.01,
+            to=100.0,
+            increment=0.01,
+            textvariable=self.manual_scale,
+            width=8,
+        ).pack(side="left", padx=4)
+        ttk.Label(row, text="Spacing (in):").pack(side="left", padx=(12, 0))
+        ttk.Spinbox(
+            row, from_=0.0, to=10.0, increment=0.05, textvariable=self.gap, width=6
+        ).pack(side="left", padx=4)
+        ttk.Checkbutton(row, text=".lbrn", variable=self.write_lbrn).pack(
+            side="left", padx=10
         )
-        ttk.Checkbutton(row2, text="Write .svg", variable=self.write_svg).pack(
-            side="left", padx=6
+        ttk.Checkbutton(row, text=".svg backup", variable=self.write_svg).pack(
+            side="left"
         )
 
         tip = ttk.Label(
             self,
             text=(
-                "Opens in LightBurn as .lbrn (Cut=blue, Fold=red, SheetGuide=magenta).\n"
-                "Units auto-detect: if parts look like millimeters, they are scaled to inches.\n"
-                "Default sheet is 48×96 with 1\" margin and 0.25\" gap. Delete SheetGuide before cutting."
+                "Puts every DXF into one LightBurn file at matching scale.\n"
+                "Does not pack onto a 48×96 sheet — arrange in LightBurn yourself.\n"
+                "Cut=blue, Fold=red. If parts look tiny/huge, set units to inches or mm."
             ),
             justify="left",
         )
@@ -112,13 +102,13 @@ class App(tk.Tk):
         btns = ttk.Frame(self)
         btns.pack(fill="x", **pad)
         ttk.Button(btns, text="Preview DXF list", command=self.preview).pack(side="left")
-        ttk.Button(btns, text="Build LightBurn layout", command=self.start).pack(
+        ttk.Button(btns, text="Make one LightBurn file", command=self.start).pack(
             side="left", padx=8
         )
 
         self.listbox = tk.Listbox(self, font=("Consolas", 10))
         self.listbox.pack(fill="both", expand=True, padx=10, pady=6)
-        self.status = tk.StringVar(value="Pick a DXF folder, then Preview → Build.")
+        self.status = tk.StringVar(value="Pick a DXF folder → Preview → Make one file.")
         ttk.Label(self, textvariable=self.status).pack(anchor="w", padx=10, pady=(0, 8))
 
     def _row(self, parent, row, label, var, cmd) -> None:
@@ -131,7 +121,7 @@ class App(tk.Tk):
         if p:
             self.dxf_dir.set(p)
             if not self.out_dir.get().strip():
-                self.out_dir.set(str(Path(p) / "lightburn_layout"))
+                self.out_dir.set(str(Path(p) / "lightburn"))
             self.preview()
 
     def _browse_out(self) -> None:
@@ -154,43 +144,37 @@ class App(tk.Tk):
         if self._busy:
             return
         folder = Path(self.dxf_dir.get().strip())
-        out = Path(self.out_dir.get().strip() or (folder / "lightburn_layout"))
+        out = Path(self.out_dir.get().strip() or (folder / "lightburn"))
         if not folder.is_dir():
             messagebox.showerror("Error", "Choose a valid DXF folder.")
             return
         if not self.write_lbrn.get() and not self.write_svg.get():
-            messagebox.showerror("Error", "Enable at least one of .lbrn or .svg.")
+            messagebox.showerror("Error", "Enable at least .lbrn or .svg.")
             return
         files = list_dxf_files(folder)
         if not files:
             messagebox.showinfo("None", "No .dxf files in that folder.")
             return
         if not messagebox.askyesno(
-            "Build layout?",
-            f"Nest {len(files)} DXF(s) onto "
-            f'{self.sheet_w.get()}" × {self.sheet_h.get()}" sheet(s)?',
+            "Combine DXFs?",
+            f"Combine {len(files)} DXF(s) into one LightBurn file?\n"
+            "(Same scale for all — no sheet nesting.)",
         ):
             return
         self._busy = True
-        self.status.set("Building layout…")
-        threading.Thread(
-            target=self._run, args=(folder, out), daemon=True
-        ).start()
+        self.status.set("Combining…")
+        threading.Thread(target=self._run, args=(folder, out), daemon=True).start()
 
     def _run(self, folder: Path, out: Path) -> None:
         try:
-            sheets, reason, parts = build_layout_from_folder(
+            parts, reason = combine_folder_to_lightburn(
                 folder,
                 unit_mode=self.unit_mode.get(),  # type: ignore[arg-type]
                 manual_scale=float(self.manual_scale.get()),
-                sheet_width=float(self.sheet_w.get()),
-                sheet_height=float(self.sheet_h.get()),
-                margin=float(self.margin.get()),
                 gap=float(self.gap.get()),
-                allow_rotate_90=bool(self.rotate90.get()),
             )
-            written = write_outputs(
-                sheets,
+            written = write_combined_outputs(
+                parts,
                 out,
                 basename=self.basename.get().strip() or "layout",
                 write_svg=bool(self.write_svg.get()),
@@ -202,13 +186,13 @@ class App(tk.Tk):
             )
             msg = (
                 f"Wrote {len(written)} file(s) → {out}\n"
-                f"Sheets: {len(sheets)} | Scale: {reason}\n"
+                f"Parts: {len(parts)} | Scale: {reason}\n"
                 f"Sample sizes: {sizes}"
             )
 
             def done_ok() -> None:
                 self._busy = False
-                self.status.set(f"Done — {len(sheets)} sheet(s) in {out}")
+                self.status.set(f"Done — {len(parts)} parts → {out}")
                 self.listbox.delete(0, tk.END)
                 for path in written:
                     self.listbox.insert(tk.END, path.name)
@@ -216,10 +200,11 @@ class App(tk.Tk):
 
             self.after(0, done_ok)
         except Exception as exc:
+
             def done_err() -> None:
                 self._busy = False
                 self.status.set("Failed")
-                messagebox.showerror("Layout failed", str(exc))
+                messagebox.showerror("Combine failed", str(exc))
 
             self.after(0, done_err)
 

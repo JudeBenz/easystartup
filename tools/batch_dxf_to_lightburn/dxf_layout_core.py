@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""Parse Pepakura DXFs, scale to inches, nest on steel sheets, write LightBurn files."""
+"""Parse Pepakura DXFs, scale consistently, combine into one LightBurn file."""
 
 from __future__ import annotations
 
@@ -563,17 +563,45 @@ def _path_shape_xml(
     )
 
 
-def sheet_to_lbrn(sheet: SheetLayout, *, units_mm: bool = True) -> str:
+def arrange_parts_side_by_side(
+    parts: Sequence[Part], gap: float = DEFAULT_GAP
+) -> list[Part]:
     """
-    Write a LightBurn legacy .lbrn project.
-    Coordinates are millimeters when units_mm=True (LightBurn default).
+    Place parts in file order left→right with a small gap so they don't overlap.
+    Does NOT nest onto a steel sheet — just keeps everything selectable in one file.
     """
+    placed: list[Part] = []
+    x = 0.0
+    for src in parts:
+        part = src.copy()
+        part.shift_to_origin()
+        part.shift(x, 0.0)
+        placed.append(part)
+        x += part.width_height()[0] + gap
+    return placed
+
+
+def parts_union_bbox(parts: Sequence[Part]) -> BBox:
+    if not parts:
+        return (0.0, 0.0, 0.0, 0.0)
+    boxes = [p.bbox() for p in parts]
+    return (
+        min(b[0] for b in boxes),
+        min(b[1] for b in boxes),
+        max(b[2] for b in boxes),
+        max(b[3] for b in boxes),
+    )
+
+
+def parts_to_lbrn(parts: Sequence[Part], *, units_mm: bool = True) -> str:
+    """One LightBurn .lbrn with every part as its own group. No sheet frame."""
     scale = INCH_TO_MM if units_mm else 1.0
-    w_mm = sheet.width * scale
-    h_mm = sheet.height * scale
+    x0, y0, x1, y1 = parts_union_bbox(parts)
+    w_mm = max(1.0, (x1 - x0) * scale)
+    h_mm = max(1.0, (y1 - y0) * scale)
 
     parts_xml: list[str] = []
-    for part in sheet.parts:
+    for part in parts:
         part_cuts = [s for s in part.segments if s.kind != "fold"]
         part_folds = [s for s in part.segments if s.kind == "fold"]
         children = ""
@@ -581,7 +609,6 @@ def sheet_to_lbrn(sheet: SheetLayout, *, units_mm: bool = True) -> str:
             children += _path_shape_xml(part_cuts, 0, scale, indent="      ")
         if part_folds:
             children += _path_shape_xml(part_folds, 1, scale, indent="      ")
-        # Group per part for easier selection in LightBurn
         parts_xml.append(
             f'  <Shape Type="Group" CutIndex="0">\n'
             f"    <XForm>1 0 0 1 0 0</XForm>\n"
@@ -592,27 +619,84 @@ def sheet_to_lbrn(sheet: SheetLayout, *, units_mm: bool = True) -> str:
             f"  </Shape>\n"
         )
 
-    # Sheet outline on a guide layer — delete / ignore before cutting
-    outline = [
-        Segment((0.0, 0.0), (sheet.width, 0.0), "other"),
-        Segment((sheet.width, 0.0), (sheet.width, sheet.height), "other"),
-        Segment((sheet.width, sheet.height), (0.0, sheet.height), "other"),
-        Segment((0.0, sheet.height), (0.0, 0.0), "other"),
-    ]
+    return "".join(
+        [
+            '<?xml version="1.0" encoding="UTF-8"?>\n',
+            f'<LightBurnProject AppVersion="1.7.00" FormatVersion="1" '
+            f'Width="{w_mm:.4f}" Height="{h_mm:.4f}" '
+            f'MirrorX="0" MirrorY="0">\n',
+            _lbrn_cut_setting(0, "Cut", "0;0;255"),
+            _lbrn_cut_setting(1, "Fold", "255;0;0"),
+            *parts_xml,
+            "</LightBurnProject>\n",
+        ]
+    )
 
-    xml = [
-        '<?xml version="1.0" encoding="UTF-8"?>\n',
-        f'<LightBurnProject AppVersion="1.7.00" FormatVersion="1" '
-        f'Width="{w_mm:.4f}" Height="{h_mm:.4f}" '
-        f'MirrorX="0" MirrorY="0">\n',
-        _lbrn_cut_setting(0, "Cut", "0;0;255"),
-        _lbrn_cut_setting(1, "Fold", "255;0;0"),
-        _lbrn_cut_setting(2, "SheetGuide", "255;0;255"),
-        _path_shape_xml(outline, 2, scale),
-        *parts_xml,
-        "</LightBurnProject>\n",
-    ]
-    return "".join(xml)
+
+def parts_to_svg(parts: Sequence[Part]) -> str:
+    x0, y0, x1, y1 = parts_union_bbox(parts)
+    pad = 0.25
+    width = max(1.0, x1 - x0 + 2 * pad)
+    height = max(1.0, y1 - y0 + 2 * pad)
+    svg = ET.Element(
+        "svg",
+        {
+            "xmlns": "http://www.w3.org/2000/svg",
+            "width": f"{width}in",
+            "height": f"{height}in",
+            "viewBox": f"{x0 - pad} {y0 - pad} {width} {height}",
+        },
+    )
+    g_cut = ET.SubElement(svg, "g", {"id": "cuts"})
+    g_fold = ET.SubElement(svg, "g", {"id": "folds"})
+    for part in parts:
+        g = ET.SubElement(svg, "g", {"id": part.name})
+        for seg in part.segments:
+            color = "#FF0000" if seg.kind == "fold" else "#0000FF"
+            target = g_fold if seg.kind == "fold" else g_cut
+            _svg_line(target, seg.p0, seg.p1, color)
+            _svg_line(g, seg.p0, seg.p1, color)
+        b = part.bbox()
+        t = ET.SubElement(
+            g,
+            "text",
+            {
+                "x": f"{(b[0] + b[2]) * 0.5:.4f}",
+                "y": f"{(b[1] + b[3]) * 0.5:.4f}",
+                "fill": "#666666",
+                "font-size": "0.35",
+                "text-anchor": "middle",
+            },
+        )
+        t.text = part.name
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(
+        svg, encoding="unicode"
+    )
+
+
+def sheet_to_lbrn(sheet: SheetLayout, *, units_mm: bool = True) -> str:
+    """Legacy helper: write parts only (no sheet guide)."""
+    return parts_to_lbrn(sheet.parts, units_mm=units_mm)
+
+
+def write_combined_outputs(
+    parts: Sequence[Part],
+    out_dir: Path,
+    basename: str = "walking_cub",
+    write_svg: bool = True,
+    write_lbrn: bool = True,
+) -> list[Path]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    if write_lbrn:
+        path = out_dir / f"{basename}_all.lbrn"
+        path.write_text(parts_to_lbrn(parts), encoding="utf-8")
+        written.append(path)
+    if write_svg:
+        path = out_dir / f"{basename}_all.svg"
+        path.write_text(parts_to_svg(parts), encoding="utf-8")
+        written.append(path)
+    return written
 
 
 def write_outputs(
@@ -622,6 +706,7 @@ def write_outputs(
     write_svg: bool = True,
     write_lbrn: bool = True,
 ) -> list[Path]:
+    """Backward-compatible multi-sheet writer (unused by the simple GUI)."""
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
     for sheet in sheets:
@@ -637,17 +722,12 @@ def write_outputs(
     return written
 
 
-def build_layout_from_folder(
+def load_scaled_parts_from_folder(
     dxf_dir: Path,
     *,
     unit_mode: Literal["auto", "inches", "mm"] = "auto",
     manual_scale: float = 1.0,
-    sheet_width: float = DEFAULT_SHEET_W,
-    sheet_height: float = DEFAULT_SHEET_H,
-    margin: float = DEFAULT_MARGIN,
-    gap: float = DEFAULT_GAP,
-    allow_rotate_90: bool = True,
-) -> tuple[list[SheetLayout], str, list[Part]]:
+) -> tuple[list[Part], str]:
     files = list_dxf_files(dxf_dir)
     if not files:
         raise ValueError(f"No .dxf files in {dxf_dir}")
@@ -662,6 +742,38 @@ def build_layout_from_folder(
 
     scale *= manual_scale
     apply_scale(parts, scale)
+    return parts, reason
+
+
+def combine_folder_to_lightburn(
+    dxf_dir: Path,
+    *,
+    unit_mode: Literal["auto", "inches", "mm"] = "auto",
+    manual_scale: float = 1.0,
+    gap: float = DEFAULT_GAP,
+) -> tuple[list[Part], str]:
+    """Scale all DXFs the same way and space them in one canvas (no sheet nest)."""
+    parts, reason = load_scaled_parts_from_folder(
+        dxf_dir, unit_mode=unit_mode, manual_scale=manual_scale
+    )
+    return arrange_parts_side_by_side(parts, gap=gap), reason
+
+
+def build_layout_from_folder(
+    dxf_dir: Path,
+    *,
+    unit_mode: Literal["auto", "inches", "mm"] = "auto",
+    manual_scale: float = 1.0,
+    sheet_width: float = DEFAULT_SHEET_W,
+    sheet_height: float = DEFAULT_SHEET_H,
+    margin: float = DEFAULT_MARGIN,
+    gap: float = DEFAULT_GAP,
+    allow_rotate_90: bool = True,
+) -> tuple[list[SheetLayout], str, list[Part]]:
+    """Optional sheet-nest path (kept for tests / advanced use)."""
+    parts, reason = load_scaled_parts_from_folder(
+        dxf_dir, unit_mode=unit_mode, manual_scale=manual_scale
+    )
     sheets = nest_parts(
         parts,
         sheet_width=sheet_width,
