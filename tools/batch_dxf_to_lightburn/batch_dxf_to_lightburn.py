@@ -91,9 +91,9 @@ class App(tk.Tk):
         tip = ttk.Label(
             self,
             text=(
-                "Puts every DXF into one LightBurn file at matching scale.\n"
-                "Does not pack onto a 48×96 sheet — arrange in LightBurn yourself.\n"
-                "Cut=blue, Fold=red. If parts look tiny/huge, set units to inches or mm."
+                "Writes walking_cub_all.lbrn2 + .svg (same scale for every part).\n"
+                "If .lbrn2 looks empty: File → Import → pick the .svg, then Ctrl+A and zoom.\n"
+                "Your old file may already have geometry — try Ctrl+A, then Edit → Zoom to Selection."
             ),
             justify="left",
         )

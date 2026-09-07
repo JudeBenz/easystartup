@@ -104,14 +104,16 @@ class TestScaleAndCombine(unittest.TestCase):
             self.assertIn("inches", reason)
             self.assertEqual(len(parts), 2)
             written = write_combined_outputs(parts, out_dir, basename="cub")
-            lbrn = next(p for p in written if p.suffix == ".lbrn")
-            self.assertEqual(lbrn.name, "cub_all.lbrn")
-            text = lbrn.read_text(encoding="utf-8")
+            lbrn2 = next(p for p in written if p.suffix == ".lbrn2")
+            self.assertEqual(lbrn2.name, "cub_all.lbrn2")
+            text = lbrn2.read_text(encoding="utf-8")
             self.assertIn("LightBurnProject", text)
-            self.assertIn("1_A", text)
-            self.assertIn("2_B", text)
+            self.assertIn("VertList", text)
+            self.assertIn("PrimList", text)
             self.assertNotIn("SheetGuide", text)
-            self.assertIn('<P T="L"', text)
+            self.assertNotIn("<Children>", text)
+            svg = next(p for p in written if p.suffix == ".svg").read_text(encoding="utf-8")
+            self.assertIn("mm", svg)
 
     def test_mm_dxf_scaled(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -133,7 +135,7 @@ class TestScaleAndCombine(unittest.TestCase):
     def test_lbrn_uses_mm_coords(self) -> None:
         part = Part("p", [Segment((0, 0), (1, 0))])  # 1 inch
         xml = parts_to_lbrn([part])
-        self.assertIn('vx="25.400000"', xml)
+        self.assertIn("V25.400000 0.000000", xml)
 
 
 class TestNestStillWorks(unittest.TestCase):

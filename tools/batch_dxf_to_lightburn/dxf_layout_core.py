@@ -521,17 +521,19 @@ def sheet_to_svg(sheet: SheetLayout) -> str:
 
 
 def _lbrn_cut_setting(index: int, name: str, rgb: str) -> str:
-    # Minimal CutSetting block LightBurn accepts
+    # Match common LightBurn 1.7 CutSetting fields closely enough to load/show.
     return f"""  <CutSetting type="Cut">
     <index Value="{index}"/>
     <name Value="{name}"/>
-    <maxPower Value="100"/>
-    <maxPower2 Value="100"/>
-    <speed Value="20"/>
+    <minPower Value="0"/>
+    <maxPower Value="20"/>
+    <minPower2 Value="0"/>
+    <maxPower2 Value="20"/>
+    <speed Value="100"/>
     <priority Value="{index}"/>
-    <DPI Value="254"/>
     <frequency Value="20000"/>
-    <externalLaser Value="0"/>
+    <advancedMode Value="0"/>
+    <overscan Value="0"/>
     <color Value="{rgb}"/>
   </CutSetting>
 """
@@ -559,6 +561,35 @@ def _path_shape_xml(
         f'{indent}<Shape Type="Path" CutIndex="{cut_index}">\n'
         f"{indent}  <XForm>1 0 0 1 0 0</XForm>\n"
         f"{body}\n"
+        f"{indent}</Shape>\n"
+    )
+
+
+def _path_shape_lbrn2(
+    segments: Sequence[Segment], cut_index: int, scale: float, indent: str = "  "
+) -> str:
+    """LightBurn 1.7 prefers condensed VertList / PrimList (.lbrn2)."""
+    if not segments:
+        return ""
+    vert_bits: list[str] = []
+    prim_bits: list[str] = []
+    vi = 0
+    for seg in segments:
+        x0, y0 = seg.p0[0] * scale, seg.p0[1] * scale
+        x1, y1 = seg.p1[0] * scale, seg.p1[1] * scale
+        # c0x1c1x1 marks a sharp/corner vertex (straight line ends)
+        vert_bits.append(f"V{x0:.6f} {y0:.6f}c0x1c1x1")
+        vert_bits.append(f"V{x1:.6f} {y1:.6f}c0x1c1x1")
+        prim_bits.append(f"L{vi} {vi + 1}")
+        vi += 2
+    n_vert = vi
+    n_prim = len(segments)
+    return (
+        f'{indent}<Shape Type="Path" CutIndex="{cut_index}" '
+        f'VertID="{n_vert}" PrimID="{n_prim}">\n'
+        f"{indent}  <XForm>1 0 0 1 0 0</XForm>\n"
+        f"{indent}  <VertList>{''.join(vert_bits)}</VertList>\n"
+        f"{indent}  <PrimList>{''.join(prim_bits)}</PrimList>\n"
         f"{indent}</Shape>\n"
     )
 
@@ -594,77 +625,100 @@ def parts_union_bbox(parts: Sequence[Part]) -> BBox:
 
 
 def parts_to_lbrn(parts: Sequence[Part], *, units_mm: bool = True) -> str:
-    """One LightBurn .lbrn with every part as its own group. No sheet frame."""
+    """
+    One LightBurn project with flat Path shapes (no Groups / no XML comments).
+    Writes .lbrn2-style VertList geometry that LightBurn 1.7 loads reliably.
+    """
     scale = INCH_TO_MM if units_mm else 1.0
     x0, y0, x1, y1 = parts_union_bbox(parts)
     w_mm = max(1.0, (x1 - x0) * scale)
     h_mm = max(1.0, (y1 - y0) * scale)
 
-    parts_xml: list[str] = []
+    shapes: list[str] = []
     for part in parts:
         part_cuts = [s for s in part.segments if s.kind != "fold"]
         part_folds = [s for s in part.segments if s.kind == "fold"]
-        children = ""
+        # Flat paths — avoid Group/Children/comments (those can fail to draw)
         if part_cuts:
-            children += _path_shape_xml(part_cuts, 0, scale, indent="      ")
+            shapes.append(_path_shape_lbrn2(part_cuts, 0, scale))
         if part_folds:
-            children += _path_shape_xml(part_folds, 1, scale, indent="      ")
-        parts_xml.append(
-            f'  <Shape Type="Group" CutIndex="0">\n'
-            f"    <XForm>1 0 0 1 0 0</XForm>\n"
-            f"    <!-- {part.name} -->\n"
-            f"    <Children>\n"
-            f"{children}"
-            f"    </Children>\n"
-            f"  </Shape>\n"
-        )
+            shapes.append(_path_shape_lbrn2(part_folds, 1, scale))
 
     return "".join(
         [
             '<?xml version="1.0" encoding="UTF-8"?>\n',
-            f'<LightBurnProject AppVersion="1.7.00" FormatVersion="1" '
-            f'Width="{w_mm:.4f}" Height="{h_mm:.4f}" '
-            f'MirrorX="0" MirrorY="0">\n',
-            _lbrn_cut_setting(0, "Cut", "0;0;255"),
-            _lbrn_cut_setting(1, "Fold", "255;0;0"),
-            *parts_xml,
+            f'<LightBurnProject AppVersion="1.7.08" FormatVersion="1" '
+            f'MaterialHeight="0" MirrorX="False" MirrorY="False">\n',
+            _lbrn_cut_setting(0, "C00", "0;0;255"),
+            _lbrn_cut_setting(1, "C01", "255;0;0"),
+            *shapes,
             "</LightBurnProject>\n",
         ]
     )
 
 
 def parts_to_svg(parts: Sequence[Part]) -> str:
+    """SVG in millimeters — most reliable LightBurn File → Import path."""
     x0, y0, x1, y1 = parts_union_bbox(parts)
-    pad = 0.25
-    width = max(1.0, x1 - x0 + 2 * pad)
-    height = max(1.0, y1 - y0 + 2 * pad)
+    pad_in = 0.25
+    # Convert inch coords → mm for SVG (matches LightBurn mm UI)
+    s = INCH_TO_MM
+    vx0 = (x0 - pad_in) * s
+    vy0 = (y0 - pad_in) * s
+    width = max(1.0, (x1 - x0 + 2 * pad_in) * s)
+    height = max(1.0, (y1 - y0 + 2 * pad_in) * s)
+
     svg = ET.Element(
         "svg",
         {
             "xmlns": "http://www.w3.org/2000/svg",
-            "width": f"{width}in",
-            "height": f"{height}in",
-            "viewBox": f"{x0 - pad} {y0 - pad} {width} {height}",
+            "width": f"{width:.4f}mm",
+            "height": f"{height:.4f}mm",
+            "viewBox": f"{vx0:.4f} {vy0:.4f} {width:.4f} {height:.4f}",
         },
     )
-    g_cut = ET.SubElement(svg, "g", {"id": "cuts"})
-    g_fold = ET.SubElement(svg, "g", {"id": "folds"})
+    g_cut = ET.SubElement(svg, "g", {"id": "cuts", "stroke": "#0000FF", "fill": "none"})
+    g_fold = ET.SubElement(svg, "g", {"id": "folds", "stroke": "#FF0000", "fill": "none"})
     for part in parts:
         g = ET.SubElement(svg, "g", {"id": part.name})
         for seg in part.segments:
-            color = "#FF0000" if seg.kind == "fold" else "#0000FF"
             target = g_fold if seg.kind == "fold" else g_cut
-            _svg_line(target, seg.p0, seg.p1, color)
-            _svg_line(g, seg.p0, seg.p1, color)
+            color = "#FF0000" if seg.kind == "fold" else "#0000FF"
+            ET.SubElement(
+                target,
+                "line",
+                {
+                    "x1": f"{seg.p0[0] * s:.4f}",
+                    "y1": f"{seg.p0[1] * s:.4f}",
+                    "x2": f"{seg.p1[0] * s:.4f}",
+                    "y2": f"{seg.p1[1] * s:.4f}",
+                    "stroke": color,
+                    "stroke-width": "0.1",
+                    "fill": "none",
+                },
+            )
+            ET.SubElement(
+                g,
+                "line",
+                {
+                    "x1": f"{seg.p0[0] * s:.4f}",
+                    "y1": f"{seg.p0[1] * s:.4f}",
+                    "x2": f"{seg.p1[0] * s:.4f}",
+                    "y2": f"{seg.p1[1] * s:.4f}",
+                    "stroke": color,
+                    "stroke-width": "0.1",
+                    "fill": "none",
+                },
+            )
         b = part.bbox()
         t = ET.SubElement(
             g,
             "text",
             {
-                "x": f"{(b[0] + b[2]) * 0.5:.4f}",
-                "y": f"{(b[1] + b[3]) * 0.5:.4f}",
+                "x": f"{(b[0] + b[2]) * 0.5 * s:.4f}",
+                "y": f"{(b[1] + b[3]) * 0.5 * s:.4f}",
                 "fill": "#666666",
-                "font-size": "0.35",
+                "font-size": "4",
                 "text-anchor": "middle",
             },
         )
@@ -689,9 +743,14 @@ def write_combined_outputs(
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
     if write_lbrn:
-        path = out_dir / f"{basename}_all.lbrn"
+        # .lbrn2 is what LightBurn 1.7 saves by default
+        path = out_dir / f"{basename}_all.lbrn2"
         path.write_text(parts_to_lbrn(parts), encoding="utf-8")
         written.append(path)
+        # Also write legacy extension pointing at same content for older habits
+        legacy = out_dir / f"{basename}_all.lbrn"
+        legacy.write_text(parts_to_lbrn(parts), encoding="utf-8")
+        written.append(legacy)
     if write_svg:
         path = out_dir / f"{basename}_all.svg"
         path.write_text(parts_to_svg(parts), encoding="utf-8")
